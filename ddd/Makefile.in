@@ -134,11 +134,8 @@ CXXSTUFF = @CXXSTUFF@
 # Possible extra libraries required for all C++ programs.  ()
 CXXLIBS = @CXXLIBS@
 
-# Executable extension.  Empty on Unix, `.exe' on Windows. ()
+# The `.exe' extension on Windows (Cygwin)
 EXEEXT = @EXEEXT@
-
-# Object extension.  `o' on Unix, `obj' on Windows. (o)
-OBJEXT = @OBJEXT@
 
 
 ## The C compiler; for demos only
@@ -173,10 +170,10 @@ M2FLAGS = -g
 ## The FORTRAN compiler (for demos only)
 
 # What we use to compile FORTRAN files.
-FC = @F77@
+FC = g77
 
 # The flags we use to compile FORTRAN files.
-FFLAGS = @FFLAGS@
+FFLAGS = -g
 
 
 
@@ -211,8 +208,6 @@ LIBRX      =
 LIBTERMCAP = @LIBTERMCAP@
 # -liberty library (../libiberty/libiberty.a)
 LIBIBERTY  = @LIBIBERTY@
-# -lreadline library (../readline/libreadline.a)
-LIBREADLINE = @LIBREADLINE@
 # Yacc library (-ly)
 LIBY       = @LIBY@
 # Math library (-lm)
@@ -227,7 +222,7 @@ LIBNSL     = @LIBNSL@
 NON_X_LIBS = @LIBS@
 
 # All libraries shown above
-LIBS = $(CXXLIBS) $(LIBREADLINE) $(LIBSOCKET) $(LIBNSL) $(LIBRX) \
+LIBS = $(CXXLIBS) $(LIBSOCKET) $(LIBNSL) $(LIBRX) \
        $(LIBTERMCAP) $(LIBY) $(LIBIBERTY) $(LIBM)
 
 
@@ -322,13 +317,7 @@ MAKEINFO = @MAKEINFO@
 TEXINDEX = texindex
 
 # The texi2html program.  (texi2html)
-TEXI2HTML = texi2html -split_chapter
-
-# The texi2dvi program.  (texi2dvi)
-TEXI2DVI = texi2dvi
-
-# The dvips program.  (dvips)
-DVIPS = @DVIPS@
+TEXI2HTML = texi2html
 
 # The TeX program.  (tex)
 TEX = tex
@@ -338,6 +327,9 @@ AD2C = $(SED) -n -f $(srcdir)/ad2c.sed
 
 # The vsl2c program.
 VSL2C = $(SED) -f $(srcdir)/vsl2c.sed
+
+# The dvips program.  (dvips)
+DVIPS = @DVIPS@
 
 # The ls program.  (ls)
 LS = ls
@@ -408,16 +400,6 @@ PPMTOPGM   = ppmtopgm
 PPMTOXPM   = ppmtoxpm
 XBMTOPBM   = xbmtopbm
 XPMTOPPM   = xpmtoppm
-
-# The ImageMagick `convert' program (convert)
-CONVERT    = convert
-
-# The image extension (.gif or .jpg)
-IMGEXT     = .gif
-
-# GIF <=> PPM conversion
-GIFTOPPM   = giftoppm
-PPMTOGIF   = ppmtogif
 
 # The face-generating program from the `compface' package.  (xbm2xface.pl)
 XBM2XFACE  = xbm2xface.pl
@@ -505,14 +487,14 @@ INCLUDE = -I. -I$(srcdir) -I$(srcdir)/.. $(X_INCLUDE)
 
 ## Implicit rules.
 .SUFFIXES: .C .cc .c .mod .p .Y .YY .L .txt .i .xbm .xbmxx .xpm .xpmxx \
-	   .xface .C~ .c~ .f .f~ .sh .sh~ .fig .eps $(IMGEXT)
-.C.$(OBJEXT):
+	   .xface .C~ .c~ .f .f~ .sh .sh~
+.C.o:
 	$(COMPILE.cc) $(INCLUDE) -o $@ $<
-.cc.$(OBJEXT):
+.cc.o:
 	$(COMPILE.cc) $(INCLUDE) -o $@ $<
-.c.$(OBJEXT):
+.c.o:
 	$(COMPILE.c) $(INCLUDE) -o $@ $<
-.p.$(OBJEXT):
+.p.o:
 	$(COMPILE.p) -o $@ $<
 .C.i:
 	$(COMPILE.cc) $(INCLUDE) -E -o $@ $<
@@ -538,7 +520,7 @@ INCLUDE = -I. -I$(srcdir) -I$(srcdir)/.. $(X_INCLUDE)
 	$(YACCTOCXX)
 	$(MV) y.tab.H $@
 	$(RM) y.tab.C y.tab.c y.tab.h
-.Y.$(OBJEXT):
+.Y.o:
 	$(YACC) $(YFLAGS) $<
 	$(YACCTOCXX)
 	$(COMPILE.cc) y.tab.C
@@ -557,7 +539,7 @@ INCLUDE = -I. -I$(srcdir) -I$(srcdir)/.. $(X_INCLUDE)
 	$(LEXTOCXX)
 	$(MV) $(LEX_OUTPUT_ROOT).C $@
 	$(RM) $(LEX_OUTPUT_ROOT).c
-.L.$(OBJEXT):
+.L.o:
 	$(LEX.L) $<
 	$(LEXTOCXX)
 	$(COMPILE.cc) -o $@ $(LEX_OUTPUT_ROOT).C
@@ -647,176 +629,157 @@ INCLUDE = -I. -I$(srcdir) -I$(srcdir)/.. $(X_INCLUDE)
 	$(SED) "s/static char/static unsigned char/g" > $@~
 	@test -s $@~ && $(MV) $@~ $@ || ($(RM) $@~; test -s $@)
 
-## Picture conversions
-
-# Width of image in HTML manual (pixels)
-IMAGE_WIDTH = 600
-
-# We use giftoppm/ppmtogif to get optimal GIF compression.
-.eps.gif:
-	$(CONVERT) -geometry $(IMAGE_WIDTH) -interlace Line $< $@
-	$(GIFTOPPM) $@ | $(PPMTOGIF) -interlace > $@~ && $(MV) $@~ $@
-
-.eps.jpeg:
-	$(CONVERT) -geometry $(IMAGE_WIDTH) -interlace Line $< $@
-
-.eps.jpg:
-	$(CONVERT) -geometry $(IMAGE_WIDTH) -interlace Line $< $@
-
-.fig.eps:
-	(cd `dirname $<` && $(FIG2PS) `basename $<` ) > $@
 
 
 ## Libraries and object files
 # General-purpose utilities: strings, regexps, run-type type info...
 BASE_OBJECTS = \
-	compare.$(OBJEXT)    \
-	cook.$(OBJEXT)       \
-	cwd.$(OBJEXT)        \
-	glob.$(OBJEXT)       \
-	hash.$(OBJEXT)       \
-	home.$(OBJEXT)       \
-	rxclass.$(OBJEXT)    \
-	sigName.$(OBJEXT)    \
-	strclass.$(OBJEXT)   \
-	tabs.$(OBJEXT)       \
-	uniquify.$(OBJEXT)   \
-	PrintGC.$(OBJEXT)    \
-	SignalB.$(OBJEXT)    \
-	TypeInfo.$(OBJEXT)   \
-	UniqueId.$(OBJEXT)   \
-	MemCheck.$(OBJEXT)
+	compare.o    \
+	cook.o       \
+	cwd.o        \
+	glob.o       \
+	hash.o       \
+	home.o       \
+	rxclass.o    \
+	sigName.o    \
+	strclass.o   \
+	tabs.o       \
+	uniquify.o   \
+	PrintGC.o    \
+	SignalB.o    \
+	TypeInfo.o   \
+	UniqueId.o   \
+	MemCheck.o
 
 # Instantiated templates
 TEMPLATE_OBJECTS = \
-	IntIntAA.$(OBJEXT)   \
-	StringA.$(OBJEXT)    \
-	StringMap.$(OBJEXT)  \
-	StringSA.$(OBJEXT)   \
-	VoidArray.$(OBJEXT)  \
-	WidgetSA.$(OBJEXT)
+	IntIntAA.o   \
+	StringA.o    \
+	StringMap.o  \
+	StringSA.o   \
+	VoidArray.o  \
+	WidgetSA.o
 
 # Interprocess communication
 # Top-level class is `Agent', declared in `Agent.h'
 AGENT_OBJECTS = \
-	Agent.$(OBJEXT)      \
-	AgentM.$(OBJEXT)     \
-	AsyncAgent.$(OBJEXT) \
-	ChunkQueue.$(OBJEXT) \
-	DataLength.$(OBJEXT) \
-	HandlerL.$(OBJEXT)   \
-	LiterateA.$(OBJEXT)  \
-	ReadLineA.$(OBJEXT)  \
-	TimeOut.$(OBJEXT)    \
-	TTYAgent.$(OBJEXT)
+	Agent.o      \
+	AgentM.o     \
+	AsyncAgent.o \
+	ChunkQueue.o \
+	DataLength.o \
+	HandlerL.o   \
+	LiterateA.o  \
+	TimeOut.o    \
+	TTYAgent.o
 
 # Miscellaneous utilities for X programs: Motif strings, hourglasses,
 # context-sensitive help...
 XSTUFF_OBJECTS = \
-	charsets.$(OBJEXT)   \
-	converters.$(OBJEXT) \
-	decoration.$(OBJEXT) \
-	events.$(OBJEXT)     \
-	findParent.$(OBJEXT) \
-	findWindow.$(OBJEXT) \
-	fileSBF.$(OBJEXT)    \
-	frame.$(OBJEXT)      \
-	longName.$(OBJEXT)   \
-	selection.$(OBJEXT)  \
-	simpleMenu.$(OBJEXT) \
-	verify.$(OBJEXT)     \
-	ComboBox.$(OBJEXT)   \
-	Delay.$(OBJEXT)      \
-	DestroyCB.$(OBJEXT)  \
-	ExitCB.$(OBJEXT)     \
-	InitImage.$(OBJEXT)  \
-	LabelH.$(OBJEXT)     \
-	LessTifH.$(OBJEXT)   \
-	MString.$(OBJEXT)    \
-	MakeMenu.$(OBJEXT)   \
-	SpinBox.$(OBJEXT)    \
-	Swallower.$(OBJEXT)  \
-	XErrorB.$(OBJEXT)
+	charsets.o   \
+	converters.o \
+	decoration.o \
+	events.o     \
+	findParent.o \
+	findWindow.o \
+	fileSBF.o    \
+	frame.o      \
+	longName.o   \
+	selection.o  \
+	simpleMenu.o \
+	verify.o     \
+	ComboBox.o   \
+	Delay.o      \
+	DestroyCB.o  \
+	ExitCB.o     \
+	InitImage.o  \
+	LabelH.o     \
+	LessTifH.o   \
+	MString.o    \
+	MakeMenu.o   \
+	SpinBox.o    \
+	Swallower.o  \
+	XErrorB.o
 
 # Box library - rectangular composible graphical items
 # Top-level class is `Box', declared in `Box.h'
 BOX_OBJECTS = \
-	printBox.$(OBJEXT)   \
-	AlignBox.$(OBJEXT)   \
-	ArcBox.$(OBJEXT)     \
-	BinBox.$(OBJEXT)     \
-	Box.$(OBJEXT)        \
-	BoxD.$(OBJEXT)       \
-	BoxExtend.$(OBJEXT)  \
-	BoxPoint.$(OBJEXT)   \
-	BoxRegion.$(OBJEXT)  \
-	BoxSize.$(OBJEXT)    \
-	ColorBox.$(OBJEXT)   \
-	CompositeB.$(OBJEXT) \
-	DiagBox.$(OBJEXT)    \
-	DummyBox.$(OBJEXT)   \
-	FixBox.$(OBJEXT)     \
-	FontFixBox.$(OBJEXT) \
-	FontTable.$(OBJEXT)  \
-	HatBox.$(OBJEXT)     \
-	LineBox.$(OBJEXT)    \
-	ListBox.$(OBJEXT)    \
-	MarkBox.$(OBJEXT)    \
-	MatchBox.$(OBJEXT)   \
-	PrimitiveB.$(OBJEXT) \
-	SlopeBox.$(OBJEXT)   \
-	StringBox.$(OBJEXT)  \
-	THatBox.$(OBJEXT)    \
-	TagBox.$(OBJEXT)     \
-	TrueBox.$(OBJEXT)
+	printBox.o   \
+	AlignBox.o   \
+	ArcBox.o     \
+	BinBox.o     \
+	Box.o        \
+	BoxD.o       \
+	BoxExtend.o  \
+	BoxPoint.o   \
+	BoxRegion.o  \
+	BoxSize.o    \
+	ColorBox.o   \
+	CompositeB.o \
+	DiagBox.o    \
+	DummyBox.o   \
+	FixBox.o     \
+	FontFixBox.o \
+	FontTable.o  \
+	HatBox.o     \
+	LineBox.o    \
+	ListBox.o    \
+	MarkBox.o    \
+	MatchBox.o   \
+	PrimitiveB.o \
+	SlopeBox.o   \
+	StringBox.o  \
+	THatBox.o    \
+	TagBox.o     \
+	TrueBox.o
 
 # VSL library - building boxes from structured data
 # Top-level class is `VSLLib', declared in `VSLLib.h'
 VSL_OBJECTS = \
-	ArgNode.$(OBJEXT)    \
-	BuiltinCN.$(OBJEXT)  \
-	CallNode.$(OBJEXT)   \
-	ConstNode.$(OBJEXT)  \
-	DefCallN.$(OBJEXT)   \
-	DummyNode.$(OBJEXT)  \
-	LetNode.$(OBJEXT)    \
-	NameNode.$(OBJEXT)   \
-	ListNode.$(OBJEXT)   \
-	TestNode.$(OBJEXT)   \
-	TrueNode.$(OBJEXT)   \
-	VSEFlags.$(OBJEXT)   \
-	VSLArgList.$(OBJEXT) \
-	VSLBuiltin.$(OBJEXT) \
-	VSLDef.$(OBJEXT)     \
-	VSLDefList.$(OBJEXT) \
-        VSLErr.$(OBJEXT)     \
-	VSLLib.$(OBJEXT)     \
-	VSLNode.$(OBJEXT)    \
-        VSLRead.$(OBJEXT)
+	ArgNode.o    \
+	BuiltinCN.o  \
+	CallNode.o   \
+	ConstNode.o  \
+	DefCallN.o   \
+	DummyNode.o  \
+	LetNode.o    \
+	NameNode.o   \
+	ListNode.o   \
+	TestNode.o   \
+	TrueNode.o   \
+	VSEFlags.o   \
+	VSLArgList.o \
+	VSLBuiltin.o \
+	VSLDef.o     \
+	VSLDefList.o \
+        VSLErr.o     \
+	VSLLib.o     \
+	VSLNode.o    \
+        VSLRead.o
 
 # Graph structure, graph layout and graph editor widget
 # Top-level classes are `Graph', declared in `Graph.h'
 # and the `GraphEdit' widget, deckared in `GraphEdit.h'.
 GRAPH_OBJECTS = \
-	ArcGraphE.$(OBJEXT)  \
-	BoxEdgeA.$(OBJEXT)   \
-	BoxGraphN.$(OBJEXT)  \
-	EdgeA.$(OBJEXT)      \
-	EdgeAPA.$(OBJEXT)    \
-	Graph.$(OBJEXT)      \
-	GraphEdge.$(OBJEXT)  \
-	GraphEdit.$(OBJEXT)  \
-	GraphGC.$(OBJEXT)    \
-	GraphNode.$(OBJEXT)  \
-	GraphNPA.$(OBJEXT)   \
-	HintGraphN.$(OBJEXT) \
-	LineGraphE.$(OBJEXT) \
-	LineGESI.$(OBJEXT)   \
-	PannedGE.$(OBJEXT)   \
-	PosGraphN.$(OBJEXT)  \
-	RegionGN.$(OBJEXT)   \
-	ScrolledGE.$(OBJEXT) \
-	layout.$(OBJEXT)
+	ArcGraphE.o  \
+	BoxEdgeA.o   \
+	BoxGraphN.o  \
+	EdgeA.o      \
+	EdgeAPA.o    \
+	Graph.o      \
+	GraphEdge.o  \
+	GraphEdit.o  \
+	GraphGC.o    \
+	GraphNode.o  \
+	GraphNPA.o   \
+	HintGraphN.o \
+	LineGraphE.o \
+	LineGESI.o   \
+	PannedGE.o   \
+	PosGraphN.o  \
+	RegionGN.o   \
+	ScrolledGE.o \
+	layout.o
 
 # All these objects were originally part of the NORA library; they are
 # now maintained as part of DDD.
@@ -832,101 +795,101 @@ LIB_OBJECTS = \
 # The DDD application itself.  `ddd.C' is the main program, `SourceView.C'
 # is the source window, `DataDisp.C' is the data window.
 DDD_OBJECTS = \
-	annotation.$(OBJEXT) \
-	args.$(OBJEXT)       \
-	buttons.$(OBJEXT)    \
-	cmdtty.$(OBJEXT)     \
-	comm-manag.$(OBJEXT) \
-	complete.$(OBJEXT)   \
-	ctrl.$(OBJEXT)       \
-	data.$(OBJEXT)       \
-	dbx-lookup.$(OBJEXT) \
-	deref.$(OBJEXT)      \
-	disp-read.$(OBJEXT)  \
-	editing.$(OBJEXT)    \
-	environ.$(OBJEXT)    \
-	examine.$(OBJEXT)    \
-	exectty.$(OBJEXT)    \
-	exit.$(OBJEXT)       \
-	expired.$(OBJEXT)    \
-	file.$(OBJEXT)       \
-	filetype.$(OBJEXT)   \
-	fonts.$(OBJEXT)      \
-	fortranize.$(OBJEXT) \
-	gdbinit.$(OBJEXT)    \
-	history.$(OBJEXT)    \
-	hostname.$(OBJEXT)   \
-	index.$(OBJEXT)      \
-	isid.$(OBJEXT)       \
-	java.$(OBJEXT) 	    \
-	logo.$(OBJEXT)       \
-	logplayer.$(OBJEXT)  \
-	mainloop.$(OBJEXT)   \
-	mydialogs.$(OBJEXT)  \
-	options.$(OBJEXT)    \
-	plotter.$(OBJEXT)    \
-	post.$(OBJEXT)       \
-	print.$(OBJEXT)      \
-	question.$(OBJEXT)   \
-	regexps.$(OBJEXT)    \
-	resources.$(OBJEXT)  \
-	sashes.$(OBJEXT)     \
-	select.$(OBJEXT)     \
-	session.$(OBJEXT)    \
-	settings.$(OBJEXT)   \
-	shell.$(OBJEXT)      \
-	shorten.$(OBJEXT)    \
-	show.$(OBJEXT)       \
-	configinfo.$(OBJEXT) \
-	source.$(OBJEXT)     \
-	status.$(OBJEXT)     \
-	string-fun.$(OBJEXT) \
-	tictactoe.$(OBJEXT)  \
-	tips.$(OBJEXT)       \
-	toolbar.$(OBJEXT)    \
-	ungrab.$(OBJEXT)     \
-	value-read.$(OBJEXT) \
-	windows.$(OBJEXT)    \
-	wm.$(OBJEXT)         \
-	xconfig.$(OBJEXT)    \
-	AliasGE.$(OBJEXT)    \
-	ArgField.$(OBJEXT)   \
-	BreakPoint.$(OBJEXT) \
-	BreakPM.$(OBJEXT)    \
-	CodeCache.$(OBJEXT)  \
-	Command.$(OBJEXT)    \
-	DataDisp.$(OBJEXT)   \
-	DispBox.$(OBJEXT)    \
-	DispBuffer.$(OBJEXT) \
-	DispGraph.$(OBJEXT)  \
-	DispNode.$(OBJEXT)   \
-	DispNodeM.$(OBJEXT)  \
-	DispValue.$(OBJEXT)  \
-	DispValueA.$(OBJEXT) \
-	DispValueT.$(OBJEXT) \
-	EntryType.$(OBJEXT)  \
-	GDBAgent.$(OBJEXT)   \
-	HelpCB.$(OBJEXT)     \
-	HistoryD.$(OBJEXT)   \
-	HistoryF.$(OBJEXT)   \
-	MinMaxA.$(OBJEXT)    \
-	PlotAgent.$(OBJEXT)  \
-	PlotArea.$(OBJEXT)   \
-	PosBuffer.$(OBJEXT)  \
-	ProgressM.$(OBJEXT)  \
-	RefreshDI.$(OBJEXT)  \
-	SmartC.$(OBJEXT)     \
-	SourceView.$(OBJEXT) \
-	Tool.$(OBJEXT)       \
-	UndoBuffer.$(OBJEXT) \
-	UndoBE.$(OBJEXT)     \
-	WhatNextCB.$(OBJEXT)
+	annotation.o \
+	args.o       \
+	buttons.o    \
+	cmdtty.o     \
+	comm-manag.o \
+	complete.o   \
+	ctrl.o       \
+	data.o       \
+	dbx-lookup.o \
+	deref.o      \
+	disp-read.o  \
+	editing.o    \
+	environ.o    \
+	examine.o    \
+	exectty.o    \
+	exit.o       \
+	expired.o    \
+	file.o       \
+	filetype.o   \
+	fonts.o      \
+	fortranize.o \
+	gdbinit.o    \
+	history.o    \
+	hostname.o   \
+	index.o      \
+	isid.o       \
+	java.o 	     \
+	logo.o       \
+	logplayer.o  \
+	mainloop.o   \
+	mydialogs.o  \
+	options.o    \
+	plotter.o    \
+	post.o       \
+	print.o      \
+	question.o   \
+	regexps.o    \
+	resources.o  \
+	sashes.o     \
+	select.o     \
+	session.o    \
+	settings.o   \
+	shell.o      \
+	shorten.o    \
+	show.o       \
+	configinfo.o \
+	source.o     \
+	status.o     \
+	string-fun.o \
+	tictactoe.o  \
+	tips.o       \
+	toolbar.o    \
+	ungrab.o     \
+	value-read.o \
+	windows.o    \
+	wm.o         \
+	xconfig.o    \
+	AliasGE.o    \
+	ArgField.o   \
+	BreakPoint.o \
+	BreakPM.o    \
+	CodeCache.o  \
+	Command.o    \
+	DataDisp.o   \
+	DispBox.o    \
+	DispBuffer.o \
+	DispGraph.o  \
+	DispNode.o   \
+	DispNodeM.o  \
+	DispValue.o  \
+	DispValueA.o \
+	DispValueT.o \
+	EntryType.o  \
+	GDBAgent.o   \
+	HelpCB.o     \
+	HistoryD.o   \
+	HistoryF.o   \
+	MinMaxA.o    \
+	PlotAgent.o  \
+	PlotArea.o   \
+	PosBuffer.o  \
+	ProgressM.o  \
+	RefreshDI.o  \
+	SmartC.o     \
+	SourceView.o \
+	Tool.o       \
+	UndoBuffer.o \
+	UndoBE.o     \
+	WhatNextCB.o
 
 # Objects required for userinfo
 USERINFO_OBJECTS =
 
 # Objects required for huffencode and huffdecode
-HUFFMAN_OBJECTS = strclass.$(OBJEXT) cook.$(OBJEXT) rxclass.$(OBJEXT)
+HUFFMAN_OBJECTS = strclass.o cook.o rxclass.o
 
 ## All objects.
 OBJECTS = $(LIB_OBJECTS) $(DDD_OBJECTS)
@@ -942,163 +905,87 @@ DEMOS = userinfo$(EXEEXT) stringify$(EXEEXT) huffencode$(EXEEXT) \
 	huffdecode$(EXEEXT) cxxtest$(EXEEXT) ctest$(EXEEXT) grabtest$(EXEEXT) \
 	ftest$(EXEEXT) ptest$(EXEEXT) m2test$(EXEEXT) \
 	test-file$(EXEEXT) test-graph$(EXEEXT) vsl$(EXEEXT) ttytest$(EXEEXT) \
-	bug$(EXEEXT) sample$(EXEEXT) tString$(EXEEXT) \
-	mmtest$(EXEEXT) gcore$(EXEEXT) logplayer$(EXEEXT)
+	bug$(EXEEXT) tString$(EXEEXT) mmtest$(EXEEXT) gcore$(EXEEXT) \
+	logplayer$(EXEEXT)
+
+## Where to find texinfo files and so
+MAKEINFO_FLAGS = \
+	-I. -I$(srcdir) -I$(srcdir)/../readline/doc -I$(srcdir)/../texinfo
 
 ## The index files
 IDXS = *.cp *.fn *.ky *.pg *.tp *.vr
 
 ## The dvi files.
-docdir = $(srcdir)/../doc
-DVIS = 	ddd.dvi
+DVIS =
 
 ## The postscript files.
-PSS = \
-	$(docdir)/ddd.man-nopics.ps \
-	$(docdir)/ddd.man.ps \
-	$(docdir)/ddd.ps
-
-## The HTML files.
-htmldir = $(docdir)/html
-HTMLS = $(htmldir)/index.html $(docdir)/sample.c
-
-## The info files.
-INFOS = $(docdir)/ddd.info
+PSS = $(srcdir)/../doc/ddd.man-nopics.ps $(srcdir)/../doc/ddd.man.ps
 
 ## PostScript pictures in the DDD manual.
 # All of these are generated from FIG and XPM files.
 picdir = $(srcdir)/PICS
 PICS = \
-	$(picdir)/disclaimer.eps           \
-	$(picdir)/dddlogo.eps		   \
-	$(picdir)/dddsplash.eps            \
-	$(picdir)/ddd-aliases.eps          \
-	$(picdir)/ddd-all.eps              \
-	$(picdir)/ddd-arguments.eps        \
-	$(picdir)/ddd-attach.eps           \
-	$(picdir)/ddd-backtrace.eps	   \
-	$(picdir)/ddd-bp-popup.eps         \
-	$(picdir)/ddd-bp-properties.eps    \
-	$(picdir)/ddd-button-editor.eps    \
-	$(picdir)/ddd-clusters.eps         \
-	$(picdir)/ddd-code.eps             \
-	$(picdir)/ddd-console.eps          \
-	$(picdir)/ddd-data-prefs.eps       \
-	$(picdir)/ddd-define-command.eps   \
-	$(picdir)/ddd-display.eps          \
-	$(picdir)/ddd-drag.eps             \
-	$(picdir)/ddd-edit-breakpoints.eps \
-	$(picdir)/ddd-edit-displays.eps    \
-	$(picdir)/ddd-examine.eps          \
-	$(picdir)/ddd-font-prefs.eps       \
-	$(picdir)/ddd-general-prefs.eps    \
-	$(picdir)/ddd-helpers.eps  	   \
-	$(picdir)/ddd-hide-display.eps     \
-	$(picdir)/ddd-history.eps          \
-	$(picdir)/ddd-layout.eps           \
-	$(picdir)/ddd-line-popup.eps       \
-	$(picdir)/ddd-locals.eps	   \
-	$(picdir)/ddd-open.eps             \
-	$(picdir)/ddd-open-session.eps     \
-	$(picdir)/ddd-plots.eps            \
-	$(picdir)/ddd-print-graph.eps      \
-	$(picdir)/ddd-print-output.eps     \
-	$(picdir)/ddd-print-popup.eps      \
-	$(picdir)/ddd-registers.eps        \
-	$(picdir)/ddd-repeats.eps          \
-	$(picdir)/ddd-rotate-display.eps   \
-	$(picdir)/ddd-save-session.eps     \
-	$(picdir)/ddd-select-display.eps   \
-	$(picdir)/ddd-separate.eps         \
-	$(picdir)/ddd-set.eps	           \
-	$(picdir)/ddd-settings.eps         \
-	$(picdir)/ddd-shortcuts.eps        \
-	$(picdir)/ddd-shortcut-editor.eps  \
-	$(picdir)/ddd-signals.eps          \
-	$(picdir)/ddd-source-popup.eps     \
-	$(picdir)/ddd-source-prefs.eps     \
-	$(picdir)/ddd-source.eps           \
-	$(picdir)/ddd-startup-prefs.eps    \
-	$(picdir)/ddd-status-displays.eps  \
-	$(picdir)/ddd-threads.eps          \
-	$(picdir)/ddd-tool.eps             \
-	$(picdir)/ddd-toolbar.eps          \
-	$(picdir)/ddd-toolbars.eps         \
-	$(picdir)/ddd-value-tip.eps        \
-	$(picdir)/tut-backtrace.eps        \
-	$(picdir)/tut-display.eps          \
-	$(picdir)/tut-finish.eps           \
-	$(picdir)/tut-invoke.eps           \
-	$(picdir)/tut-run.eps              \
-	$(picdir)/tut-set.eps              \
-	$(picdir)/tut-value.eps
+	$(picdir)/dddsplash.ps          \
+	$(picdir)/ddd-aliases.ps        \
+	$(picdir)/ddd-all.ps            \
+	$(picdir)/ddd-arguments.ps      \
+	$(picdir)/ddd-attach.ps         \
+	$(picdir)/ddd-backtrace.ps	\
+	$(picdir)/ddd-bp-popup.ps       \
+	$(picdir)/ddd-bp-properties.ps  \
+	$(picdir)/ddd-button-editor.ps  \
+	$(picdir)/ddd-clusters.ps       \
+	$(picdir)/ddd-code.ps           \
+	$(picdir)/ddd-console.ps        \
+	$(picdir)/ddd-data-prefs.ps     \
+	$(picdir)/ddd-define-command.ps \
+	$(picdir)/ddd-display.ps        \
+	$(picdir)/ddd-drag.ps           \
+	$(picdir)/ddd-edit-breakpoints.ps \
+	$(picdir)/ddd-edit-displays.ps  \
+	$(picdir)/ddd-examine.ps        \
+	$(picdir)/ddd-font-prefs.ps     \
+	$(picdir)/ddd-general-prefs.ps  \
+	$(picdir)/ddd-helpers.ps  	\
+	$(picdir)/ddd-hide-display.ps   \
+	$(picdir)/ddd-history.ps        \
+	$(picdir)/ddd-layout.ps         \
+	$(picdir)/ddd-line-popup.ps     \
+	$(picdir)/ddd-locals.ps	        \
+	$(picdir)/ddd-open.ps           \
+	$(picdir)/ddd-open-session.ps   \
+	$(picdir)/ddd-plots.ps          \
+	$(picdir)/ddd-print-graph.ps    \
+	$(picdir)/ddd-print-output.ps   \
+	$(picdir)/ddd-print-popup.ps    \
+	$(picdir)/ddd-registers.ps      \
+	$(picdir)/ddd-repeats.ps        \
+	$(picdir)/ddd-rotate-display.ps \
+	$(picdir)/ddd-save-session.ps   \
+	$(picdir)/ddd-select-display.ps \
+	$(picdir)/ddd-separate.ps       \
+	$(picdir)/ddd-set.ps	        \
+	$(picdir)/ddd-settings.ps       \
+	$(picdir)/ddd-shortcuts.ps      \
+	$(picdir)/ddd-shortcut-editor.ps \
+	$(picdir)/ddd-signals.ps        \
+	$(picdir)/ddd-source-popup.ps   \
+	$(picdir)/ddd-source-prefs.ps   \
+	$(picdir)/ddd-source.ps         \
+	$(picdir)/ddd-startup-prefs.ps  \
+	$(picdir)/ddd-status-displays.ps \
+	$(picdir)/ddd-threads.ps        \
+	$(picdir)/ddd-tool.ps           \
+	$(picdir)/ddd-toolbar.ps        \
+	$(picdir)/ddd-toolbars.ps       \
+	$(picdir)/ddd-value-tip.ps      \
+	$(picdir)/disclaimer.ps
 
-IMAGES = \
-	$(picdir)/disclaimer$(IMGEXT)           \
-	$(picdir)/dddback$(IMGEXT)		\
-	$(picdir)/dddlogo$(IMGEXT)              \
-	$(picdir)/dddsplash$(IMGEXT)            \
-	$(picdir)/ddd-aliases$(IMGEXT)          \
-	$(picdir)/ddd-all$(IMGEXT)              \
-	$(picdir)/ddd-arguments$(IMGEXT)        \
-	$(picdir)/ddd-attach$(IMGEXT)           \
-	$(picdir)/ddd-backtrace$(IMGEXT)	\
-	$(picdir)/ddd-bp-popup$(IMGEXT)         \
-	$(picdir)/ddd-bp-properties$(IMGEXT)    \
-	$(picdir)/ddd-button-editor$(IMGEXT)    \
-	$(picdir)/ddd-clusters$(IMGEXT)         \
-	$(picdir)/ddd-code$(IMGEXT)             \
-	$(picdir)/ddd-console$(IMGEXT)          \
-	$(picdir)/ddd-data-prefs$(IMGEXT)       \
-	$(picdir)/ddd-define-command$(IMGEXT)   \
-	$(picdir)/ddd-display$(IMGEXT)          \
-	$(picdir)/ddd-drag$(IMGEXT)             \
-	$(picdir)/ddd-edit-breakpoints$(IMGEXT) \
-	$(picdir)/ddd-edit-displays$(IMGEXT)    \
-	$(picdir)/ddd-examine$(IMGEXT)          \
-	$(picdir)/ddd-font-prefs$(IMGEXT)       \
-	$(picdir)/ddd-general-prefs$(IMGEXT)    \
-	$(picdir)/ddd-helpers$(IMGEXT)  	\
-	$(picdir)/ddd-hide-display$(IMGEXT)     \
-	$(picdir)/ddd-history$(IMGEXT)          \
-	$(picdir)/ddd-layout$(IMGEXT)           \
-	$(picdir)/ddd-line-popup$(IMGEXT)       \
-	$(picdir)/ddd-locals$(IMGEXT)	        \
-	$(picdir)/ddd-open$(IMGEXT)             \
-	$(picdir)/ddd-open-session$(IMGEXT)     \
-	$(picdir)/ddd-plots$(IMGEXT)            \
-	$(picdir)/ddd-print-graph$(IMGEXT)      \
-	$(picdir)/ddd-print-output$(IMGEXT)     \
-	$(picdir)/ddd-print-popup$(IMGEXT)      \
-	$(picdir)/ddd-registers$(IMGEXT)        \
-	$(picdir)/ddd-repeats$(IMGEXT)          \
-	$(picdir)/ddd-rotate-display$(IMGEXT)   \
-	$(picdir)/ddd-save-session$(IMGEXT)     \
-	$(picdir)/ddd-select-display$(IMGEXT)   \
-	$(picdir)/ddd-separate$(IMGEXT)         \
-	$(picdir)/ddd-set$(IMGEXT)	        \
-	$(picdir)/ddd-settings$(IMGEXT)         \
-	$(picdir)/ddd-shortcuts$(IMGEXT)        \
-	$(picdir)/ddd-shortcut-editor$(IMGEXT)  \
-	$(picdir)/ddd-signals$(IMGEXT)          \
-	$(picdir)/ddd-source-popup$(IMGEXT)     \
-	$(picdir)/ddd-source-prefs$(IMGEXT)     \
-	$(picdir)/ddd-source$(IMGEXT)           \
-	$(picdir)/ddd-startup-prefs$(IMGEXT)    \
-	$(picdir)/ddd-status-displays$(IMGEXT)  \
-	$(picdir)/ddd-threads$(IMGEXT)          \
-	$(picdir)/ddd-tool$(IMGEXT)             \
-	$(picdir)/ddd-toolbar$(IMGEXT)          \
-	$(picdir)/ddd-toolbars$(IMGEXT)         \
-	$(picdir)/ddd-value-tip$(IMGEXT)        \
-	$(picdir)/tut-backtrace$(IMGEXT)        \
-	$(picdir)/tut-display$(IMGEXT)          \
-	$(picdir)/tut-finish$(IMGEXT)           \
-	$(picdir)/tut-invoke$(IMGEXT)           \
-	$(picdir)/tut-run$(IMGEXT)              \
-	$(picdir)/tut-set$(IMGEXT)              \
-	$(picdir)/tut-value$(IMGEXT)
-
+## The HTML files.
+# HTML_BASES = ddd_toc.html dddint_toc.html
+# HTML_PATTERNS = $(srcdir)/ddd_*.html $(srcdir)/dddint_*.html
+# HTMLS = $(HTML_BASES) $(HTML_PATTERNS)
+HTMLS = 
 
 ## The manual page.
 MANS = ddd.man
@@ -1201,7 +1088,7 @@ ICONS = \
 	$(XBM_XX_ICONS)
 
 
-## Readme files built from ddd.texi
+## Readme files built from ddd.texinfo
 README_FILES = 
 
 ## GDB symbol files
@@ -1229,13 +1116,10 @@ DIST_STUFF	 = $(PROG_STUFF) $(MANS) $(PSS) $(ICONS)
 
 # Temporary Files to be cleaned, keeping configuration intact
 CLEAN_STUFF	 = $(ddd)-$(VERSION)-* $(PROGS) $(DEMOS) \
-		   core *.$(OBJEXT) *.a *.s *.i \
+		   core *.o *.a *.s *.i \
 		   tmp* *.tmp .*hist* *.syms *.log dddgraph.* \
-		   *.au *.aus *.aux *.cm *.cms *.cp *.cps *.en *.ens \
-		   *.fl *.flc *.fls *.fn *.fns *.ky *.kys *.lb *.lbs \
-		   *.log *.pg *.pgs *.toc *.tp *.tps *.vr *.vrs \
-		   *.info* *.html *.dvi \
-		   gpl.texinfo lgpl.texinfo texinfo.tex epsf.tex xepsf.tex \
+		   *.aux *.cp *.cps *.fn *.fns *.flc \
+		   *.ky *.kys *.log *.pg *.pgs *.toc *.tp *.tps *.vr *.vrs \
 		   *.tar *.tar.gz *~ lex.* y.tab.* site.* *.sum \
 		   *.diff *.private USERINFO *.huff.C \
 		   *.txt.gz COPYING.gz NEWS.gz *.gz.C
@@ -1245,18 +1129,16 @@ DISTCLEAN_STUFF	 = $(CLEAN_STUFF) \
 		   config.status config.h host.h paths.h \
 		   Makefile MakeOut LOG OOBR OOBR-FTR TAGS \
 		   config.log config.cache configinfo.C stamp-h \
-		   Ddd Ddd.ad.h ddd.man-nopics $(PICS) $(IMAGES)
+		   Ddd Ddd.ad.h ddd.man-nopics $(PICS)
 
 # Any files that can be reconstructed, except configure script
 REALCLEAN_STUFF	 = $(DISTCLEAN_STUFF) $(DIST_STUFF) \
-		   header.str trailer.str eps-code.h \
-		   vr.h bld.h cfg.texi $(MANS)
+		   header.str trailer.str eps-code.h vr.h bld.h $(MANS)
 
 # All files that can be reconstructed (but may require special programs)
 ULTRACLEAN_STUFF = $(REALCLEAN_STUFF) \
 		   config.h.in stamp-h.in configure Makedeps \
-		   $(README_FILES) $(docdir)/sample.c \
-		   $(htmldir)/*.html $(htmldir)/PICS $(srcdir)/Ddd.in
+		   $(README_FILES) $(HTMLS) $(srcdir)/Ddd.in
 
 
 ## Targets as specified in GNU standards.
@@ -1306,13 +1188,12 @@ uninstall-prog:
 	done
 
 .PHONY: install-info
-install-info: $(INFOS)
+install-info: $(INFO_BASES)
 	-parent=`$(ECHO) $(infodir) | $(SED) -e 's@/[^/]*$$@@'`; \
 	grandparent=`$(ECHO) $$parent | $(SED) -e 's@/[^/]*$$@@'`; \
 	test -d $$grandparent || $(MKDIR) $$grandparent; \
 	test -d $$parent || $(MKDIR) $$parent
 	-test -d $(infodir) || $(MKDIR) $(infodir)
-	cd $(infodir) && $(RM) $(INFOS)
 	for i in $(INFOS); do \
 	    test -s $$i && $(INSTALL_DATA) $$i $(infodir); \
 	done
@@ -1338,7 +1219,7 @@ uninstall-man:
 
 .PHONY: picsclean
 picsclean:
-	$(RM) $(picdir)/*.eps $(picdir)/*.gif $(picdir)/*.jpg ./#*#
+	$(RM) $(PICS) ./#*#
 	-cd $(picdir) && $(RM) $(CLEAN_STUFF) ./#*#
 
 .PHONY: iconclean
@@ -1373,11 +1254,11 @@ ultraclean:
 	$(RM) $(ULTRACLEAN_STUFF) ./#*#
 
 .PHONY: info
-info:	$(INFOS)
+info:	$(INFO_BASES)
 	@:
 
-.PHONY: tex dvi
-tex dvi: $(DVIS)
+.PHONY: dvi
+dvi:	$(DVIS)
 	@:
 
 .PHONY: ps
@@ -1393,7 +1274,7 @@ postscript: $(PSS)
 	@:
 
 .PHONY: html
-html:	$(HTMLS)
+html:	$(HTML_BASES)
 	@:
 
 .PHONY: readme
@@ -1552,7 +1433,7 @@ $(srcdir)/tips.html: $(srcdir)/../TIPS
 
 
 # `make depend' fails to find this dependency :-(
-DispBox.$(OBJEXT): ddd.vsl.h
+DispBox.o: ddd.vsl.h
 
 # And these are never computed:
 ddd.vsl.h: $(srcdir)/../vsllib/std.vsl
@@ -1567,142 +1448,101 @@ ddd.vsl.h: $(srcdir)/../vsllib/tab.vsl
 $(ddd)$(EXEEXT): $(ddd_canonical)$(EXEEXT)
 	$(RM) $@ $(SYMS); $(LN_S) $(ddd_canonical)$(EXEEXT) $@
 
-$(ddd_canonical)$(EXEEXT): ddd.$(OBJEXT) $(OBJECTS)
-	$(LINK.cc) -o $@ ddd.$(OBJEXT) $(OBJECTS) $(ALL_X_LIBS) $(LIBS)
+$(ddd_canonical)$(EXEEXT): ddd.o $(OBJECTS)
+	$(LINK.cc) -o $@ ddd.o $(OBJECTS) $(ALL_X_LIBS) $(LIBS)
 
 
 ## The demonstration programs.
 
-userinfo$(EXEEXT): userinfo.$(OBJEXT) $(USERINFO_OBJECTS)
-	-$(LINK.cc) -o $@ userinfo.$(OBJEXT) \
-		$(USERINFO_OBJECTS) $(NON_X_LIBS) $(LIBS)
+userinfo$(EXEEXT): userinfo.o $(USERINFO_OBJECTS)
+	-$(LINK.cc) -o $@ userinfo.o $(USERINFO_OBJECTS) $(NON_X_LIBS) $(LIBS)
 
-rxtest$(EXEEXT): rxtest.$(OBJEXT) $(HUFFMAN_OBJECTS)
-	-$(LINK.cc) -o $@ rxtest.$(OBJEXT) \
-		$(HUFFMAN_OBJECTS) $(NON_X_LIBS) $(LIBS)
+rxtest$(EXEEXT): rxtest.o $(HUFFMAN_OBJECTS)
+	-$(LINK.cc) -o $@ rxtest.o $(HUFFMAN_OBJECTS) $(NON_X_LIBS) $(LIBS)
 
-huffencode$(EXEEXT): huffencode.$(OBJEXT) $(HUFFMAN_OBJECTS)
-	$(LINK.cc) -o $@ huffencode.$(OBJEXT) \
-		$(HUFFMAN_OBJECTS) $(NON_X_LIBS) $(LIBS)
+huffencode$(EXEEXT): huffencode.o $(HUFFMAN_OBJECTS)
+	$(LINK.cc) -o $@ huffencode.o $(HUFFMAN_OBJECTS) $(NON_X_LIBS) $(LIBS)
 
-huffdecode$(EXEEXT): huffdecode.$(OBJEXT) $(HUFFMAN_OBJECTS)
-	$(LINK.cc) -o $@ huffdecode.$(OBJEXT) \
-		$(HUFFMAN_OBJECTS) $(NON_X_LIBS) $(LIBS)
+huffdecode$(EXEEXT): huffdecode.o $(HUFFMAN_OBJECTS)
+	$(LINK.cc) -o $@ huffdecode.o $(HUFFMAN_OBJECTS) $(NON_X_LIBS) $(LIBS)
 
-stringify$(EXEEXT): stringify.$(OBJEXT)
-	$(LINK.cc) -o $@ stringify.$(OBJEXT) $(LIBS)
+stringify$(EXEEXT): stringify.o
+	$(LINK.cc) -o $@ stringify.o $(LIBS)
 
-mmtest$(EXEEXT): mmtest.$(OBJEXT) $(LIB_OBJECTS) 
-	$(LINK.cc) -o $@ mmtest.$(OBJEXT) $(LIB_OBJECTS) $(ALL_X_LIBS) $(LIBS)
+mmtest$(EXEEXT): mmtest.o $(LIB_OBJECTS) 
+	$(LINK.cc) -o $@ mmtest.o $(LIB_OBJECTS) $(ALL_X_LIBS) $(LIBS)
 
-gcore$(EXEEXT): gcore.$(OBJEXT) $(HUFFMAN_OBJECTS)
-	$(LINK.cc) -o $@ gcore.$(OBJEXT) \
-		$(HUFFMAN_OBJECTS) $(NON_X_LIBS) $(LIBS)
+gcore$(EXEEXT): gcore.o $(HUFFMAN_OBJECTS)
+	$(LINK.cc) -o $@ gcore.o $(HUFFMAN_OBJECTS) $(NON_X_LIBS) $(LIBS)
 
 logplayer$(EXEEXT): $(srcdir)/logplayer.C $(HUFFMAN_OBJECTS)
 	$(COMPILE_AND_LINK.cc) -DMAIN $(INCLUDE) -o $@ \
 	$(srcdir)/logplayer.C $(HUFFMAN_OBJECTS) $(NON_X_LIBS) $(LIBS)
 
-test-file$(EXEEXT): test-file.$(OBJEXT)
-	$(LINK.cc) -o $@ test-file.$(OBJEXT) $(ALL_X_LIBS)
+test-file$(EXEEXT): test-file.o
+	$(LINK.cc) -o $@ test-file.o $(ALL_X_LIBS)
 
-test-graph$(EXEEXT): test-graph.$(OBJEXT) $(LIB_OBJECTS) 
-	$(LINK.cc) -o $@ test-graph.$(OBJEXT) \
-		$(LIB_OBJECTS) $(ALL_X_LIBS) $(LIBS)
+test-graph$(EXEEXT): test-graph.o $(LIB_OBJECTS) 
+	$(LINK.cc) -o $@ test-graph.o $(LIB_OBJECTS) $(ALL_X_LIBS) $(LIBS)
 
-vsl$(EXEEXT):	vsl.$(OBJEXT) DocSpace.$(OBJEXT) $(LIB_OBJECTS)
-	$(LINK.cc) -o $@ vsl.$(OBJEXT) DocSpace.$(OBJEXT) \
-		$(LIB_OBJECTS) $(ALL_X_LIBS) $(LIBS)
+vsl$(EXEEXT):	vsl.o DocSpace.o $(LIB_OBJECTS)
+	$(LINK.cc) -o $@ vsl.o DocSpace.o $(LIB_OBJECTS) $(ALL_X_LIBS) $(LIBS)
 
-ttytest$(EXEEXT): ttytest.$(OBJEXT) $(BASE_OBJECTS) $(AGENT_OBJECTS)
-	$(LINK.cc) -o $@ ttytest.$(OBJEXT) $(BASE_OBJECTS) $(AGENT_OBJECTS) \
+ttytest$(EXEEXT): ttytest.o $(BASE_OBJECTS) $(AGENT_OBJECTS)
+	$(LINK.cc) -o $@ ttytest.o $(BASE_OBJECTS) $(AGENT_OBJECTS) \
 	$(ALL_X_LIBS) $(LIBS)
 
-bug$(EXEEXT):	bug.$(OBJEXT)
-	$(LINK.cc) -o $@ bug.$(OBJEXT) $(LIBS)
+bug$(EXEEXT):	bug.o
+	$(LINK.cc) -o $@ bug.o $(LIBS)
 
-sample$(EXEEXT): sample.$(OBJEXT)
-	$(LINK.c) -o $@ sample.$(OBJEXT) $(LIBS)
+tString$(EXEEXT): tString.o  $(HUFFMAN_OBJECTS)
+	$(LINK.cc) -o $@ tString.o $(HUFFMAN_OBJECTS) $(NON_X_LIBS) $(LIBS)
 
-tString$(EXEEXT): tString.$(OBJEXT)  $(HUFFMAN_OBJECTS)
-	$(LINK.cc) -o $@ tString.$(OBJEXT) \
-		$(HUFFMAN_OBJECTS) $(NON_X_LIBS) $(LIBS)
+cxxtest$(EXEEXT): cxxtest.o
+	$(LINK.cc) -o $@ cxxtest.o $(LIBS)
 
-cxxtest$(EXEEXT): cxxtest.$(OBJEXT)
-	$(LINK.cc) -o $@ cxxtest.$(OBJEXT) $(LIBS)
+grabtest$(EXEEXT): grabtest.o
+	$(LINK.cc) -o $@ grabtest.o $(ALL_X_LIBS) $(LIBS)
 
-grabtest$(EXEEXT): grabtest.$(OBJEXT)
-	$(LINK.cc) -o $@ grabtest.$(OBJEXT) $(ALL_X_LIBS) $(LIBS)
+ctest$(EXEEXT):  ctest.o
+	$(LINK.c) -o $@ ctest.o
 
-ctest$(EXEEXT):  ctest.$(OBJEXT)
-	$(LINK.c) -o $@ ctest.$(OBJEXT)
-
-ptest$(EXEEXT):  ptest.$(OBJEXT)
-	$(LINK.p) -o $@ ptest.$(OBJEXT)
+ptest$(EXEEXT):  ptest.o
+	$(LINK.p) -o $@ ptest.o
 
 m2test$(EXEEXT): $(srcdir)/m2test.mod
 	$(COMPILE_AND_LINK.m2) -o $@ -e $@ $(srcdir)/m2test.mod \
 	-lmodula2 -ltermcap
 
-ftest$(EXEEXT):	ftest.$(OBJEXT)
-	$(LINK.f) -o $@ ftest.$(OBJEXT)
+ftest$(EXEEXT):	ftest.o
+	$(LINK.f) -o $@ ftest.o
 
 .PHONY: jtest
 jtest: 	
 	cd $(srcdir)/jtest; $(MAKE) jtest
 
-swallow$(EXEEXT): swallow.$(OBJEXT) findWindow.$(OBJEXT) Swallower.$(OBJEXT)
-	$(LINK.cc) -o $@ swallow.$(OBJEXT) findWindow.$(OBJEXT) Swallower.$(OBJEXT) \
+swallow$(EXEEXT): swallow.o findWindow.o Swallower.o
+	$(LINK.cc) -o $@ swallow.o findWindow.o Swallower.o \
 	$(ALL_X_LIBS) $(LIBS)
 
 # We don't want no optimizing, but debugging info in our test files
-MAKE_DEBUG = \
-$(MAKE) CXXFLAGS="`$(ECHO) '$(CXXFLAGS)' | \
-	$(SED) 's/-O[^ ]*//' | $(SED) 's/-DNDEBUG//'`" \
-	CFLAGS="`$(ECHO) '$(CFLAGS)' | \
-	$(SED) 's/-O[^ ]*//' | $(SED) 's/-DNDEBUG//'`"
+cxxtest.o: $(srcdir)/cxxtest.C
+	$(CXX) $(INCLUDE) @CXXDEBUG@ -c -o $@ $(srcdir)/cxxtest.C
 
-cxxtest.$(OBJEXT): $(srcdir)/cxxtest.C
-	@case '$(CXXFLAGS)' in \
-	*-O*) $(MAKE_DEBUG) $@;; \
-	*) set -x; \
-	   $(COMPILE.cc) @CXXDEBUG@ $(INCLUDE) $(srcdir)/cxxtest.C -o $@;; \
-	esac
+ctest.o: $(srcdir)/ctest.c
+	$(CC) $(INCLUDE) -g -c -o $@ $(srcdir)/ctest.c
 
-ctest.$(OBJEXT): $(srcdir)/ctest.c
-	@case '$(CFLAGS)' in \
-	*-O*) $(MAKE_DEBUG) $@;; \
-	*) set -x; \
-	   $(COMPILE.c) -g $(INCLUDE) $(srcdir)/ctest.c -o $@;; \
-	esac
+grabtest.o: $(srcdir)/grabtest.C
+	$(CXX) $(X_INCLUDE) @CXXDEBUG@ -c -o $@ $(srcdir)/grabtest.C
 
-sample.$(OBJEXT): $(srcdir)/sample.c
-	@case '$(CFLAGS)' in \
-	*-O*) $(MAKE_DEBUG) $@;; \
-	*) set -x; \
-	   $(COMPILE.c) -g $(INCLUDE) $(srcdir)/sample.c -o $@;; \
-	esac
+bug.o:	$(srcdir)/bug.C
+	$(CXX) $(INCLUDE) @CXXDEBUG@ -c -o $@ $(srcdir)/bug.C
 
-grabtest.$(OBJEXT): $(srcdir)/grabtest.C
-	@case '$(CXXFLAGS)' in \
-	*-O*) $(MAKE_DEBUG) $@;; \
-	*) set -x; \
-	   $(COMPILE.cc) @CXXDEBUG@ $(INCLUDE) $(srcdir)/grabtest.C -o $@;; \
-	esac
-
-bug.$(OBJEXT):	$(srcdir)/bug.C
-	@case '$(CXXFLAGS)' in \
-	*-O*) $(MAKE_DEBUG) $@;; \
-	*) set -x; \
-	   $(COMPILE.cc) @CXXDEBUG@ $(INCLUDE) $(srcdir)/bug.C -o $@;; \
-	esac
-
-# These are special.
-huffdecode.$(OBJEXT): $(srcdir)/huffdecode.C ddd.man.huff.C
+huffdecode.o: $(srcdir)/huffdecode.C ddd.man.huff.C
 	$(COMPILE.cc) -DMAIN -DHUFFTEXT='"$(srcdir)/ddd.man.huff.C"' \
 	$(INCLUDE) -o $@ $(srcdir)/huffdecode.C
 
-ftest.$(OBJEXT): $(srcdir)/ftest.f
+ftest.o: $(srcdir)/ftest.f
 	$(COMPILE.f) -c -o $@ $(srcdir)/ftest.f
 
 
@@ -1764,303 +1604,244 @@ rxscan.C: $(srcdir)/rxscan.L
 	$(RM) $(LEX_OUTPUT_ROOT).c
 
 # `make depend' fails to find these dependencies :-(
-VSLRead.$(OBJEXT): vsl-lex.C vsl-gramma.h vsl-gramma.C
-regexps.$(OBJEXT): rxscan.C
+VSLRead.o: vsl-lex.C vsl-gramma.h vsl-gramma.C
+regexps.o: rxscan.C
 
 
 ## The manual page in PostScript format, including all pictures.
 
-$(docdir)/ddd.man.ps: ddd.man $(PICS)
+$(srcdir)/../doc/ddd.man.ps: ddd.man $(PICS)
 	$(GROFF) -man ddd.man > $@~ && $(MV) $@~ $@
 
-$(docdir)/ddd.man-nopics.ps: ddd.man-nopics
+$(srcdir)/../doc/ddd.man-nopics.ps: ddd.man-nopics
 	$(GROFF) -man ddd.man-nopics > $@~ && $(MV) $@~ $@
 
-
-# Included pictures
-
-$(picdir)/ddd-all.eps: \
+$(picdir)/ddd-all.ps: \
 	$(picdir)/ddd-all.fig $(picdir)/ddd-all.xpm
-$(picdir)/ddd-console.eps: \
+	cd $(picdir); $(FIG2PS) ddd-all.fig > ddd-all.ps
+
+$(picdir)/ddd-console.ps: \
 	$(picdir)/ddd-console.fig $(picdir)/ddd-console.xpm
-$(picdir)/ddd-history.eps: \
+	cd $(picdir); $(FIG2PS) ddd-console.fig > ddd-console.ps
+
+$(picdir)/ddd-history.ps: \
 	$(picdir)/ddd-history.fig $(picdir)/ddd-history.xpm
-$(picdir)/ddd-open.eps: \
+	cd $(picdir); $(FIG2PS) ddd-history.fig > ddd-history.ps
+
+$(picdir)/ddd-open.ps: \
 	$(picdir)/ddd-open.fig $(picdir)/ddd-open.xpm
-$(picdir)/ddd-source.eps: \
+	cd $(picdir); $(FIG2PS) ddd-open.fig > ddd-open.ps
+
+$(picdir)/ddd-source.ps: \
 	$(picdir)/ddd-source.fig $(picdir)/ddd-source.xpm
-$(picdir)/ddd-line-popup.eps: \
+	cd $(picdir); $(FIG2PS) ddd-source.fig > ddd-source.ps
+
+$(picdir)/ddd-line-popup.ps: \
 	$(picdir)/ddd-line-popup.fig $(picdir)/ddd-line-popup.xpm
-$(picdir)/ddd-bp-popup.eps: \
+	cd $(picdir); $(FIG2PS) ddd-line-popup.fig > ddd-line-popup.ps
+
+$(picdir)/ddd-bp-popup.ps: \
 	$(picdir)/ddd-bp-popup.fig $(picdir)/ddd-bp-popup.xpm
-$(picdir)/ddd-source-popup.eps: \
+	cd $(picdir); $(FIG2PS) ddd-bp-popup.fig > ddd-bp-popup.ps
+
+$(picdir)/ddd-source-popup.ps: \
 	$(picdir)/ddd-source-popup.fig $(picdir)/ddd-source-popup.xpm
-$(picdir)/ddd-arguments.eps: \
+	cd $(picdir); $(FIG2PS) ddd-source-popup.fig > ddd-source-popup.ps
+
+$(picdir)/ddd-arguments.ps: \
 	$(picdir)/ddd-arguments.fig $(picdir)/ddd-arguments.xpm
-$(picdir)/ddd-tool.eps: \
-	$(picdir)/ddd-tool.fig $(picdir)/ddd-tool.xpm
-$(picdir)/ddd-backtrace.eps: \
+	cd $(picdir); $(FIG2PS) ddd-arguments.fig > ddd-arguments.ps
+
+$(picdir)/ddd-tool.ps: $(picdir)/ddd-tool.fig $(picdir)/ddd-tool.xpm
+	cd $(picdir); $(FIG2PS) ddd-tool.fig > ddd-tool.ps
+
+$(picdir)/ddd-backtrace.ps: \
 	$(picdir)/ddd-backtrace.fig $(picdir)/ddd-backtrace.xpm
-$(picdir)/ddd-value-tip.eps: \
+	cd $(picdir); $(FIG2PS) ddd-backtrace.fig > ddd-backtrace.ps
+
+$(picdir)/ddd-value-tip.ps: \
 	$(picdir)/ddd-value-tip.fig $(picdir)/ddd-value-tip.xpm
-$(picdir)/ddd-print-popup.eps: \
+	cd $(picdir); $(FIG2PS) ddd-value-tip.fig > ddd-value-tip.ps
+
+$(picdir)/ddd-print-popup.ps: \
 	$(picdir)/ddd-print-popup.fig $(picdir)/ddd-print-popup.xpm
-$(picdir)/ddd-select-display.eps: \
+	cd $(picdir); $(FIG2PS) ddd-print-popup.fig > ddd-print-popup.ps
+
+$(picdir)/ddd-select-display.ps: \
 	$(picdir)/ddd-select-display.fig $(picdir)/ddd-select-display.xpm
-$(picdir)/ddd-hide-display.eps: \
+	cd $(picdir); $(FIG2PS) ddd-select-display.fig > ddd-select-display.ps
+
+$(picdir)/ddd-hide-display.ps: \
 	$(picdir)/ddd-hide-display.fig $(picdir)/ddd-hide-display.xpm
-$(picdir)/ddd-rotate-display.eps: \
+	cd $(picdir); $(FIG2PS) ddd-hide-display.fig > ddd-hide-display.ps
+
+$(picdir)/ddd-rotate-display.ps: \
 	$(picdir)/ddd-rotate-display.fig $(picdir)/ddd-rotate-display.xpm
-$(picdir)/ddd-locals.eps: \
+	cd $(picdir); $(FIG2PS) ddd-rotate-display.fig > ddd-rotate-display.ps
+
+$(picdir)/ddd-locals.ps: \
 	$(picdir)/ddd-locals.fig $(picdir)/ddd-locals.xpm
-$(picdir)/ddd-status-displays.eps: \
+	cd $(picdir); $(FIG2PS) ddd-locals.fig > ddd-locals.ps
+
+$(picdir)/ddd-status-displays.ps: \
 	$(picdir)/ddd-status-displays.fig $(picdir)/ddd-status-displays.xpm
-$(picdir)/ddd-set.eps: \
+	cd $(picdir); $(FIG2PS) ddd-status-displays.fig > ddd-status-displays.ps
+
+$(picdir)/ddd-set.ps: \
 	$(picdir)/ddd-set.fig $(picdir)/ddd-set.xpm
-$(picdir)/ddd-layout.eps: \
+	cd $(picdir); $(FIG2PS) ddd-set.fig > ddd-set.ps
+
+$(picdir)/ddd-layout.ps: \
 	$(picdir)/ddd-layout.fig $(picdir)/ddd-layout.xpm
-$(picdir)/ddd-print-graph.eps: \
+	cd $(picdir); $(FIG2PS) ddd-layout.fig > ddd-layout.ps
+
+$(picdir)/ddd-print-graph.ps: \
 	$(picdir)/ddd-print-graph.fig $(picdir)/ddd-print-graph.xpm
-$(picdir)/ddd-print-output.eps: \
+	cd $(picdir); $(FIG2PS) ddd-print-graph.fig > ddd-print-graph.ps
+
+$(picdir)/ddd-print-output.ps: \
 	$(picdir)/ddd-print-output.fig $(picdir)/ddd-graph.eps
-$(picdir)/ddd-code.eps: \
+	cd $(picdir); $(FIG2PS) ddd-print-output.fig > ddd-print-output.ps
+
+$(picdir)/ddd-code.ps: \
 	$(picdir)/ddd-code.fig $(picdir)/ddd-code.xpm
-$(picdir)/ddd-registers.eps: \
+	cd $(picdir); $(FIG2PS) ddd-code.fig > ddd-code.ps
+
+$(picdir)/ddd-registers.ps: \
 	$(picdir)/ddd-registers.fig $(picdir)/ddd-registers.xpm
-$(picdir)/ddd-general-prefs.eps: \
+	cd $(picdir); $(FIG2PS) ddd-registers.fig > ddd-registers.ps
+
+$(picdir)/ddd-general-prefs.ps: \
 	$(picdir)/ddd-general-prefs.fig $(picdir)/ddd-general-prefs.xpm 
-$(picdir)/ddd-helpers.eps: \
+	cd $(picdir); $(FIG2PS) ddd-general-prefs.fig > ddd-general-prefs.ps
+
+$(picdir)/ddd-helpers.ps: \
 	$(picdir)/ddd-helpers.fig $(picdir)/ddd-helpers.xpm 
-$(picdir)/ddd-source-prefs.eps: \
+	cd $(picdir); $(FIG2PS) ddd-helpers.fig > ddd-helpers.ps
+
+$(picdir)/ddd-source-prefs.ps: \
 	$(picdir)/ddd-source-prefs.fig $(picdir)/ddd-source-prefs.xpm
-$(picdir)/ddd-data-prefs.eps: \
+	cd $(picdir); $(FIG2PS) ddd-source-prefs.fig > ddd-source-prefs.ps
+
+$(picdir)/ddd-data-prefs.ps: \
 	$(picdir)/ddd-data-prefs.fig $(picdir)/ddd-data-prefs.xpm
-$(picdir)/ddd-startup-prefs.eps: \
+	cd $(picdir); $(FIG2PS) ddd-data-prefs.fig > ddd-data-prefs.ps
+
+$(picdir)/ddd-startup-prefs.ps: \
 	$(picdir)/ddd-startup-prefs.fig $(picdir)/ddd-startup-prefs.xpm
-$(picdir)/ddd-settings.eps: \
+	cd $(picdir); $(FIG2PS) ddd-startup-prefs.fig > ddd-startup-prefs.ps
+
+$(picdir)/ddd-settings.ps: \
 	$(picdir)/ddd-settings.fig $(picdir)/ddd-settings.xpm
-$(picdir)/ddd-threads.eps: \
+	cd $(picdir); $(FIG2PS) ddd-settings.fig > ddd-settings.ps
+
+$(picdir)/ddd-threads.ps: \
 	$(picdir)/ddd-threads.fig $(picdir)/ddd-threads.xpm
-$(picdir)/ddd-aliases.eps: \
+	cd $(picdir); $(FIG2PS) ddd-threads.fig > ddd-threads.ps
+
+$(picdir)/ddd-aliases.ps: \
 	$(picdir)/ddd-aliases.fig $(picdir)/ddd-aliases.xpm
-$(picdir)/ddd-edit-displays.eps: \
+	cd $(picdir); $(FIG2PS) ddd-aliases.fig > ddd-aliases.ps
+
+$(picdir)/ddd-edit-displays.ps: \
 	$(picdir)/ddd-edit-displays.fig $(picdir)/ddd-edit-displays.xpm
-$(picdir)/ddd-attach.eps: \
+	cd $(picdir); $(FIG2PS) ddd-edit-displays.fig > ddd-edit-displays.ps
+
+$(picdir)/ddd-attach.ps: \
 	$(picdir)/ddd-attach.fig $(picdir)/ddd-attach.xpm
-$(picdir)/ddd-save-session.eps: \
+	cd $(picdir); $(FIG2PS) ddd-attach.fig > ddd-attach.ps
+
+$(picdir)/ddd-save-session.ps: \
 	$(picdir)/ddd-save-session.fig $(picdir)/ddd-save-session.xpm
-$(picdir)/ddd-open-session.eps: \
+	cd $(picdir); $(FIG2PS) ddd-save-session.fig > ddd-save-session.ps
+
+$(picdir)/ddd-open-session.ps: \
 	$(picdir)/ddd-open-session.fig $(picdir)/ddd-open-session.xpm
-$(picdir)/ddd-button-editor.eps: \
+	cd $(picdir); $(FIG2PS) ddd-open-session.fig > ddd-open-session.ps
+
+$(picdir)/ddd-button-editor.ps: \
 	$(picdir)/ddd-button-editor.fig $(picdir)/ddd-button-editor.xpm
-$(picdir)/ddd-shortcuts.eps: \
+	cd $(picdir); $(FIG2PS) ddd-button-editor.fig > ddd-button-editor.ps
+
+$(picdir)/ddd-shortcuts.ps: \
 	$(picdir)/ddd-shortcuts.fig $(picdir)/ddd-shortcuts.xpm
-$(picdir)/ddd-shortcut-editor.eps: \
+	cd $(picdir); $(FIG2PS) ddd-shortcuts.fig > ddd-shortcuts.ps
+
+$(picdir)/ddd-shortcut-editor.ps: \
 	$(picdir)/ddd-shortcut-editor.fig $(picdir)/ddd-shortcut-editor.xpm
-$(picdir)/ddd-drag.eps: \
+	cd $(picdir); $(FIG2PS) ddd-shortcut-editor.fig > ddd-shortcut-editor.ps
+
+$(picdir)/ddd-drag.ps: \
 	$(picdir)/ddd-drag.fig \
-	$(picdir)/ddd-drag1.xpm \
-	$(picdir)/ddd-drag2.xpm \
-	$(picdir)/ddd-drag3.xpm
-$(picdir)/disclaimer.eps: \
+	$(picdir)/ddd-drag1.xpm $(picdir)/ddd-drag2.xpm $(picdir)/ddd-drag3.xpm
+	cd $(picdir); $(FIG2PS) ddd-drag.fig > ddd-drag.ps
+
+$(picdir)/disclaimer.ps: \
 	$(picdir)/disclaimer.fig
-$(picdir)/ddd-separate.eps: \
+	cd $(picdir); $(FIG2PS) disclaimer.fig > disclaimer.ps
+
+$(picdir)/ddd-separate.ps: \
 	$(picdir)/ddd-separate.fig $(picdir)/ddd-separate.xpm
-$(picdir)/ddd-bp-properties.eps: \
+	cd $(picdir); $(FIG2PS) ddd-separate.fig > ddd-separate.ps
+
+$(picdir)/ddd-bp-properties.ps: \
 	$(picdir)/ddd-bp-properties.fig $(picdir)/ddd-bp-properties.xpm
-$(picdir)/ddd-edit-breakpoints.eps: \
+	cd $(picdir); $(FIG2PS) ddd-bp-properties.fig > ddd-bp-properties.ps
+
+$(picdir)/ddd-edit-breakpoints.ps: \
 	$(picdir)/ddd-edit-breakpoints.fig $(picdir)/ddd-edit-breakpoints.xpm
-$(picdir)/ddd-display.eps: \
+	cd $(picdir); $(FIG2PS) ddd-edit-breakpoints.fig > ddd-edit-breakpoints.ps
+
+$(picdir)/ddd-display.ps: \
 	$(picdir)/ddd-display.fig $(picdir)/ddd-display.xpm
-$(picdir)/ddd-repeats.eps: \
+	cd $(picdir); $(FIG2PS) ddd-display.fig > ddd-display.ps
+
+$(picdir)/ddd-repeats.ps: \
 	$(picdir)/ddd-repeats.fig $(picdir)/ddd-repeats.xpm
-$(picdir)/ddd-toolbar.eps: \
-	$(picdir)/ddd-toolbar.fig $(picdir)/ddd-toolbar.xpm
-$(picdir)/ddd-font-prefs.eps: \
+	cd $(picdir); $(FIG2PS) ddd-repeats.fig > ddd-repeats.ps
+
+$(picdir)/ddd-toolbar.ps: $(picdir)/ddd-toolbar.fig $(picdir)/ddd-toolbar.xpm
+	cd $(picdir); $(FIG2PS) ddd-toolbar.fig > ddd-toolbar.ps
+
+$(picdir)/ddd-font-prefs.ps: \
 	$(picdir)/ddd-font-prefs.fig $(picdir)/ddd-font-prefs.xpm
-$(picdir)/ddd-define-command.eps: \
+	cd $(picdir); $(FIG2PS) ddd-font-prefs.fig > ddd-font-prefs.ps
+
+$(picdir)/ddd-define-command.ps: \
 	$(picdir)/ddd-define-command.fig $(picdir)/ddd-define-command.xpm
-$(picdir)/ddd-signals.eps: \
+	cd $(picdir); $(FIG2PS) ddd-define-command.fig > ddd-define-command.ps
+
+$(picdir)/ddd-signals.ps: \
 	$(picdir)/ddd-signals.fig $(picdir)/ddd-signals.xpm
-$(picdir)/ddd-examine.eps: \
+	cd $(picdir); $(FIG2PS) ddd-signals.fig > ddd-signals.ps
+
+$(picdir)/ddd-examine.ps: \
 	$(picdir)/ddd-examine.fig $(picdir)/ddd-examine.xpm
-$(picdir)/ddd-clusters.eps: \
+	cd $(picdir); $(FIG2PS) ddd-examine.fig > ddd-examine.ps
+
+$(picdir)/ddd-clusters.ps: \
 	$(picdir)/ddd-clusters.fig \
-	$(picdir)/clustered.ps $(picdir)/unclustered.ps
-$(picdir)/ddd-plots.eps: \
+	$(picdir)/clustered.ps \
+	$(picdir)/unclustered.ps
+	cd $(picdir); $(FIG2PS) ddd-clusters.fig > ddd-clusters.ps
+
+$(picdir)/ddd-plots.ps: \
 	$(picdir)/ddd-plots.fig $(picdir)/ddd-plots.xpm
-$(picdir)/ddd-toolbars.eps: \
+	cd $(picdir); $(FIG2PS) ddd-plots.fig > ddd-plots.ps
+
+$(picdir)/ddd-toolbars.ps: \
 	$(picdir)/ddd-toolbars.fig \
 	$(picdir)/ddd-toolbar-1.xpm \
 	$(picdir)/ddd-toolbar-2.xpm \
 	$(picdir)/ddd-toolbar-3.xpm \
 	$(picdir)/ddd-toolbar-4.xpm
-
-
-# GIFs are derived from EPS files
-
-$(picdir)/ddd-all$(IMGEXT):              $(picdir)/ddd-all.eps
-$(picdir)/ddd-console$(IMGEXT):          $(picdir)/ddd-console.eps
-$(picdir)/ddd-history$(IMGEXT):          $(picdir)/ddd-history.eps
-$(picdir)/ddd-open$(IMGEXT):             $(picdir)/ddd-open.eps
-$(picdir)/ddd-source$(IMGEXT):           $(picdir)/ddd-source.eps
-$(picdir)/ddd-line-popup$(IMGEXT):       $(picdir)/ddd-line-popup.eps
-$(picdir)/ddd-bp-popup$(IMGEXT):         $(picdir)/ddd-bp-popup.eps
-$(picdir)/ddd-source-popup$(IMGEXT):     $(picdir)/ddd-source-popup.eps
-$(picdir)/ddd-arguments$(IMGEXT):        $(picdir)/ddd-arguments.eps
-$(picdir)/ddd-tool$(IMGEXT):             $(picdir)/ddd-tool.eps
-$(picdir)/ddd-backtrace$(IMGEXT):        $(picdir)/ddd-backtrace.eps
-$(picdir)/ddd-value-tip$(IMGEXT):        $(picdir)/ddd-value-tip.eps
-$(picdir)/ddd-print-popup$(IMGEXT):      $(picdir)/ddd-print-popup.eps
-$(picdir)/ddd-select-display$(IMGEXT):   $(picdir)/ddd-select-display.eps
-$(picdir)/ddd-hide-display$(IMGEXT):     $(picdir)/ddd-hide-display.eps
-$(picdir)/ddd-rotate-display$(IMGEXT):   $(picdir)/ddd-rotate-display.eps
-$(picdir)/ddd-locals$(IMGEXT):           $(picdir)/ddd-locals.eps
-$(picdir)/ddd-status-displays$(IMGEXT):  $(picdir)/ddd-status-displays.eps
-$(picdir)/ddd-set$(IMGEXT):              $(picdir)/ddd-set.eps
-$(picdir)/ddd-layout$(IMGEXT):           $(picdir)/ddd-layout.eps
-$(picdir)/ddd-print-graph$(IMGEXT):      $(picdir)/ddd-print-graph.eps
-$(picdir)/ddd-print-output$(IMGEXT):     $(picdir)/ddd-print-output.eps
-$(picdir)/ddd-code$(IMGEXT):             $(picdir)/ddd-code.eps
-$(picdir)/ddd-registers$(IMGEXT):        $(picdir)/ddd-registers.eps
-$(picdir)/ddd-general-prefs$(IMGEXT):    $(picdir)/ddd-general-prefs.eps
-$(picdir)/ddd-helpers$(IMGEXT):          $(picdir)/ddd-helpers.eps
-$(picdir)/ddd-source-prefs$(IMGEXT):     $(picdir)/ddd-source-prefs.eps
-$(picdir)/ddd-data-prefs$(IMGEXT):       $(picdir)/ddd-data-prefs.eps
-$(picdir)/ddd-startup-prefs$(IMGEXT):    $(picdir)/ddd-startup-prefs.eps
-$(picdir)/ddd-settings$(IMGEXT):         $(picdir)/ddd-settings.eps
-$(picdir)/ddd-threads$(IMGEXT):          $(picdir)/ddd-threads.eps
-$(picdir)/ddd-aliases$(IMGEXT):          $(picdir)/ddd-aliases.eps
-$(picdir)/ddd-edit-displays$(IMGEXT):    $(picdir)/ddd-edit-displays.eps
-$(picdir)/ddd-attach$(IMGEXT):           $(picdir)/ddd-attach.eps
-$(picdir)/ddd-save-session$(IMGEXT):     $(picdir)/ddd-save-session.eps
-$(picdir)/ddd-open-session$(IMGEXT):     $(picdir)/ddd-open-session.eps
-$(picdir)/ddd-button-editor$(IMGEXT):    $(picdir)/ddd-button-editor.eps
-$(picdir)/ddd-shortcuts$(IMGEXT):        $(picdir)/ddd-shortcuts.eps
-$(picdir)/ddd-shortcut-editor$(IMGEXT):  $(picdir)/ddd-shortcut-editor.eps
-$(picdir)/ddd-drag$(IMGEXT):             $(picdir)/ddd-drag.eps
-$(picdir)/disclaimer$(IMGEXT):           $(picdir)/disclaimer.eps
-$(picdir)/ddd-separate$(IMGEXT):         $(picdir)/ddd-separate.eps
-$(picdir)/ddd-bp-properties$(IMGEXT):    $(picdir)/ddd-bp-properties.eps
-$(picdir)/ddd-edit-breakpoints$(IMGEXT): $(picdir)/ddd-edit-breakpoints.eps
-$(picdir)/ddd-display$(IMGEXT):          $(picdir)/ddd-display.eps
-$(picdir)/ddd-repeats$(IMGEXT):          $(picdir)/ddd-repeats.eps
-$(picdir)/ddd-toolbar$(IMGEXT):          $(picdir)/ddd-toolbar.eps
-$(picdir)/ddd-font-prefs$(IMGEXT):       $(picdir)/ddd-font-prefs.eps
-$(picdir)/ddd-define-command$(IMGEXT):   $(picdir)/ddd-define-command.eps
-$(picdir)/ddd-signals$(IMGEXT):          $(picdir)/ddd-signals.eps
-$(picdir)/ddd-examine$(IMGEXT):          $(picdir)/ddd-examine.eps
-$(picdir)/ddd-clusters$(IMGEXT):         $(picdir)/ddd-clusters.eps
-$(picdir)/ddd-plots$(IMGEXT):            $(picdir)/ddd-plots.eps
-$(picdir)/ddd-toolbars$(IMGEXT):         $(picdir)/ddd-toolbars.eps
+	cd $(picdir); $(FIG2PS) ddd-toolbars.fig > ddd-toolbars.ps
 
 
 # The logo comes in XPM source
-$(picdir)/dddsplash.eps: $(icondir)/dddsplash.xpm
-	$(CONVERT) $(icondir)/dddsplash.xpm $@
-
-$(picdir)/dddsplash.gif: $(icondir)/dddsplash.xpm
-	$(CONVERT) $(icondir)/dddsplash.xpm $@
-	$(GIFTOPPM) $@ | $(PPMTOGIF) > $@~ && $(MV) $@~ $@
-
-$(picdir)/dddsplash.jpg: $(icondir)/dddsplash.xpm
-	$(CONVERT) $(icondir)/dddsplash.xpm $@
-
-$(picdir)/dddlogo.eps: $(icondir)/dddlogo.xpm
-	$(CONVERT) $(icondir)/dddlogo.xpm $@
-
-$(picdir)/dddlogo.gif: $(icondir)/dddlogo.xpm
-	$(CONVERT) $(icondir)/dddlogo.xpm $@
-	$(GIFTOPPM) $@ | $(PPMTOGIF) > $@~ && $(MV) $@~ $@
-
-$(picdir)/dddlogo.jpg: $(icondir)/dddlogo.xpm
-	$(CONVERT) $(icondir)/dddlogo.xpm $@
-
-$(picdir)/dddback.eps: $(icondir)/dddback.xpm
-	$(CONVERT) $(icondir)/dddback.xpm $@
-
-$(picdir)/dddback.gif: $(icondir)/dddback.xpm
-	$(CONVERT) $(icondir)/dddback.xpm $@
-	$(GIFTOPPM) $@ | $(PPMTOGIF) > $@~ && $(MV) $@~ $@
-
-$(picdir)/dddback.jpg: $(icondir)/dddback.xpm
-	$(CONVERT) $(icondir)/dddback.xpm $@
-
-
-## The DDD manual in PostScript format, including all pictures.
-
-$(docdir)/ddd.ps: ddd.dvi
-	$(DVIPS) ddd.dvi -o $@
-
-
-## The DDD manual in DVI format.
-
-INCLUDES = \
-	config.texi \
-	gpl.texinfo \
-	lgpl.texinfo \
-	texinfo.tex \
-	epsf.tex \
-	xepsf.tex
-
-ddd.dvi: ddd.texi $(INCLUDES) $(PICS)
-	-test -d PICS || $(LN_S) $(picdir) .
-	$(TEXI2DVI) $(srcdir)/ddd.texi
-
-texidir = $(srcdir)/../texinfo
-
-gpl.texinfo: $(texidir)/gpl.texinfo
-	$(LN_S) $(texidir)/gpl.texinfo $@
-
-lgpl.texinfo: $(texidir)/lgpl.texinfo
-	$(LN_S) $(texidir)/lgpl.texinfo $@
-
-texinfo.tex: $(texidir)/texinfo.tex
-	$(LN_S) $(texidir)/texinfo.tex $@
-
-epsf.tex: $(texidir)/epsf.tex
-	$(LN_S) $(texidir)/epsf.tex $@
-
-xepsf.tex: epsf.tex
-	$(LN_S) epsf.tex $@
-
-
-## The DDD manual in HTML format.
-
-$(htmldir)/index.html: ddd.texi $(INCLUDES) $(IMAGES) \
-	style.css $(srcdir)/fix-html.sed $(srcdir)/fix-toc.sed
-	@-test -d $(htmldir) || $(MKDIR) $(htmldir)
-	@-test -d $(htmldir)/PICS || $(MKDIR) $(htmldir)/PICS
-	@-test -d PICS || $(LN_S) $(picdir) .
-	$(RM) ddd*.html
-	$(TEXI2HTML) $(srcdir)/ddd.texi
-	for file in ddd*.html; do \
-		$(SED) -f $(srcdir)/fix-html.sed $$file > $$file~ && \
-		$(MV) $$file~ $$file; \
-	done
-	$(SED) -f $(srcdir)/fix-toc.sed ddd_toc.html > ddd_toc.html~ && \
-		$(MV) ddd_toc.html~ ddd_toc.html
-	cd $(htmldir) && $(RM) ddd*.html style.css PICS/*
-	$(INSTALL_DATA) ddd*.html $(srcdir)/style.css $(htmldir)
-	@$(ECHO) Installing images...
-	@$(INSTALL_DATA) $(IMAGES) $(htmldir)/PICS
-	@$(ECHO) Installing images...done.
-	$(RM) $(htmldir)/index.html
-	$(LN_S) ddd_toc.html $@
-
-## The DDD manual in Info format.
-
-$(docdir)/ddd.info: ddd.texi $(INCLUDES)
-	$(RM) ddd.info*
-	$(MAKEINFO) -I$(srcdir) $(srcdir)/ddd.texi
-	$(INSTALL_DATA) ddd.info* $(docdir)
-
-
-## Auxiliary manual files.
-
-$(docdir)/sample.c: $(srcdir)/sample.c
-	$(INSTALL_DATA) $(srcdir)/sample.c $(docdir)
-
+$(picdir)/dddsplash.ps: $(icondir)/dddsplash.xpm
+	$(XPMTOPPM) $(icondir)/dddsplash.xpm | $(PNMDEPTH) 255 | \
+	$(PNMTOPS) -noturn > $@~ && $(MV) $@~ $@
 
 
 ## Icons and logos.
@@ -2159,16 +1940,6 @@ build.h: bld.h
 bld.h: bld.h.in config.status
 	CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
-# We use configure to create `config.texi'.
-# To make sure these are not touched upon every invocation,
-# we create temporary cfg.* files instead and touch the config.* files
-# only if the cfg.* files changed.
-config.texi: cfg.texi
-	@$(CMP) cfg.texi $@ 2> /dev/null || \
-	( $(CAT) cfg.texi > $@~ && $(MV) $@~ $@ )
-cfg.texi: cfg.texi.in config.status
-	CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
-
 ## The manual page
 ddd.man: $(srcdir)/ddd.man.in config.status
 	CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
@@ -2232,14 +2003,14 @@ NEWS.gz.C: NEWS.gz
 	-./stringify < NEWS.gz > $@~ && $(MV) $@~ $@
 
 # `make depend' fails to find this dependency :-(
-show.$(OBJEXT): COPYING.gz.C NEWS.gz.C ddd.man.txt.gz.C
+show.o: COPYING.gz.C NEWS.gz.C ddd.man.txt.gz.C
 
 
 ## The xlibdir script
 xlibdir.C: xlibdir.txt
 
 # `make depend' fails to find this dependency :-(
-xconfig.$(OBJEXT): xlibdir.C
+xconfig.o: xlibdir.C
 
 
 ## The host type
@@ -2271,7 +2042,7 @@ $(srcdir)/TAGS:	FORCE
 loc stats:
 	cd $(srcdir); \
 	for list in '$(LIB_OBJECTS)' '$(DDD_OBJECTS)' '$(OBJECTS)'; do \
-	pattern=`$(ECHO) $$list | $(SED) 's/\([a-zA-Z0-9_]*\)\.$(OBJEXT)/\1\\.*/g'`; \
+	pattern=`$(ECHO) $$list | $(SED) 's/\([a-zA-Z0-9_]*\)\.o/\1\\.*/g'`; \
 	$(ECHO) "Lines of code for $$pattern"; \
 	$(CAT) `$(LS) $$pattern | grep '\.[ChLY]'` | \
 		$(GREP) -v '^[ 	]*//' | \
@@ -2302,7 +2073,7 @@ configinfo.C: USERINFO $(srcdir)/config-info
 
 # configinfo.C:	Makefile config.h
 
-configinfo.$(OBJEXT):	configinfo.C configinfo.h
+configinfo.o:	configinfo.C configinfo.h
 
 # If `~/.ddd_userinfo' exists, use this file as personal identification.
 USERINFO: userinfo$(EXEEXT)
