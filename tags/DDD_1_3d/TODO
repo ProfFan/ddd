@@ -1,0 +1,166 @@
+# $Id$ -*- Text -*-
+# The DDD projects.
+
+This is a list of frequently suggested DDD features, which should be
+realized in some future DDD release.  If you want to realize one or
+more of these projects, please ask us (ddd@ips.cs.tu-bs.de) whether
+there are already people working on that project.  Similar, if you
+have a project idea, be sure to send it to us such that we may realize
+it (or include it in this list :-)
+
+Projects marked with an `*' represent work in progress.
+Volunteers for these and other projects are welcome!
+
+001. Have DDD ported to a free widget set -- Athena or lwlib, for
+     example.  DDD could then be included in the GNU distribution.
+
+002. Have breakpoint menus like
+
+       (gdb) b Foo::bar
+       [0] cancel
+       [1] all
+       [2] Foo:bar(int)
+       [2] Foo:bar(char)
+       >
+
+     realized in a selection dialog.
+
+003. Support full annotation mode (`gdb --annotate=2').  This would
+     make prompt recognition easier and allow full trace of the current
+     GDB status.  Disadvantage: won't work with earlier GDBs and requires
+     a major redesign.
+
+004. Have interactive help -- a wrapper to the GDB `help' command.
+
+005. Have a menu of frequently used GDB commands (classed by help classes?)
+
+006. With GDB 4.14 and later, define `graph display' command such that
+     a special code is issued which causes DDD to show the display.
+     This makes it possible to use `graph display' in own definitions.
+
+007. [done]
+
+008. Have buttons arranged such that they do not disappear when the window
+     gets smaller.
+
+009. Recognize shared data structures (that is, two displays
+     referencing the same object).  This could be achieved by
+     comparing display addresses.  See also the mail of
+     markusd@cs.tu-berlin.de (Markus Dahm).
+
+010. [done]
+
+011. Have local source files without path indication located via the
+     GDB directories setting.  Maybe through the `info source'
+     command?
+
+012. [done]
+
+013. [done]
+
+014. [done]
+
+015. [done]
+
+016. [done]
+
+017. Have the graph editor scroll automatically when the pointer drags
+     something out of the visible part of the window.
+
+018. [done]
+
+019. [done]
+
+020. [done]
+
+021. In the manual index, use special fonts for bold keywords.
+     [Requires Motif 2.0 and CMText.]
+
+022. [done]
+
+023. [done]
+
+024. Have Fortran support. [Definitely a volunteer job.]
+
+025. Have auto-unfolding for recursive data structures.  Dereferencing
+     a pointer P * would automatically select all P * members in the
+     referenced structure.
+
+026. Have optional abstraction levels, hiding implementation details.
+     Every data type would be assigned an individual VSL function
+     determining its representation.
+
+027. [done]
+
+028. Assembly and register windows.  [Nice job for a volunteer.]
+
+029. [done]
+
+030. [done]
+
+031. Have a three-dimensional data display (using red/green glasses) :-)
+
+032. [done]
+
+033. Call for bug report if `make' fails.  But how?
+
+034. Call for bug report if a fatal X error occurs.
+
+035. [done]
+
+036. [done]
+
+037. Group dereference.  If multiple pointers are selected,
+     dereference them all.
+
+038. [done]
+
+039. [done]
+
+040. [done]
+
+041. [done]
+
+042. jcrupi@mystech.com (John Crupi) wants to change the 'break point' symbol.
+
+043. [done]
+
+044. Disable pointer grabs from the debugged application as soon as
+     the Debugger prompt reappears.  But how?
+
+045. [done]
+
+046. [done]
+
+047. [done]
+
+048. From bruno@nsipo.nasa.gov (Eric Bruno):
+     Under the program menu and a menu option with a dialog
+     to be used with a set args line which would be issued with
+     before each run request.
+     A history list would also be used for this dialog, so if one
+     was testing different command lines it would be just a point
+     and click.
+
+049. albrecht@igpm.rwth-aachen.de (Harald Albrecht):
+     The dialog windows (especially the backtrace dialog) should not
+     exceed a specific size (at least, they should not be larger than
+     the screen :-).  Also, the DDD dialogs should be iconified on
+     their own, without always laying on top of the main windows.
+
+050. Include algorithm animation; for instance, in a way similar to
+     LENS (see ftp.cc.gatech.edu:pub/people/stasko).  Suggested by
+     bruce@liverpool.ac.uk (Bruce Stephens).
+
+051. [done]
+
+052. [done]
+
+053. Improve location of source files through `info sources' and `show
+     directories', such that a lookup of a base file name will refer
+     to the source file used in compilation.
+
+054. Adapt DDD to DBX as found on DEC Alpha.  Ruediger Berlich
+     <berlich@pc66.mppmu.mpg.de> has a description of the DBX format.
+
+055. (Insert your project idea here)
