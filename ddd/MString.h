@@ -1,7 +1,7 @@
 // $Id$
 // Simple interface to Motif composite strings
 
-// Copyright (C) 1995-1998 Technische Universitaet Braunschweig, Germany.
+// Copyright (C) 1995 Technische Universitaet Braunschweig, Germany.
 // Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
@@ -52,38 +52,37 @@ private:
 
 public:
     // Constructors
-    MString(char *text = "",
+    MString(char *text = "", 
 	    XmStringCharSet charset = MSTRING_DEFAULT_CHARSET):
-	_mstring(text ? XmStringCreateLtoR(text, charset) : 0)
+	_mstring(XmStringCreateLtoR(text, charset))
     {
 	assert(OK());
     }
 
     MString(const char *text,
 	    XmStringCharSet charset = MSTRING_DEFAULT_CHARSET):
-	_mstring(text ? XmStringCreateLtoR((char *)text, charset) : 0)
+	_mstring(XmStringCreateLtoR((char *)text, charset))
     {
 	assert(OK());
     }
 
-    MString(const string& text,
+    MString(const string& text, 
 	    XmStringCharSet charset = MSTRING_DEFAULT_CHARSET):
 	_mstring(XmStringCreateLtoR((char *)text, charset))
     {
 	assert(OK());
     }
 
-    // In Motif 1.1, `XmString' is defined as `char *'; hence the
-    // DUMMY parameter
+    // In Motif 1.1, `XmString' is defined as `char *'; hence the DUMMY parameter
     MString(XmString text, bool /* dummy */):
-	_mstring(text ? XmStringCopy(text) : 0)
+	_mstring(XmStringCopy(text))
     {
 	assert(OK());
     }
 
     // Copy constructor
     MString(const MString& m):
-	_mstring(m._mstring ? XmStringCopy(m._mstring) : 0)
+	_mstring(XmStringCopy(m._mstring))
     {
 	assert(m.OK());
 	assert(OK());
@@ -105,11 +104,6 @@ public:
     Boolean isEmpty() const
     {
 	return XmStringEmpty(_mstring);
-    }
-
-    Boolean isNull() const
-    {
-	return xmstring() == 0;
     }
 
     int lineCount() const
@@ -137,11 +131,21 @@ public:
 	return XmStringLength(_mstring);
     }
 
-    // Return all characters, regardless of charset
-    string str() const;
+    string str(XmStringCharSet charset = MSTRING_DEFAULT_CHARSET) const
+    {
+	char *text;
+	if (XmStringGetLtoR(_mstring, charset, &text))
+	{
+	    string s = text;
+	    XtFree(text);
+	    return s;
+	}
+
+	return "";
+    }
 
     // Assignment
-    MString& operator = (const MString& m)
+    MString& operator=(const MString& m)
     {
 	assert(OK());
 	assert(m.OK());
@@ -160,23 +164,16 @@ public:
 	assert(OK());
 	assert(m.OK());
 
-	if (isNull())
-	    return operator = (m);
-
 	XmString old = _mstring;
 	_mstring = XmStringConcat(_mstring, m._mstring);
 	XmStringFree(old);
 
 	return *this;
     }
-
     MString& prepend(const MString& m)
     {
 	assert(OK());
 	assert(m.OK());
-
-	if (isNull())
-	    return operator = (m);
 
 	XmString old = _mstring;
 	_mstring = XmStringConcat(m._mstring, _mstring);
@@ -205,6 +202,11 @@ public:
     operator XmString()       { return _mstring; }
     XmString xmstring() const { return _mstring; }
 
+    Boolean isNull() const
+    {
+	return xmstring() == 0;
+    }
+
     // Substrings
     Boolean contains(const MString& m) const
     {
@@ -223,11 +225,6 @@ inline MString operator + (const MString& m1, const MString& m2)
 {
     assert(m1.OK());
     assert(m2.OK());
-
-    if (m1.isNull())
-	return m2;
-    if (m2.isNull())
-	return m1;
 
     return MString(XmStringConcat(m1.xmstring(), m2.xmstring()), true);
 }
