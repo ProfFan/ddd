@@ -1,0 +1,33 @@
+#! /bin/sh
+# $Id$
+
+# Script to setup DDD configuration work before actually running configure
+# when starting from fresh CVS checkout.  See `README-CVS' for details.
+
+this=`basename $0`
+echo "$this: setting up DDD from CVS..."
+
+# Set up configure scripts.
+# Note: no `--copy': config scripts are created as symbolic links.
+(cd ddd && aclocal)
+autoconf -l ddd
+automake --include-deps --gnu --add-missing --verbose
+(cd ddd && autoconf && automake --include-deps --foreign --add-missing --verbose)
+(cd vsllib && autoconf -l ../ddd && automake --include-deps --foreign --verbose)
+(cd themes && autoconf -l ../ddd && automake --include-deps --foreign --verbose)
+(cd readline && autoconf)
+(cd termcap && autoconf)
+
+# Configure the package once, using default arguments (or given arguments)
+sh ./configure "$@"
+
+# Make DDD Makefiles
+(cd ddd && (make Makefile; make Makefile))
+
+# Create everything in the distribution that can be installed.
+# See the `INSTALL' file for prerequisites.
+# If all went well, delete any configuration-dependent files.
+make progstuff && make distclean
+
+echo "$this: setting up DDD from CVS...done."
+echo "$this: Now see the INSTALL file for configuring and building DDD."
