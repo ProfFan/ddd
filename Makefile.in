@@ -36,7 +36,7 @@ SHELL = /bin/sh
 srcdir = @srcdir@
 VPATH = @srcdir@
 
-## Subdirectories.  (readline termcap libiberty ddd)
+## Subdirectories.  (libiberty termcap ddd)
 SUBDIRS = @subdirs@
 
 ## Architecture.

@@ -33,7 +33,7 @@ dnl
 dnl
 dnl Revision Control
 dnl
-AC_PREREQ(2.13)dnl
+AC_PREREQ(2.12)dnl
 AC_REVISION($Revision$)
 dnl
 dnl
@@ -120,15 +120,6 @@ dnl
 dnl
 dnl Locate programs
 dnl
-AC_CHECK_PROGS(F77, g77 f77 f2c, "")
-if test "$F77" != ""; then
-AC_PROG_F77
-else
-# Use default values
-F77=g77
-FFLAGS=-g
-AC_SUBST(FFLAGS)
-fi
 AC_PROG_LN_S
 AC_PATH_PROGS(SH, sh)
 AC_CHECK_PROGS(TAR, gtar tar)
@@ -205,8 +196,8 @@ dnl
 ICE_PROG_CC
 ICE_PROG_CXX
 dnl
-dnl
-dnl Find and check C/C++/F77 preprocessors
+dnl 
+dnl Find and check C/C++ preprocessors
 dnl
 AC_PROG_CPP
 AC_PROG_CXXCPP
@@ -234,11 +225,9 @@ ICE_CXX_LIFETIME_OF_TEMPORARIES
 ICE_PROG_CPP_TRADITIONAL
 dnl
 dnl
-dnl Check for `.exe' and `.obj' extensions (for Windows/Cygwin)
+dnl Check for .exe extension (used in the Windows/Cygwin32 environment)
 dnl
-AC_CYGWIN
-AC_EXEEXT
-AC_OBJEXT
+AM_EXEEXT
 dnl
 dnl
 dnl The C++ compiler is set up.  Use it for further checks.
@@ -323,30 +312,10 @@ dnl The `-liberty' library per definition contains only functions
 dnl missing in system libraries.
 LIBIBERTY="../libiberty/libiberty.a"
 dnl
-dnl If we have an installed library, prefer it over the one shipped with DDD.
+dnl Prefer the installed one over the one shipped with DDD.
 AC_CHECK_LIB(iberty, xstrerror, LIBIBERTY="-liberty")
 dnl
 AC_SUBST(LIBIBERTY)
-dnl
-dnl
-dnl Readline library (optional)
-dnl
-LIBREADLINE=""
-readline=yes
-AC_ARG_WITH(readline,
-[  --without-readline               do not support tty command line editing],
-	readline="$withval")
-if test "$readline" != no; then
-dnl
-dnl Find a readline library
-LIBREADLINE="../readline/libreadline.a"
-dnl
-dnl If we have an installed library, prefer it over the one shipped with DDD.
-AC_CHECK_LIB(readline, rl_callback_read_char, LIBREADLINE="-lreadline")
-dnl
-AC_DEFINE(WITH_READLINE)
-fi
-AC_SUBST(LIBREADLINE)
 dnl
 dnl
 dnl
@@ -581,8 +550,7 @@ dnl
 dnl
 dnl
 AC_HEADER_STDC
-AC_CHECK_HEADERS(alloca.h fcntl.h limits.h locale.h malloc.h netdb.h pwd.h)
-AC_CHECK_HEADERS(regex.h rx.h)
+AC_CHECK_HEADERS(alloca.h fcntl.h limits.h malloc.h netdb.h pwd.h regex.h rx.h)
 AC_CHECK_HEADERS(stdlib.h string.h strings.h termio.h termios.h unistd.h)
 AC_CHECK_HEADERS(sys/ioctl.h sys/int_types.h sys/param.h sys/resource.h)
 AC_CHECK_HEADERS(sys/stat.h sys/stropts.h sys/vty.h sys/sysmacros.h sys/core.h)
@@ -644,7 +612,6 @@ ICE_CHECK_DECL(rand, stdlib.h)
 ICE_CHECK_DECL(random, stdlib.h)
 ICE_CHECK_DECL(readlink, unistd.h)
 ICE_CHECK_DECL(setbuf, stdio.h)
-ICE_CHECK_DECL(setlocale, locale.h)
 ICE_CHECK_DECL(setpgid, unistd.h)
 ICE_CHECK_DECL(setpgrp, unistd.h)
 ICE_CHECK_DECL(setpgrp2, unistd.h)
@@ -722,6 +689,7 @@ if test "$builtin_app_defaults" != no; then
 AC_DEFINE(WITH_BUILTIN_APP_DEFAULTS)
 fi
 dnl
+dnl
 dnl Check for risky LessTif versions.
 dnl
 risky_lesstif=false
@@ -765,7 +733,7 @@ dnl
 dnl
 dnl That's all, folks!
 dnl
-AC_OUTPUT(Makefile vr.h bld.h Ddd ddd.man cfg.texi .gdbinit, date > stamp-h)
+AC_OUTPUT(Makefile vr.h bld.h Ddd ddd.man .gdbinit, date > stamp-h)
 dnl
 dnl 
 dnl Give some warnings

@@ -1344,7 +1344,7 @@ Ddd*XmFileSelectionBox*XmTextField.@TRANSLATIONS@: \
 
 
 ! In `print', `make', and `cd' dialogs, use a `file' completion, too.
-Ddd*print*XmTextField.@TRANSLATIONS@:        	   \
+Ddd*print_popup*XmTextField.@TRANSLATIONS@:        \
 #override\n COMPLETE_TRANSLATIONS(file) CLIPBOARD_TRANSLATIONS
 
 Ddd*make_dialog*XmTextField.@TRANSLATIONS@:        \
@@ -1690,7 +1690,7 @@ Ddd*manual_help.okLabelString: 	Close
 Ddd*tip_dialog.okLabelString: 	Close
 
 ! Titles
-Ddd*help.dialogTitle:           DDD Help
+Ddd*help_popup.title:           DDD Help
 Ddd*manual_help.title:    	DDD Reference
 Ddd*manual_help.iconName: 	DDD Reference
 Ddd*license.title:        	DDD License
@@ -1699,10 +1699,10 @@ Ddd*news.title:           	DDD News
 Ddd*news.iconName:     		DDD News
 
 ! Icons
-Ddd*help.symbolPixmap: ddd
+Ddd*help_popup.help.symbolPixmap: ddd
 
 ! Help on help.
-Ddd*help*helpString: \
+Ddd*help_popup.help*helpString: \
 @rm Welcome to DDD Help\!\n\
 \n\
 To get help about an item, just point on it and press KEY_HELP.\n\
@@ -3193,7 +3193,7 @@ Ddd*toolbar.?.shadowThickness:			1
 
 ! Ddd*preferences.okLabelString: 		Close
 Ddd*preferences.cancelLabelString:		Reset
-Ddd*preferences.dialogTitle:			DDD Preferences
+Ddd*preferences_popup.title:			DDD Preferences
 
 Ddd*preferences*buttons.orientation: 		XmHORIZONTAL
 Ddd*preferences*buttons.borderWidth:  		0
@@ -3320,7 +3320,7 @@ Ddd*preferences*showExecPos.labelString:	Show Position and Breakpoints
 Ddd*preferences*asGlyphs.labelString:		as Glyphs
 Ddd*preferences*asText.labelString:		as Text Characters
 
-Ddd*preferences*toolButtons.labelString:	Tool Buttons Location
+Ddd*preferences*toolButtons.labelString:	Tool buttons location
 Ddd*toolButtonsMenu*commandTool.labelString:	\
 Command Tool
 Ddd*toolButtonsMenu*sourceWindow.labelString:   \
@@ -3590,10 +3590,9 @@ Ddd*preferences*text.columns:			47
 ! Settings
 !-----------------------------------------------------------------------------
 
-Ddd*settings.dialogTitle: DDD: Debugger Settings
-Ddd*settings.okLabelString: Apply
-Ddd*settings.applyLabelString: Reset
-Ddd*settings.cancelLabelString: Close
+Ddd*settings_popup.title: DDD: Debugger Settings
+! Ddd*settings.okLabelString: Close
+Ddd*settings.cancelLabelString: Reset
 Ddd*settings.textAccelerators:
 
 Ddd*settings*help.labelString:		?
@@ -3625,26 +3624,23 @@ Ddd*settings*scroll*helpString:
 Ddd*settings*helpString: \
 WIDGET(@GDB@ Settings)\n\
 \n\
-These settings control @GDB@ operations.\n\
+All settings (except source and object paths) can be saved\n\
+using LBL(Edit, Save Options).\n\
+\n\
 Click on LBL(?) near an item to get further information.\n\
+In a text field, press the KEY_RETURN key to commit the changes.\n\
 \n\
-LBL(Edit, Save Options) saves all @GDB@ settings, except\n\
-session-dependent settings such as source or object paths.\n\
-LBL(File, Save Session) also saves session-dependent @GDB@ settings.\n\
-\n\
-Click on LBL(Apply) to apply changed text settings.\n\
 Click on LBL(Reset) to restore the saved settings.\n\
-Click on LBL(Close) to close this window.
+Click on LBL(OK) to close this window.
 
 
 !-----------------------------------------------------------------------------
 ! Status displays
 !-----------------------------------------------------------------------------
 
-Ddd*infos.dialogTitle: DDD: Status Displays
-Ddd*infos.okLabelString:     Apply
-Ddd*infos.applyLabelString:  Reset
-Ddd*infos.cancelLabelString: Close
+! Ddd*infos.okLabelString: Close
+Ddd*infos.cancelLabelString: Reset
+Ddd*infos_popup.title: DDD: Status Displays
 
 Ddd*infos*help.labelString:			?
 Ddd*infos*help.tipString:\
@@ -3664,7 +3660,7 @@ in the data window.  Please pick your choice from the list.\n\
 Click on LBL(?) near an item to get further information.\n\
 \n\
 Click on LBL(Reset) to delete all status displays.\n\
-Click on LBL(Close) to close this window.
+Click on LBL(OK) to close this window.
 
 
 
@@ -3673,10 +3669,8 @@ Click on LBL(Close) to close this window.
 !-----------------------------------------------------------------------------
 
 ! Ddd*signals.okLabelString: Close
-Ddd*signals.dialogTitle: DDD: Signal Handling
-Ddd*signals.okLabelString:     Apply
-Ddd*signals.applyLabelString:  Reset
-Ddd*signals.cancelLabelString: Close
+Ddd*signals.cancelLabelString: Reset
+Ddd*signals_popup.title: DDD: Signal Handling
 
 Ddd*signals*send.labelString:	   Send
 Ddd*signals*send.rightOffset:	   5
@@ -3709,14 +3703,14 @@ Use LBL(All Signals) to modify all signals at once.\n\
 Click on LBL(?) to get further information on the specific signal.\n\
 \n\
 Click on LBL(Reset) to restore the original settings.\n\
-Click on LBL(Close) to close this window.
+Click on LBL(OK) to close this window.
 
 
 !-----------------------------------------------------------------------------
 ! Button Editor and Shortcut Editor
 !-----------------------------------------------------------------------------
 
-Ddd*edit_buttons.dialogTitle: DDD: Button Editor
+Ddd*edit_buttons_popup.title: DDD: Button Editor
 ! Ddd*edit_buttons.okLabelString: Close
 Ddd*edit_buttons.cancelLabelString: Reset
 
@@ -5075,7 +5069,7 @@ Ddd*contourMenu.surface.documentationString:	\
 @rm Draw contour on surface
 
 
-Ddd*plot_command_dialog.dialogTitle:		DDD: Plot Command
+Ddd*plot_command_dialog_popup.title:		DDD: Plot Command
 Ddd*plot_command_dialog.cancelLabelString:	Close
 Ddd*plot_command.promptString:			gnuplot>
 Ddd*plot_command_dialog*helpString:     \
@@ -5285,7 +5279,7 @@ Ddd*?*Reload.documentationString: \
 ! Print Dialog
 !-----------------------------------------------------------------------------
 
-Ddd*print.dialogTitle: DDD: Print
+Ddd*print_popup.title: DDD: Print
 Ddd*print.okLabelString: Print
 
 Ddd*print*to.labelString:		      Print To
@@ -5346,7 +5340,7 @@ For POSTSCRIPT format only, you can also specify orientation and paper size.\n\
 \n\
 To print, click on LBL(Print).
 
-Ddd*paper_size_dialog.dialogTitle:  		DDD: Paper Size
+Ddd*paper_size_dialog_popup.title:  		DDD: Paper Size
 Ddd*paper_size_dialog.selectionLabelString: 	Paper size
 Ddd*paper_size_dialog.textAccelerators:
 Ddd*paper_size_dialog*helpString: \
@@ -5361,7 +5355,7 @@ Supported units for VAR(width) and VAR(height) include:\n\
 KBD(pt) (points), KBD(in) (inches),\n\
 KBD(mm) (millimeters), KBD(cm) (centimeters).
 
-Ddd*browse_print.dialogTitle:       DDD: Print to File
+Ddd*browse_print_popup.title:       DDD: Print to File
 Ddd*browse_print.selectionLabelString: Print to File
 Ddd*browse_print*helpString:	   \
 @rm You can select the file to print to.\n\
@@ -5375,7 +5369,7 @@ Click on LBL(Filter) to apply the given filter.
 ! File Selection Dialogs
 !-----------------------------------------------------------------------------
 
-Ddd*exec_files.dialogTitle:		   DDD: Open Program
+Ddd*exec_files_popup.title:		   DDD: Open Program
 Ddd*exec_files.okLabelString:	   Open
 Ddd*exec_files.selectionLabelString: Program
 Ddd*exec_files*helpString:	   \
@@ -5395,7 +5389,7 @@ No argument means to have no executable file and no symbols.\n\
 Click on LBL(Open) to open the selected file.\n\
 Click on LBL(Filter) to apply the given filter.
 
-Ddd*core_files.dialogTitle:		   DDD: Open Core Dump
+Ddd*core_files_popup.title:		   DDD: Open Core Dump
 Ddd*core_files.okLabelString:	   Open
 Ddd*core_files.selectionLabelString: Core Dump
 Ddd*core_files*helpString:	   \
@@ -5413,7 +5407,7 @@ to specify the program causing the core dump, and to load its symbol table.\n\
 Click on LBL(Open) to open the selected core dump.\n\
 Click on LBL(Filter) to apply the given filter.
 
-Ddd*source_files.dialogTitle:		   DDD: Open Source
+Ddd*source_files_popup.title:		   DDD: Open Source
 Ddd*source_files.okLabelString:	   Open
 Ddd*source_files.selectionLabelString: Source File
 Ddd*source_files*helpString:    \
@@ -5431,7 +5425,7 @@ to specify the executable program, and to load its symbol table.\n\
 Click on LBL(Open) to open the selected source file.\n\
 Click on LBL(Filter) to apply the given filter.
 
-Ddd*processes.dialogTitle: DDD: Attach to Process
+Ddd*processes_popup.title: DDD: Attach to Process
 Ddd*processes.listLabelString:	Processes
 Ddd*processes.selectionPolicy:	XmSINGLE_SELECT
 
@@ -5463,7 +5457,7 @@ Click on LBL(Attach) to attach to the selected process.\n\
 Click on LBL(Update) to update the list of processes.
 
 
-Ddd*classes.dialogTitle: 		DDD: Open Class
+Ddd*classes_popup.title: 		DDD: Open Class
 Ddd*classes.listLabelString:		Classes
 Ddd*classes.selectionLabelString: 	Open Class
 Ddd*classes*selectionPolicy:		XmSINGLE_SELECT
@@ -5483,7 +5477,7 @@ Click on LBL(Open) to open the selected class.\n\
 Click on LBL(Update) to scan the class path once more.
 
 
-Ddd*sources.dialogTitle: 		DDD: Open Source
+Ddd*sources_popup.title: 		DDD: Open Source
 Ddd*sources.listLabelString:		Sources
 Ddd*sources.selectionLabelString: 	Open Source
 Ddd*sources*label.labelString:		Filter
@@ -5509,7 +5503,7 @@ Click on LBL(Lookup) to lookup the selected source.\n\
 Click on LBL(Filter) to apply the given filter.
 
 
-Ddd*sessions_to_open.dialogTitle: 		DDD: Open Session
+Ddd*sessions_to_open_popup.title: 		DDD: Open Session
 Ddd*sessions_to_open.listLabelString:		Sessions
 Ddd*sessions_to_open.selectionLabelString: 	Open Session
 Ddd*sessions_to_open*selectionPolicy:		XmSINGLE_SELECT
@@ -5528,7 +5522,7 @@ Click on LBL(Open) to open the selected session.\n\
 Click on LBL(Delete) to delete the selected session.
 
 
-Ddd*sessions_to_save.dialogTitle: 		DDD: Save Session
+Ddd*sessions_to_save_popup.title: 		DDD: Save Session
 Ddd*sessions_to_save.listLabelString:		Sessions
 Ddd*sessions_to_save.selectionLabelString: 	Save Session
 Ddd*sessions_to_save*selectionPolicy:		XmSINGLE_SELECT
@@ -5568,7 +5562,7 @@ Click on LBL(Save) to save the current DDD session.\n\
 Click on LBL(Delete) to delete the selected session.
 
 
-Ddd*export_data.dialogTitle:       DDD: Save Plot Data
+Ddd*export_data_popup.title:       DDD: Save Plot Data
 Ddd*export_data.okLabelString:	   Save
 Ddd*export_data.selectionLabelString: Data File
 Ddd*export_data*helpString:	   \
@@ -5583,7 +5577,7 @@ Click on LBL(Filter) to apply the given filter.
 ! Breakpoint Editor
 !-----------------------------------------------------------------------------
 
-Ddd*edit_breakpoins_dialog.dialogTitle: DDD: Breakpoint and Watchpoint Editor
+Ddd*edit_breakpoins_dialog_popup.title: DDD: Breakpoint and Watchpoint Editor
 Ddd*edit_breakpoints_dialog.listLabelString: Breakpoints and Watchpoints
 Ddd*edit_breakpoints_dialog*buttons.orientation: XmHORIZONTAL
 Ddd*edit_breakpoints_dialog.okLabelString:	 Close
@@ -5699,7 +5693,7 @@ Ddd*edit_breakpoints_dialog*delete.documentationString:     \
 ! New Breakpoint, New Watchpoint dialogs
 !-----------------------------------------------------------------------------
 
-Ddd*new_breakpoint_dialog.dialogTitle: DDD: New Breakpoint
+Ddd*new_breakpoint_dialog_popup.title: DDD: New Breakpoint
 Ddd*new_breakpoint_dialog*label.labelString: Set Breakpoint at
 Ddd*new_breakpoint_dialog.okLabelString: Set
 Ddd*new_breakpoint_dialog.textAccelerators:
@@ -5723,7 +5717,7 @@ Multiple breakpoints at one place are permitted, and useful if conditional.\n\
 Click on LBL(Set) to set the specified breakpoint.
 
 
-Ddd*new_watchpoint_dialog.dialogTitle: DDD: New Watchpoint
+Ddd*new_watchpoint_dialog_popup.title: DDD: New Watchpoint
 Ddd*new_watchpoint_dialog*set.labelString:	Set
 Ddd*new_watchpoint_dialog*cwatch.labelString:	Watchpoint
 Ddd*new_watchpoint_dialog*rwatch.labelString:	Read Watchpoint
@@ -5749,9 +5743,9 @@ Click on LBL(Set) to set the specified watchpoint.
 ! Breakpoint Properties
 !-----------------------------------------------------------------------------
 
-Ddd*breakpoint_properties.dialogTitle:    DDD: Properties
+Ddd*breakpoint_properties_popup.title:    DDD: Properties
 
-Ddd*breakpoint_properties.cancelLabelString:    	Close
+Ddd*breakpoint_properties.okLabelString:    		Close
 
 Ddd*breakpoint_properties*title.labelString:		Breakpoint
 Ddd*breakpoint_properties*titleMenu.marginWidth:	0
@@ -5878,7 +5872,6 @@ DESC(Commands, [record and edit @GDB@ command sequences])\n\
     SUBITEM Click on LBL(End) to stop the recording.\n\
     SUBITEM Use LBL(Edit @small>>) to edit the recorded commands.\n\
 \n\
-Click on LBL(Apply) to apply the changes you made.\n\
 Click on LBL(Close) to close this window.
 
 
@@ -5887,9 +5880,9 @@ Click on LBL(Close) to close this window.
 ! Define Command
 !-----------------------------------------------------------------------------
 
-Ddd*define_command.dialogTitle:    		DDD: Define Command
+Ddd*define_command_popup.title:    		DDD: Define Command
 
-Ddd*define_command.cancelLabelString:    	Close
+! Ddd*define_command.okLabelString:    		Close
 
 Ddd*define_command*name.labelString:		Command
 Ddd*define_command*name*text*columns:       	25
@@ -5952,14 +5945,14 @@ To define a command with argument, enable the LBL(()) toggle.\n\
 This will make the command use LBL(()) as symbolic argument.\n\
 \n\
 Click on LBL(Apply) to apply the new command.\n\
-Click on LBL(Close) to close this window.
+Click on LBL(OK) to close this window.
 
 
 !-----------------------------------------------------------------------------
 ! Show Backtrace
 !-----------------------------------------------------------------------------
 
-Ddd*stack_dialog.dialogTitle:		  DDD: Backtrace
+Ddd*stack_dialog_popup.title:		  DDD: Backtrace
 Ddd*stack_dialog.listLabelString:	  Backtrace
 Ddd*stack_dialog.okLabelString:		  Up
 Ddd*stack_dialog.applyLabelString:	  Down
@@ -5984,7 +5977,7 @@ LBL(Up) or LBL(Down).
 ! Registers
 !-----------------------------------------------------------------------------
 
-Ddd*register_dialog.dialogTitle:	     DDD: Registers
+Ddd*register_dialog_popup.title:	     DDD: Registers
 Ddd*register_dialog.listLabelString:	     Registers
 Ddd*register_dialog.okLabelString:	     Close
 Ddd*register_dialog.listVisibleItemCount:    12
@@ -6009,7 +6002,7 @@ If LBL(All registers) is set, all registers are shown.
 ! Threads
 !-----------------------------------------------------------------------------
 
-Ddd*thread_dialog.dialogTitle:	     	     DDD: Threads
+Ddd*thread_dialog_popup.title:	     	     DDD: Threads
 Ddd*thread_dialog.listLabelString:	     Threads
 Ddd*thread_dialog.cancelLabelString:	     Close
 Ddd*thread_dialog.okLabelString:	     Suspend
@@ -6040,10 +6033,9 @@ ITEM click on LBL(Resume) to resume execution of the selected threads.
 ! Command History
 !-----------------------------------------------------------------------------
 
-Ddd*history_dialog.dialogTitle:		    DDD: Command History
+Ddd*history_dialog_popup.title:		    DDD: Command History
 Ddd*history_dialog.listLabelString:	    Command History
 Ddd*history_dialog*visibleItemCount:	    10
-Ddd*history_dialog.cancelLabelString:	    Close
 
 Ddd*history_dialog*helpString:	    \
 WIDGET(Command History)\n\
@@ -6060,7 +6052,7 @@ Click on LBL(Apply) to execute the current command.
 ! Display Editor
 !-----------------------------------------------------------------------------
 
-Ddd*edit_displays_dialog.dialogTitle: DDD: Display Editor
+Ddd*edit_displays_dialog_popup.title: DDD: Display Editor
 Ddd*edit_displays_dialog*listLabelString: Displays
 Ddd*edit_displays_dialog*buttons.orientation: XmHORIZONTAL
 Ddd*edit_displays_dialog.okLabelString:	      Close
@@ -6172,7 +6164,7 @@ stack frame, plus all those whose scope is global or an entire file.\n\
 If LBL(Include in `Display ()' Menu) is set, the new display expression\n\
 becomes an item in the LBL(Display ()) menu.])dnl
 
-Ddd*new_display_dialog.dialogTitle:          	   DDD: New Display
+Ddd*new_display_dialog_popup.title:          	   DDD: New Display
 Ddd*new_display_dialog.okLabelString:              Display
 Ddd*new_display_dialog*label.labelString:    	   Display Expression
 Ddd*new_display_dialog*shortcut.labelString:   	   Include in 
@@ -6182,7 +6174,7 @@ Ddd*new_display_dialog*display.labelPixmap:   	   display
 Ddd*new_display_dialog*menu.labelString:   	   menu
 Ddd*new_display_dialog*helpString:	           NEW_DISPLAY_HELP
 
-Ddd*dependent_display_dialog.dialogTitle:          DDD: New Dependent Display
+Ddd*dependent_display_dialog_popup.title:          DDD: New Dependent Display
 Ddd*dependent_display_dialog.okLabelString:        Display
 Ddd*dependent_display_dialog*label.labelString:    Display Expression
 Ddd*dependent_display_dialog*shortcut.labelString: Include in 
@@ -6199,7 +6191,7 @@ The new display will be made dependent on the currently selected display.
 ! Examine Memory
 !-----------------------------------------------------------------------------
  
-Ddd*examine_dialog.dialogTitle:	DDD: Examine Memory
+Ddd*examine_dialog_popup.title:	DDD: Examine Memory
 
 Ddd*examine_dialog*examine.label.labelString:	Examine
 Ddd*examine_dialog*examine*text.columns:	4
@@ -6254,7 +6246,7 @@ Click on LBL(Close) to close this window.
 ! Run, make, and CD dialogs
 !-----------------------------------------------------------------------------
 
-Ddd*run_dialog.dialogTitle: DDD: Run Program
+Ddd*run_dialog_popup.title: DDD: Run Program
 Ddd*run_dialog.listLabelString:		Arguments
 Ddd*run_dialog.selectionLabelString:	Run with Arguments
 Ddd*run_dialog.okLabelString:		Run
@@ -6271,7 +6263,7 @@ Select specific arguments to have them copied to the argument prompt.\n\
 Click on LBL(Run) to start the debugged program with the selected arguments.
 
 
-Ddd*make_dialog.dialogTitle: DDD: Make
+Ddd*make_dialog_popup.title: DDD: Make
 Ddd*make_dialog.listLabelString:	Targets
 Ddd*make_dialog.selectionLabelString:	Make Target
 Ddd*make_dialog.okLabelString:		Make
@@ -6288,7 +6280,7 @@ Select specific arguments to have them copied to the argument prompt.\n\
 Click on LBL(Make) to start the make program with the selected arguments.
 
 
-Ddd*cd_dialog.dialogTitle: DDD: Change Directory
+Ddd*cd_dialog_popup.title: DDD: Change Directory
 Ddd*cd_dialog.listLabelString:	Directories
 Ddd*cd_dialog.selectionLabelString:	Change Directory To
 Ddd*cd_dialog.okLabelString:		Change Dir
@@ -6309,7 +6301,7 @@ Click on LBL(Change Dir) to change the current directory.
 ! Tic Tac Toe
 !-----------------------------------------------------------------------------
 
-Ddd*tictactoe.dialogTitle: Tic Tac Toe
+Ddd*tictactoe_popup.title: Tic Tac Toe
 Ddd*tictactoe.okLabelString: New Game
 Ddd*tictactoe*field.foreground: grey60
 Ddd*tictactoe*helpString: \
@@ -6322,7 +6314,7 @@ Try to get three stop signs in a row.
 ! Other Dialogs
 !-----------------------------------------------------------------------------
 
-Ddd*busy_dialog.dialogTitle: DDD: Debugger Busy
+Ddd*busy_dialog_popup.title: DDD: Debugger Busy
 Ddd*busy_dialog.messageString:		\
 @rm @GDB@ is busy!
 Ddd*busy_dialog*helpString:	\
@@ -6339,7 +6331,7 @@ examine the current program state.\n\
 If @GDB@ is busy recording commands, simply enter KBD(end) 
 at the @GDB@ prompt.
 
-Ddd*quit_dialog.dialogTitle: DDD: Debugger Still Busy
+Ddd*quit_dialog_popup.title: DDD: Debugger Still Busy
 ! Ddd*quit_dialog.messageString:	 \
 ! @rm @GDB@ is still busy.  Exit anyway (and kill it)?
 Ddd*quit_dialog*okLabelString:	     Yes
@@ -6352,7 +6344,7 @@ The debugged program may be still running.\n\
 Before killing a running @GDB@, you should try to interrupt it\n\
 (by selecting LBL(Program, Interrupt)).
 
-Ddd*shutdown_dialog.dialogTitle: DDD: Program Running
+Ddd*shutdown_dialog_popup.title: DDD: Program Running
 ! Ddd*shutdown_dialog.messageString:	 \
 ! @rm The program is running.  Shutdown anyway (and kill it)?
 Ddd*shutdown_dialog*okLabelString:	     Yes
@@ -6364,7 +6356,7 @@ Ddd*shutdown_dialog*helpString:	\
 Shutting down DDD now will kill your program.\n\
 Please confirm that this is what you want.
 
-Ddd*terminated_dialog.dialogTitle: DDD: Debugger Terminated
+Ddd*terminated_dialog_popup.title: DDD: Debugger Terminated
 ! Ddd*terminated_dialog.messageString:   \
 ! @rm @GDB@ terminated abnormally.
 Ddd*terminated_dialog*okLabelString:	   Restart
@@ -6375,7 +6367,7 @@ Ddd*terminated_dialog*helpString:	\
 Click on LBL(Restart) to restart @GDB@.\n\
 Click on LBL(Exit) to exit DDD.
 
-Ddd*exited_dialog.dialogTitle: DDD: Debugger Exited
+Ddd*exited_dialog_popup.title: DDD: Debugger Exited
 ! Ddd*exited_dialog.messageString:   \
 ! @rm @GDB@ exited.
 Ddd*exited_dialog*okLabelString:	Restart
@@ -6386,7 +6378,7 @@ Ddd*exited_dialog*helpString:	\
 Click on LBL(Restart) to restart @GDB@.\n\
 Click on LBL(Exit) to exit DDD.
 
-Ddd*done_dialog.dialogTitle: DDD: Program Exited
+Ddd*done_dialog_popup.title: DDD: Program Exited
 ! Ddd*done_dialog.messageString:   \
 ! @rm Your program exited.
 Ddd*done_dialog*okLabelString:		Restart
@@ -6397,7 +6389,7 @@ Ddd*done_dialog*helpString:	\
 Click on LBL(Restart) to restart @GDB@.\n\
 Click on LBL(Exit) to exit DDD.
 
-Ddd*no_debugger_dialog.dialogTitle: DDD: No Debugger
+Ddd*no_debugger_dialog_popup.title: DDD: No Debugger
 ! Ddd*no_debugger_dialog.messageString:   \
 ! @rm @GDB@ could not be started.
 Ddd*no_debugger_dialog*okLabelString:	   Exit
@@ -6427,7 +6419,7 @@ or invoke DDD with the SAMP(--manual) option.\n\
 \n\
 Click on LBL(Exit) to exit DDD.
 
-Ddd*no_plotter_dialog.dialogTitle: DDD: No Plot
+Ddd*no_plotter_dialog_popup.title: DDD: No Plot
 ! Ddd*no_plotter_dialog.messageString:   \
 ! @rm Gnuplot could not be started.
 Ddd*no_plotter_dialog*helpString:	\
@@ -6437,7 +6429,7 @@ DDD requires the Gnuplot program to create plots.\n\
 Please install Gnuplot (available from any GNU site)\n\
 or enter its path in LBL(Edit, Preferences, Helpers, Plot).
 
-Ddd*fatal_dialog.dialogTitle: DDD: Oops
+Ddd*fatal_dialog_popup.title: DDD: Oops
 Ddd*fatal_dialog.messageString:	  \
 @rm Internal error
 Ddd*fatal_dialog*okLabelString:	       Restart
@@ -6465,7 +6457,7 @@ Click on LBL(Exit) to exit DDD.\n\
 Click on LBL(Ignore) to resume your current DDD session.
 
 
-Ddd*yn_dialog.dialogTitle: DDD: Debugger Question
+Ddd*yn_dialog_popup.title: DDD: Debugger Question
 Ddd*yn_dialog*okLabelString:	   Yes
 Ddd*yn_dialog*cancelLabelString:   No
 Ddd*yn_dialog*defaultButtonType:   XmDIALOG_OK_BUTTON
@@ -6476,13 +6468,13 @@ Click on LBL(Yes) or LBL(No), or enter KBD(yes) or KBD(no) \
 in the @GDB@ console.\n\
 For more details, consult the @GDB@ documentation.
 
-Ddd*gdb_message_dialog.dialogTitle: DDD: Debugger Message
+Ddd*gdb_message_dialog_popup.title: DDD: Debugger Message
 Ddd*gdb_message_dialog*helpString:	\
 WIDGET(@GDB@ Message)\n\
 \n\
 For details on this @GDB@ message, consult the @GDB@ documentation.
 
-Ddd*gdb_selection_dialog.dialogTitle: DDD: Selection
+Ddd*gdb_selection_dialog_popup.title: DDD: Selection
 Ddd*gdb_selection_dialog*listLabelString:  Selection
 Ddd*gdb_selection_dialog*helpString:	\
 WIDGET(@GDB@ Selection Menu)\n\
@@ -6490,7 +6482,7 @@ WIDGET(@GDB@ Selection Menu)\n\
 Please select an item from the list and click on LBL(OK).\n\
 For more details, consult the @GDB@ documentation.
 
-Ddd*confirm_overwrite_dialog.dialogTitle: DDD: File Exists
+Ddd*confirm_overwrite_dialog_popup.title: DDD: File Exists
 Ddd*confirm_overwrite_dialog*messageString:	  \
 @rm Overwrite existing file?
 Ddd*confirm_overwrite_dialog*okLabelString:	  Yes
@@ -6500,7 +6492,7 @@ Ddd*confirm_overwrite_dialog*helpString:	\
 @rm The file already exists.\n\
 Click on LBL(Yes) to overwrite the existing file.
 
-Ddd*restart_dialog.dialogTitle: DDD: Restart
+Ddd*restart_dialog_popup.title: DDD: Restart
 Ddd*restart_dialog.messageString:	 \
 @rm DDD startup preferences were modified.\n\
 Restart DDD to see their effect?
@@ -6518,13 +6510,13 @@ To see your changes take effect, click on LBL(Yes) to restart DDD.\n\
 Otherwise, click on LBL(No) and be sure to save your changes\n\
 using LBL(Edit, Save Options).
 
-Ddd*set_dialog.dialogTitle: DDD: Set Value
+Ddd*set_dialog_popup.title: DDD: Set Value
 Ddd*set_dialog.textAccelerators:
 Ddd*set_dialog*helpString:	\
 @rm You can now change the value of the variable in LBL(()).\n\
 If you want to keep it unchanged, click on LBL(Cancel).
 
-Ddd*kill_to_save_dialog.dialogTitle: DDD: Save Session
+Ddd*kill_to_save_dialog_popup.title: DDD: Save Session
 Ddd*kill_to_save_dialog.messageString: \
 @rm Kill the program being debugged?
 Ddd*kill_to_save_dialog.okLabelString:     Yes
@@ -6537,7 +6529,7 @@ Unfortunately, DDD must kill the program for that.\n\
 To kill your program and save memory contents, click on LBL(Yes).\n\
 To cancel saving the session, click on LBL(No).
 
-Ddd*confirm_restart_dialog.dialogTitle: DDD: Restart Session
+Ddd*confirm_restart_dialog_popup.title: DDD: Restart Session
 Ddd*confirm_restart_dialog.messageString: \
 @rm The program is running.  Restart anyway (and kill it)?
 Ddd*confirm_restart_dialog.okLabelString:     Yes
@@ -6547,7 +6539,7 @@ WIDGET(@GDB@ Message)\n\
 \n\
 For details on this @GDB@ message, consult the @GDB@ documentation.
 
-Ddd*data_not_saved_dialog.dialogTitle: DDD: Save Session
+Ddd*data_not_saved_dialog_popup.title: DDD: Save Session
 Ddd*data_not_saved_dialog.messageString: \
 @rm Without a core dump, the current execution position\n\
 and memory contents will not be saved.  Proceed anyway?
@@ -6574,7 +6566,7 @@ This typically happens when\n\
 ITEM options were saved from another DDD instance, or\n\
 ITEM the options file has been edited using a text editor.\n])
 
-Ddd*reload_options_dialog.dialogTitle: DDD: Reload Options
+Ddd*reload_options_dialog_popup.title: DDD: Reload Options
 Ddd*reload_options_dialog.messageString: \
 @rm Options have changed on disk.  Reload them?
 Ddd*reload_options_dialog*helpString: \
@@ -6585,7 +6577,7 @@ To ignore the changed options file, click on LBL(Cancel).\n\
 Use LBL(File, Save Session) to save the current options in a session.
 
 
-Ddd*overwrite_options_dialog.dialogTitle: DDD: Overwrite Options
+Ddd*overwrite_options_dialog_popup.title: DDD: Overwrite Options
 Ddd*overwrite_options_dialog.messageString: \
 @rm Options have changed on disk.  Overwrite them?
 Ddd*overwrite_options_dialog*helpString: \
@@ -6596,7 +6588,7 @@ To cancel saving options, click on LBL(Cancel).\n\
 Use LBL(File, Save Session) to save the current options in a session.
 
 
-Ddd*lock_dialog.dialogTitle: DDD: There can be only one
+Ddd*lock_dialog_popup.title: DDD: There can be only one
 Ddd*lock_dialog*helpString:	\
 @rm Another DDD is running, sharing state with this DDD instance.\n\
 \n\
@@ -6611,11 +6603,11 @@ Ddd*lock_dialog*kill.labelString:	Kill
 Ddd*lock_dialog.cancelLabelString: 	Exit
 
 
-Ddd*launch_tty_dialog.dialogTitle: DDD: Starting Execution Window
+Ddd*launch_tty_dialog_popup.title: DDD: Starting Execution Window
 Ddd*launch_tty_dialog.messageString:		\
 @rm Starting Execution Window...
 
-Ddd*launch_plot_dialog.dialogTitle: DDD: Starting Plot
+Ddd*launch_plot_dialog_popup.title: DDD: Starting Plot
 
 
 !-----------------------------------------------------------------------------
@@ -6624,7 +6616,7 @@ Ddd*launch_plot_dialog.dialogTitle: DDD: Starting Plot
 
 ! If we have an old app-defaults file installed, we may see an old
 ! version of this warning.  Gee, app-defaults files are just plain stupid.
-Ddd*bad_version_warning.dialogTitle: DDD: Version Mismatch
+Ddd*bad_version_warning_popup.title: DDD: Version Mismatch
 Ddd*bad_version_warning*helpString:	\
 @rm This DDD version does not match the version of the\n\
 app-defaults file FILE([Ddd]) or your FILE(~/.[ddd]/init) file.\n\
@@ -6642,77 +6634,77 @@ ITEM If your personal FILE(~/.[ddd]/init) file or some session \
 FILE(init) file is out of date,\n\
     use LBL(Edit, Save Options) to update it.
 
-Ddd*class_error.dialogTitle: DDD: No Class
+Ddd*class_error_popup.title: DDD: No Class
 Ddd*class_error*helpString:	\
 @rm The given class could not be loaded.\n\
 Please check the @GDB@ search path via LBL(Edit, @GDB@ settings).
 
-Ddd*source_file_error.dialogTitle: DDD: No Source
+Ddd*source_file_error_popup.title: DDD: No Source
 Ddd*source_file_error*helpString:	\
 @rm The given source file could not be loaded.\n\
 Please check the @GDB@ search path via LBL(Edit, @GDB@ settings).
 
-Ddd*remote_file_error.dialogTitle: DDD: No Remote Source
+Ddd*remote_file_error_popup.title: DDD: No Remote Source
 Ddd*remote_file_error*helpString:	\
 @rm The given source file could not be loaded from the remote host.\n\
 Please check the @GDB@ search path via LBL(Edit, @GDB@ settings).
 
-Ddd*source_file_from_gdb_warning.dialogTitle: DDD: Source From Debugger
+Ddd*source_file_from_gdb_warning_popup.title: DDD: Source From Debugger
 Ddd*source_file_from_gdb_warning*helpString:	\
 @rm The given source file could not be loaded directly.\n\
 Instead, the source was obtained from @GDB@ via the KBD(list) command.\n\
 Please proceed as usual.
 
-Ddd*source_trunc_error.dialogTitle: DDD: Source Truncated
+Ddd*source_trunc_error_popup.title: DDD: Source Truncated
 Ddd*source_trunc_error*helpString:	\
 @rm The given source file could not be loaded entirely;\n\
 the file size has changed during loading.\n\
 Please try again as soon as the source file contents are stable.
 
-Ddd*source_empty_warning.dialogTitle: DDD: Empty Source
+Ddd*source_empty_warning_popup.title: DDD: Empty Source
 Ddd*source_empty_warning*helpString:	\
 @rm The given source file contains no data.\n\
 This is very unusual for source files.\n\
 Please verify the file name and try again.
 
-Ddd*source_binary_warning.dialogTitle: DDD: Binary Source
+Ddd*source_binary_warning_popup.title: DDD: Binary Source
 Ddd*source_binary_warning*helpString:	\
 @rm The given source file contains NUL characters. \n\
 You probably loaded a binary file instead of a source file.\n\
 Please verify the file name and try again.
 
-Ddd*source_find_error.dialogTitle: DDD: Not Found
+Ddd*source_find_error_popup.title: DDD: Not Found
 Ddd*source_find_error*helpString:	\
 @rm The given key LBL(()) can not be found in the source text.\n\
 Please try an alternate key or change the search settings\n\
 via LBL(Edit, Preferences, Source).
 
-Ddd*manual_find_error.dialogTitle: DDD: Not Found
+Ddd*manual_find_error_popup.title: DDD: Not Found
 Ddd*manual_find_error*helpString:	\
 @rm The given search key LBL(()) can not be found in the on-line manual.\n\
 Please use an alternate key and tru again.
 
-Ddd*no_source_error.dialogTitle: DDD: No Source
+Ddd*no_source_error_popup.title: DDD: No Source
 Ddd*no_source_error*helpString:	\
 @rm There is no current source text in which to search.\n\
 Please open a program first, using LBL(File, Open Program).
 
-Ddd*no_source_edit_error.dialogTitle: DDD: No Source
+Ddd*no_source_edit_error_popup.title: DDD: No Source
 Ddd*no_source_edit_error*helpString:	\
 @rm There is no current source text to edit.\n\
 Please open a program first, using LBL(File, Open Program).
 
-Ddd*no_such_line_error.dialogTitle: DDD: No such line
+Ddd*no_such_line_error_popup.title: DDD: No such line
 Ddd*no_such_line_error*helpString:	\
 @rm There is no such line in the current source text.\n\
 Please try another line number.
 
-Ddd*no_such_breakpoint_error.dialogTitle: DDD: No Such Breakpoint
+Ddd*no_such_breakpoint_error_popup.title: DDD: No Such Breakpoint
 Ddd*no_such_breakpoint_error*helpString:	\
 @rm There is no such breakpoint in the current program.\n\
 Please verify the breakpoint number.
 
-Ddd*no_completion_error.dialogTitle: DDD: No Completion
+Ddd*no_completion_error_popup.title: DDD: No Completion
 Ddd*no_completion_error*helpString:	\
 @rm @GDB@ does not support command and argument completion.\n\
 \n\
@@ -6722,7 +6714,7 @@ which is present in GDB 4.13 and later.\n\
 To use command completion, upgrade to a recent @GDB@ version.
 
 
-Ddd*no_program.dialogTitle: DDD: No Program
+Ddd*no_program_popup.title: DDD: No Program
 Ddd*no_program*helpString: \
 @rm You have not opened any program yet.  @GDB@ needs a debuggee\n\
 to access core dumps, source files, or attaching to processes.\n\
@@ -6733,21 +6725,21 @@ to display symbolic values and determine locations.\n\
 To open a program, use LBL(File, Open Program).
 
 
-Ddd*print_empty_graph_error.dialogTitle: DDD: Nothing to Print
+Ddd*print_empty_graph_error_popup.title: DDD: Nothing to Print
 Ddd*print_empty_graph_error*helpString:	\
 @rm There is nothing to print.\n\
 The printing has been cancelled.\n\
 \n\
 Please print again as soon as there is some data to print.
 
-Ddd*print_failed_error.dialogTitle: DDD: Printing Failed
+Ddd*print_failed_error_popup.title: DDD: Printing Failed
 Ddd*print_failed_error*helpString:	\
 @rm The file holding the graph picture could not be written.\n\
 The printing has been cancelled.\n\
 \n\
 Please try another file name and try again.
 
-Ddd*export_failed_error.dialogTitle: DDD: Export Failed
+Ddd*export_failed_error_popup.title: DDD: Export Failed
 Ddd*export_failed_error*helpString:	\
 @rm The file holding the plot data could not be written.\n\
 The export has been cancelled.\n\
@@ -6763,7 +6755,7 @@ Possible SAMP(.plotTermType) values include SAMP(xlib) and SAMP(x11).\n\
 Please set up the SAMP(.plotTermType) resource\n\
 in your FILE(~/.[ddd]/init) file and try again.
 
-Ddd*tty_exec_error.dialogTitle: DDD: No Execution Window
+Ddd*tty_exec_error_popup.title: DDD: No Execution Window
 Ddd*tty_exec_error*helpString:	\
 @rm The terminal emulator for the execution window\n\
 could not be invoked.  The debugged process will\n\
@@ -6774,7 +6766,7 @@ LBL(Edit, Preferences, Helpers, Execution Window)\n\
 setting and make sure that the given\n\
 terminal program is within your executable path.
 
-Ddd*tty_command_error.dialogTitle: DDD: TTY Failed
+Ddd*tty_command_error_popup.title: DDD: TTY Failed
 Ddd*tty_command_error*helpString:	\
 @rm DDD sent a KBD(tty) command to @GDB@ in order to redirect\n\
 input/output of the debugged process to the execution window.\n\
@@ -6791,7 +6783,7 @@ CODE([Ddd]*useTTYCommand: off)\n\
 \n\
 in your FILE(~/.[ddd]/init) file and restart DDD.
 
-Ddd*tty_type_error.dialogTitle: DDD: Term Failed
+Ddd*tty_type_error_popup.title: DDD: Term Failed
 Ddd*tty_type_error*helpString:	\
 @rm DDD could not set the TERM environment variable\n\
 to the type of the execution window.  This means that\n\
@@ -6799,12 +6791,12 @@ your program will execute with a terminal type\n\
 set to SAMP(dumb) instead of SAMP(@XTERM@).\n\
 Please see FILE(~/.[ddd]/log) for further diagnostics.
 
-Ddd*history_save_error.dialogTitle: DDD: Save History Failed
+Ddd*history_save_error_popup.title: DDD: Save History Failed
 Ddd*history_save_error*helpString:	\
 @rm The command history could not be saved.\n\
 Please verify whether FILE(~/.[ddd]/history) is writable and try again.
 
-Ddd*options_save_error.dialogTitle: DDD: Save Options Failed
+Ddd*options_save_error_popup.title: DDD: Save Options Failed
 Ddd*options_save_error*helpString:	\
 @rm The DDD options could not be saved.\n\
 Please verify whether FILE(~/.[ddd]/init) is writable and try again.
@@ -6817,29 +6809,29 @@ LBL(Edit, Preferences, Helpers, Uncompress)\n\
 setting and make sure that the given\n\
 uncompressing program is within your executable path.])dnl
 
-Ddd*no_license_error.dialogTitle: DDD: No License
+Ddd*no_license_error_popup.title: DDD: No License
 Ddd*no_license_error*helpString:	\
 @rm The DDD license COULD_NOT_BE_UNCOMPRESSED
 
-Ddd*no_news_error.dialogTitle: DDD: No news is good news
+Ddd*no_news_error_popup.title: DDD: No news is good news
 Ddd*no_news_error*helpString:	\
 @rm The DDD news COULD_NOT_BE_UNCOMPRESSED
 
-Ddd*no_ddd_manual_error.dialogTitle: DDD: No Manual
+Ddd*no_ddd_manual_error_popup.title: DDD: No Manual
 Ddd*no_ddd_manual_error*helpString:	\
 @rm The DDD manual COULD_NOT_BE_UNCOMPRESSED
 
-Ddd*no_ddd_man_page_error.dialogTitle: DDD: No Manual
+Ddd*no_ddd_man_page_error_popup.title: DDD: No Manual
 Ddd*no_ddd_man_page_error*helpString:	\
 @rm It seems the DDD manual page is not installed.\n\
 Please install the DDD manual page and try again.
 
-Ddd*startup_warning.dialogTitle: DDD: New Startup Required
+Ddd*startup_warning_popup.title: DDD: New Startup Required
 Ddd*startup_warning*helpString: \
 @rm This setting cannot be changed while DDD is running.\n\
 Please save options and restart DDD to see the effects.
 
-Ddd*grab_warning.dialogTitle: DDD: Pointer Frozen
+Ddd*grab_warning_popup.title: DDD: Pointer Frozen
 Ddd*grab_warning*helpString: \
 @rm DDD has detected a frozen (grabbed) mouse pointer.\n\
 \n\
@@ -6848,18 +6840,18 @@ while it was grabbing the mouse pointer.\n\
 If DDD remains in this state, further interaction will\n\
 probably be impossible.
 
-Ddd*no_display_number_warning.dialogTitle: DDD: No Display Number
+Ddd*no_display_number_warning_popup.title: DDD: No Display Number
 Ddd*no_display_number_warning*helpString: \
 @rm DDD could not determine the number of the new display\n\
 as assigned by @GDB@.  DDD will use a default number instead.
 
-Ddd*invalid_range_error.dialogTitle: DDD: Invalid Range
+Ddd*invalid_range_error_popup.title: DDD: Invalid Range
 Ddd*invalid_range_error*helpString: \
 @rm The displays to be created have an invalid range VAR(x)..VAR(y).\n\
 The range must be where VAR(x)..VAR(y) with VAR(x) < VAR(y).\n\
 Please verify the range and try again.
 
-Ddd*expired_warning.dialogTitle: DDD: DDD Expired
+Ddd*expired_warning_popup.title: DDD: DDD Expired
 Ddd*expired_warning*helpString: \
 @rm DDD @VERSION@ has been superseded by a newer DDD version.\n\
 DDD @VERSION@ should no longer be used.\n\
@@ -6867,7 +6859,7 @@ DDD @VERSION@ should no longer be used.\n\
 Please upgrade to a recent DDD version.\n\
 For details, see the LBL(Help, [[[[DDD]]]] WWW Page).
 
-Ddd*core_missing_warning.dialogTitle: DDD: Core Missing
+Ddd*core_missing_warning_popup.title: DDD: Core Missing
 Ddd*core_missing_warning*helpString: \
 @rm DDD could not get a core dump of the debugged program.\n\
 This means that the current memory contents and execution position\n\
@@ -6881,38 +6873,38 @@ Also be sure that you have not disabled core dumps\n\
 (hint: look for SAMP(limit) and SAMP(ulimit) commands \
 in your shell startup file)
 
-Ddd*program_name_missing_warning.dialogTitle: DDD: Program Name Missing
+Ddd*program_name_missing_warning_popup.title: DDD: Program Name Missing
 Ddd*program_name_missing_warning*helpString: \
 @rm DDD could not determine the name of the current debuggee.\n\
 Please try again when @GDB@ is ready.
 
-Ddd*breakpoint_missing_warning.dialogTitle: DDD: Breakpoints Missing
+Ddd*breakpoint_missing_warning_popup.title: DDD: Breakpoints Missing
 Ddd*breakpoint_missing_warning*helpString: \
 @rm DDD could not save the current breakpoint state.\n\
 Please try again when @GDB@ is ready.
 
-Ddd*displays_missing_warning.dialogTitle: DDD: Data Displays Missing
+Ddd*displays_missing_warning_popup.title: DDD: Data Displays Missing
 Ddd*displays_missing_warning*helpString: \
 @rm DDD could not save the entire data display state.\n\
 Please try again when @GDB@ is ready.
 
-Ddd*no_sessions_error.dialogTitle: DDD: No Sessions
+Ddd*no_sessions_error_popup.title: DDD: No Sessions
 Ddd*no_sessions_error*helpString: \
 @rm DDD could not access the session repository.\n\
 Please verify whether the FILE(~/.[ddd]/sessions/) is accessible.
 
-Ddd*delete_session_error.dialogTitle: DDD: Delete Session Failed
+Ddd*delete_session_error_popup.title: DDD: Delete Session Failed
 Ddd*delete_session_error*helpString: \
 @rm DDD could not entirely remove the session directory from the repository.\n\
 Please verify whether the FILE(~/.[ddd]/sessions/) is writable.
 
-Ddd*too_many_shortcuts_warning.dialogTitle: DDD: Too many Shortcuts
+Ddd*too_many_shortcuts_warning_popup.title: DDD: Too many Shortcuts
 Ddd*too_many_shortcuts_warning*helpString:	\
 @rm DDD has not enough room for all display shortcuts and will\n\
 only display the most recently created shortcuts.\n\
 Please edit the list of display shortcuts, using LBL(Display, Edit Menu).
 
-Ddd*gdb_io_error.dialogTitle: DDD: I/O Error
+Ddd*gdb_io_error_popup.title: DDD: I/O Error
 Ddd*gdb_io_error*helpString: \
 @rm The communication between @GDB@ and DDD does not work correctly.\n\
 This is probably due to a bad DDD configuration.\n\
@@ -6920,14 +6912,14 @@ This is probably due to a bad DDD configuration.\n\
 DDD cannot work around this problem, so you may not be able to continue.\n\
 Restart DDD and try again.
 
-Ddd*gdb_io_warning.dialogTitle: DDD: I/O Warning
+Ddd*gdb_io_warning_popup.title: DDD: I/O Warning
 Ddd*gdb_io_warning*helpString: \
 @rm The communication between @GDB@ and DDD does not work correctly.\n\
 This is probably due to a bad DDD configuration.\n\
 \n\
 DDD can work around this problem, so you may continue working.
 
-Ddd*out_of_glyphs_warning.dialogTitle: DDD: Out of Glyphs
+Ddd*out_of_glyphs_warning_popup.title: DDD: Out of Glyphs
 Ddd*out_of_glyphs_warning*helpString: \
 @rm DDD can only display a limited amount of breakpoint symbols at one time.\n\
 The other breakpoints are still maintained, but not visible right now.\n\
@@ -6958,8 +6950,6 @@ information,\n\
     information, specify the SAMP(-g) option when you run the compiler.\n\
 ITEM You may need to tell @GDB@ where the source code files are.\n\
     Invoke LBL(Edit, @GDB@ Settings) and look for appropriate entries.\n\
-    Using GDB, you can also create a local FILE(.gdbinit) file that contains\n\
-    SAMP(directory VAR(path)), where VAR(path) is the source path.\n\
 ITEM Using GDB, you can continue at machine code level \
 by enabling the\n\
     Machine Code Window.  Use LBL(Source, Display Machine Code).])dnl
@@ -7113,7 +7103,7 @@ ITEM To view even earlier states of your program, use LBL(Edit, Undo).
 ! Startup tips
 !-----------------------------------------------------------------------------
 
-Ddd*tip_dialog.dialogTitle: 		DDD Tip of the Day
+Ddd*tip_dialog_popup.title: 		DDD Tip of the Day
 Ddd*tip_dialog*helpString:	\
 @rm This is the DDD tip of the day.
 Ddd*tip_dialog.cancelLabelString:	Prev Tip

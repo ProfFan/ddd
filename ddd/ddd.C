@@ -273,10 +273,6 @@ char ddd_rcsid[] =
 #include <time.h>
 #include <signal.h>
 
-#if HAVE_LOCALE_H
-#include <locale.h>
-#endif
-
 #include <limits.h>
 #ifndef ARG_MAX
 #define ARG_MAX 4096
@@ -284,12 +280,6 @@ char ddd_rcsid[] =
 
 #if HAVE_EXCEPTIONS && HAVE_EXCEPTION
 #include <exception>
-#endif
-
-#if WITH_READLINE
-extern "C" {
-#include "readline/readline.h"
-}
 #endif
 
 
@@ -401,7 +391,7 @@ static void setup_environment();
 static void setup_options(int& argc, char *argv[],
 			  StringArray& saved_options, string& gdb_name,
 			  bool& no_windows);
-static void setup_command_tty();
+static void setup_tty();
 static void setup_ddd_version_warnings();
 static void setup_motif_version_warnings();
 static void setup_auto_command_prefix();
@@ -452,9 +442,6 @@ static XrmOptionDescRec options[] = {
 
 { "--dbx",                  XtNdebugger,             XrmoptionNoArg,  "dbx" },
 { "-dbx",                   XtNdebugger,             XrmoptionNoArg,  "dbx" },
-
-{ "--ladebug",              XtNdebugger,            XrmoptionNoArg, "ladebug"},
-{ "-ladebug", 		    XtNdebugger,            XrmoptionNoArg, "ladebug"},
 
 { "--xdb",                  XtNdebugger,             XrmoptionNoArg,  "xdb" },
 { "-xdb",                   XtNdebugger,             XrmoptionNoArg,  "xdb" },
@@ -1725,12 +1712,6 @@ int main(int argc, char *argv[])
     // this point, all global data objects already have been properly
     // initialized.
 
-#ifdef LC_ALL
-    // Let DDD locales be controlled by the locale-specific
-    // environment variables -- especially $LANG.
-    setlocale(LC_ALL, "");
-#endif
-
     // Save environment for restart.
     register_argv(argv);
     register_environ();
@@ -2234,12 +2215,26 @@ int main(int argc, char *argv[])
     XtSetArg(args[arg], XmNargc,           original_argc); arg++;
     XtSetArg(args[arg], XmNargv,           original_argv); arg++;
 
-    // Make command shell a popup shell.  
-    // The toplevel window is never realized.
-    command_shell = verify(XtCreatePopupShell("command_shell",
-					      applicationShellWidgetClass,
-					      toplevel, args, arg));
+    if (!app_data.separate_source_window && !app_data.separate_data_window)
+    {
+	// One single window - use command shell as top-level shell
+	command_shell = 
+	    verify(XtAppCreateShell(NULL, DDD_CLASS_NAME,
+				    applicationShellWidgetClass,
+				    XtDisplay(toplevel), args, arg));
 
+	// From now on, use the command shell as parent
+	toplevel = command_shell;
+    }
+    else
+    {
+	// Separate windows - make command shell a popup shell.  
+	// The toplevel window is never realized.
+	command_shell =
+	    verify(XtCreatePopupShell("command_shell",
+				      applicationShellWidgetClass,
+				      toplevel, args, arg));
+    }
     WM_DELETE_WINDOW =
 	XmInternAtom(XtDisplay(toplevel), "WM_DELETE_WINDOW", False);
     XmAddWMProtocolCallback(command_shell, WM_DELETE_WINDOW, DDDCloseCB, 0);
@@ -2591,15 +2586,16 @@ int main(int argc, char *argv[])
     set_settings_title(data_edit_menu[EditItems::Settings].widget);
 
     // Close windows explicitly requested
-    if (!app_data.separate_data_window && 
-	!app_data.data_window && !app_data.full_name_mode)
+    if (!app_data.data_window && 
+	(!app_data.full_name_mode || !app_data.tty_mode))
     {
-	// We don't want the data window.
+	// We don't want the data window (unless in full name mode,
+	// where we always open a data window - because otherwise, no
+	// window would remain and we'd be gone).
 	gdbCloseDataWindowCB(gdb_w, 0, 0);
     }
 
-    if (!app_data.separate_source_window && 
-	(!app_data.source_window || app_data.full_name_mode))
+    if (!app_data.source_window || app_data.full_name_mode)
     {
 	// We don't need the source window, since we're invoked by Emacs.
 	gdbCloseSourceWindowCB(gdb_w, 0, 0);
@@ -2614,9 +2610,8 @@ int main(int argc, char *argv[])
 	gdbCloseCodeWindowCB(gdb_w, 0, 0);
     }
 
-    if ((!app_data.separate_source_window && have_source_window() || 
-	 !app_data.separate_data_window && have_data_window()) &&
-	(!app_data.debugger_console || app_data.tty_mode))
+    if ((!app_data.debugger_console || app_data.tty_mode) &&
+	(!app_data.separate_source_window || !app_data.separate_data_window))
     {
 	// We don't need the debugger console, since we have a TTY.
 	gdbCloseCommandWindowCB(gdb_w, 0, 0);
@@ -2724,14 +2719,20 @@ int main(int argc, char *argv[])
 	// Startup command shell iconified; others follow as needed
 	initial_popup_shell(command_shell);
     }
-    else if (!app_data.debugger_console || app_data.tty_mode)
+    else if ((!app_data.debugger_console || app_data.tty_mode) && 
+	     app_data.separate_source_window &&
+	     app_data.separate_data_window)
     {
 	// Debugger console is closed: wait for source to pop up
     }
-    else
+    else if (!app_data.tty_mode)
     {
 	// Popup the command shell only; other shells follow as needed
 	initial_popup_shell(command_shell);
+    }
+    else
+    {
+	// TTY mode: all shells follow as needed.
     }
 
     // Trace positions and visibility of all DDD windows
@@ -2754,7 +2755,7 @@ int main(int argc, char *argv[])
 #endif
 
     // Setup TTY interface
-    setup_command_tty();
+    setup_tty();
 
     // Raise core limit if needed; required for getting session info.
     // Note: this must be done before starting GDB.
@@ -3558,13 +3559,10 @@ Boolean ddd_setup_done(XtPointer)
 	install_button_tips();
 	fix_status_size();
 
-	if (running_shells() == 0 ||
-	    app_data.full_name_mode && running_shells() == 1)
+	if (running_shells() == 0)
 	{
 	    // We have no shell (yet).  Be sure to popup at least one shell.
-	    if (app_data.full_name_mode)
-		gdbOpenDataWindowCB(gdb_w, 0, 0);
-	    else if (app_data.source_window)
+	    if (app_data.source_window)
 		gdbOpenSourceWindowCB(gdb_w, 0, 0);
 	    else if (app_data.data_window)
 		gdbOpenDataWindowCB(gdb_w, 0, 0);
@@ -7074,17 +7072,10 @@ static void setup_options(int& argc, char *argv[],
     }
 }
 
-static void setup_command_tty()
+static void setup_tty()
 {
     if (app_data.tty_mode)
     {
-#if WITH_READLINE
-	// Initialize Readline
-	rl_initialize();
-	rl_readline_name = DDD_NAME;
-#endif
-	
-	// Initialize TTY
 	init_command_tty();
 
 	// Issue init msg (using 7-bit characters)
@@ -7260,7 +7251,7 @@ static void setup_options()
     set_sensitive(signals_w,   gdb->type() == GDB);
 
     set_sensitive(set_debugger_gdb_w,  have_cmd("gdb"));
-    set_sensitive(set_debugger_dbx_w,  have_cmd("dbx") || have_cmd("ladebug"));
+    set_sensitive(set_debugger_dbx_w,  have_cmd("dbx"));
     set_sensitive(set_debugger_xdb_w,  have_cmd("xdb"));
     set_sensitive(set_debugger_jdb_w,  have_cmd("jdb"));
     set_sensitive(set_debugger_pydb_w, have_cmd("pydb"));
