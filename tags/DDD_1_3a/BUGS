@@ -1,0 +1,225 @@
+# $Id$ -*- Text -*-
+# The DDD bug list.
+
+Note: For problems occurring when *building* DDD, see the file `PROBLEMS'.
+
+This is a list of known DDD bugs, which should be fixed in some future
+DDD release.  If you want to fix one or more of these bugs, please ask
+us (at ddd@ips.cs.tu-bs.de) whether there are already people working
+on that bug.  Similar, if you find a bug, be sure to report it to us
+(at ddd-bugs@ips.cs.tu-bs.de) such that we may fix it (or include it
+in this list :-)
+
+Bugs marked with an `*' represent work in progress.
+Volunteers for fixing these and other bugs are welcome!
+
+001. It's too big and too slow.  [This one will never get fixed]
+
+002. [fixed]
+
+003. Using Motif 1.1 or earlier, the command window is scrolled
+     whenever obscured.  [This seems to be a Motif bug.]
+
+004. [fixed]
+
+005. [fixed]
+
+006. [fixed]
+
+007. [fixed]
+
+008. [fixed]
+
+009. [fixed]
+
+010. On some systems, switching back from running processes in the
+     execution window to running processes in the command window does
+     not work correctly; processes attempting to read from stdio are
+     interrupted with SIGTTIN.  [This is due to the `tty' command in
+     GDB, which on some systems messes up tty control when applied to
+     the command window pty.  As a workaround, enter a line
+     `*useTTYCommand: false' in `~/.dddinit': this will set up an
+     alternative redirection scheme].
+
+011. [fixed]
+
+012. [fixed]
+
+013. Raising windows using the `Windows' menu does not assign them `mwm'
+     input focus.  [Anyone willing to give me a hint here?  -AZ]
+
+014. [fixed]
+
+015. On Motif 1.2 or later, using DDD with both explicit keyboard
+     focus and a panned graph editor causes problems: Keyboard
+     traversal of the graph editor does not work; on
+     mips-dec-ultrix4.4 (and others?), pointer selection of an
+     arbitrary display causes DDD to crash.  [It seems that it is
+     generally not wise to combine explicit keyboard focus and panned
+     data displays, since this means involving Athena widgets in Motif
+     keyboard traversal.  A simple workaround: If you want panners,
+     don't use explicit keyboard focus; if you want explicit keyboard
+     focus, use scrollbars.]
+
+016. [fixed]
+
+017. [fixed]
+
+018. [not a DDD bug, forwarded to manual page]
+
+019. [not a DDD bug, forwarded to manual page]
+
+020. [fixed]
+
+021. Using DBX, attempting to dereference a `(nil)' pointer results in
+     an error message and no new display.  However, the expression is
+     entered as an ordinary display.
+
+022. [fixed]
+
+023. [fixed]
+
+024. [fixed]
+
+025. DBX on mips-dec-ultrix4 is only partially supported since it has
+     an entirely different output format than Sun's DBX.  [If someone
+     convinces us that s/he requires ULTRIX DBX support, we'll do it.]
+
+026. Using DBX with PASCAL or Modula-2, selected array elements are
+     always counted from zero, instead of the starting index of the array.
+
+027. [fixed]
+
+028. [fixed]
+
+029. [fixed]
+
+030. [fixed]
+
+031. [fixed]
+
+032. [fixed]
+
+033. [fixed]
+
+034. [fixed]
+
+035. [fixed]
+
+036. [fixed]
+
+037. Paul Eggert (eggert@twinsun.com) states:
+
+     The first time I ran ddd, my X server dumped core!  Ack!
+
+     Here are the details.  I was running on `shade', a SunOS 4.1.4
+     sparc, using the old X News server.  ddd was running on a Solaris
+     2.4 host, with the DISPLAY='shade:0'.
+
+     I managed to narrow it down to the following.  Use the .Xdefaults
+     at the end of this message.  This should be the only file in your
+     home directory.  Log in to a SunOS 4.1.x (x = 3 or 4) host ONE.
+     Type `/usr/openwin/bin/openwin' to start up Open Windows.  Click
+     in the command tool, and type `rlogin TWO' where TWO is a Solaris
+     2.4 host.  Then type `setenv DISPLAY ONE:0' (where ONE is the
+     SunOS 4.1.x host).  Then run `ddd'.  This will make the SunOS
+     4.1.x X server dump core.
+
+038. Doing `Open Source' and typing in the name of an
+     executable causes DDD to abort with 
+
+     SourceView.C: In function `static char *
+     SourceView::read_indented(class string &)':
+
+     SourceView.C:728: assertion `pos_ptr - indented_text ==
+     indented_text_length' failed
+
+     Reported by neal@ctd.comsat.com (Neal Becker).
+
+039. [fixed]
+
+040. dmitzel@everest.hitc.com (Danny J. Mitzel) states:
+     I'm running the DDD 1.1 sparc-sun-sunos4.1.1 prebuilt binary on a
+     Sun4/300 SunOS4.1.3_U1.  I notice that once I have typed any
+     commands in the 'DDD Command Window' and then bring up the
+     'Command History' list that there is always an extra entry at the
+     bottom of the list, usually it's blank sometimes there's garbage.
+     anyways, selecting that entry leads to 'Internal error
+     (Segmentation fault).'  no core dump.  I've attached the
+     '--configuration' and '--check-configuration' report.  let me
+     know if you need any other info.
+     [A bug in Motif 1.1 - does not occur in later Motif versions].
+
+041. Starting DDD iconified under vtwm causes trouble with group
+     iconification.
+
+042. [fixed]
+
+043. vickery@babbage.cs.qc.edu (Christopher Vickery) states:
+     The display() operation generates a segmentation fault if the variable
+     to be displayed is an uninitialized pointer.
+
+044. DDD does not run on a DEC Alpha running OSF/1.  As
+     bjtong@cse.unsw.edu.au (Banchong Harangsri) states, when coming
+     to starting it up, DDD just hung over, i.e., it didn't accept any
+     of the keyboard or mouse that the user types in.  Also, there
+     were lots of warnings in the rx library.
+     hannu@roope.cctap.carel.fi (Hannu Mallat) states that DDD usually
+     kept crashing right in the start or a bit later.
+
+045. The distributed DDD binary for Linux crashes on some machines as
+     soon as `Open Source' is selected.  This has also been reported
+     from freebsd2.0 users.  [According to dernst@pppl.gov (Darin
+     Ernst), this is a bug in the Motif libraries, not in DDD: ``any
+     call to OpenFileSelectionDialog() will give a seg fault when
+     using motif 2.0 and gcc 2.6.3, regardless of kernel version'';
+     raines@slac.stanford.edu (Paul Raines) states that ``from what I
+     recall of the motif newsgroup discussion, it is totally Motif's
+     fault''].  We now have a Linux DDD binary linked with a fixed
+     SWiM Motif 2.0 library available.  As a workaround, use the GDB
+     `file' and `core' commands; to open a specific source, use the
+     GDB `info file FUNCTION' command, where FUNCTION is a function
+     defined in that source file.
+
+046. Line continuations (i.e. GDB commands ended by `\' and continued
+     on the next line) are not handled.
+
+047. [fixed]
+
+048. [fixed]
+
+049. The bounding box is computed for all boxes, even if only selected
+     boxes are to be printed.
+
+050. jcrupi@mystech.com (John Crupi) states: 
+     When trying to dereference (using the mouse) a very large
+     structure, ddd locks up.  It usually happens if I quickly select
+     'dereference' after I display the pointer.  The structure contains
+     unions.  Machine is sparc-sun-solaris2.4.
+
+051. grant@isgtec.com (Grant McDorman) has run purify on DDD and
+     reported some memory leaks as well as bad memory accesses.
+
+052. [fixed]
+
+053. emeijer@us.oracle.com (Edwin Meijer) states:
+     I tried the following scenario: 
+     > exec program [arg,....] 
+     and while my program was in a sleep I did:  
+     > ddd --dbx program process-id 
+     ddd seemed to start up fine, but after loading it core-dumped. 
+
+054. tbe@glenlivet.fokus.gmd.de (Thomas Berndes) says that his DDD
+     crashed after failing to allocate the `grey' colormap.
+
+055. [fixed]
+
+056. `Select All' does not select hints.
+
+057. Mike Hoffmann <mike@psa.pencom.com> states: 
+     I had been successfuly using DDD 1.2 on Solaris 2.4 w/ X11R6 fix
+     level 11.  Since then I updated to the latest fix level 12, that
+     came out a few weeks ago.  Now DDD hangs at "random" points when
+     coming up.
+
+058. (Insert your bug here)
