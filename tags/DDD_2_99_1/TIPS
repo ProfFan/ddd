@@ -1,0 +1,208 @@
+# $Id$ -*- autoconf -*-
+# DDD tips of the day.
+
+# Copyright (C) 1998 Technische Universitaet Braunschweig, Germany.
+# Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
+# 
+# This file is part of DDD.
+# 
+# DDD is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation; either
+# version 2 of the License, or (at your option) any later version.
+# 
+# DDD is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public
+# License along with DDD -- see the file COPYING.
+# If not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+# 
+# DDD is the data display debugger.
+# For details, see the DDD World-Wide-Web page, 
+# `http://www.cs.tu-bs.de/softech/ddd/',
+# or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
+
+# This is a list of tips for DDD.  Every time DDD is started, one tip
+# will be selected from this file and will be displayed in the `Tip of
+# the day' dialog.
+#
+# - Lines starting with `#' and `!' are comments.
+#   `!` comments will appear in the resource file, `#' comments will not.
+# - Blank lines or comments separate two tips (they are not ignored).
+#   Multiple blank lines are treated as one.  If you want to have a
+#   blank line in a tip, put a space or tab in it.
+# - Text will appear in the dialog as it is in this file.  This is
+#   done on purpose in order to have more freedom in the layout of the
+#   tips than with automatic word-wrapping, but this also means that
+#   you have to avoid excessively long lines in this file.
+# - This file is processed by M4 and may contain typesetting macros.
+#   See `ddd/macros.m4' for details.
+# - Tips should be concise: 3 lines or less.
+
+# Include Macro definitions
+include(ifdef(`srcdir',srcdir()/macros.m4,macros.m4))dnl
+
+! Initial tip - shown after wrap-around.
+
+If you have any more DDD tips of the day,
+please send them to the DDD developers EMAIL([ddd]@ ips.cs.tu-bs.de).
+
+
+! First tips.
+
+Welcome to DDD!
+You can get help on all items by pointing at them and pressing F1.
+And don't worry, there is the LBL(Help) menu with much more information...
+
+Buttons with a small triangle in the upper right corner are special:
+pressing and holding BUTTON(1) on them will pop up a menu 
+with additional options.
+
+There are three ways to show the value of a variable:
+ITEM You can view its value, simply by pointing at it;
+ITEM You can print its value in the debugger console, using LBL(Print ());
+ITEM You can display it graphically, using LBL(Display ()).
+
+A quick way to manipulate variables, breakpoints, and displays
+is to press BUTTON(3) on them.
+
+The difference between LBL(OK) and LBL(Apply) is that 
+LBL(OK) pops down the dialog, while LBL(Apply) does not.
+
+Double-clicking on any value in the data display 
+will toggle more details.
+
+
+! Intermediate tips.
+
+If you want to customize the DDD fonts, see
+LBL(Edit) | LBL(Preferences) | LBL(Fonts).
+
+When using GDB, all text fields have command and argument completion
+with KEY(Tab), just like the shell.  In a file selection box, type part of
+a filename, hit KEY(Tab), and voila!  It's completed.
+
+To display a variable-length array in GDB, enter 
+KBD(graph display VAR(ptr)\1330\135@ VAR(n)) at the GDB prompt.
+This displays VAR(n) elements of a C or C++ array VAR(ptr).
+
+To scroll the data display, most users find a EMPH(panner)
+much more convenient than two scrollbars.
+Check out LBL(Edit) | LBL(Preferences) | LBL(Startup) | LBL(Data Scrolling).
+
+To limit the number of array elements in a data display, set
+LBL(Edit) | LBL(GDB Settings) | LBL(Limit on array elements to print).
+
+If DDD cannot find a source, don't use LBL(File) | LBL(Open Source).
+Instead, set the @GDB@ source path via LBL(Edit) | LBL(@GDB@ Settings).
+
+To see the EMPH(actual) type of a C++ object in GDB, set
+LBL(Edit) | LBL(GDB Settings) | LBL(Set printing of object's derived type).
+
+To display VAR(data) in hexadecimal format, display it and choose
+LBL(Convert to Hex) from the LBL(Display ()) menu, 
+or enter KBD(graph display /x VAR(data)) at the GDB prompt.
+
+To send a signal to the debuggee, use the GDB SAMP(signal) command.
+For instance, to continue execution with an interrupt signal, use
+KBD(signal SIGINT) or KBD(signal 2) at the GDB prompt.
+
+You can repeat the last command by hitting KEY_RETURN.
+Use KEY(Ctrl+R) and KEY(Ctrl+S) to search the command history.
+
+You can move breakpoints by dragging them.  
+Just press and hold BUTTON(1) on a breakpoint,
+move it to the new position and release BUTTON(1) again.  That's all!
+
+! You can save space by disabling toolbar captions.
+! See LBL(Edit) | LBL(Preferences) | LBL(Startup) | LBL(Toolbar Appearance).
+
+In GCC, SAMP(-Wall) does not enable all warnings.  See the GCC
+documentation for other warnings you might consider useful.
+BY(J.H.M. Dassen, jdassen@ wi.leidenuniv.nl)
+
+To get a global idea of what a process or program does or is doing,
+use a system call tracer, like SAMP(strace), SAMP(truss), or SAMP(trace).
+BY(J.H.M. Dassen, jdassen@ wi.leidenuniv.nl)
+
+To have GDB start your program automatically upon startup,
+put the following lines in your FILE(.gdbinit) file:
+CODE(break main)      - or some other initial function
+CODE(run       )      - possibly giving arguments here
+
+
+! Advanced tips.
+
+To get rid of these tips of the day, unset
+LBL(Edit) | LBL(Preferences) | LBL(Startup) | LBL(Show Tip of the Day).
+
+You can have each of DDD, @GDB@ and the debugged program run on
+different machines.  See the DDD KBD(--rhost) option for details.
+
+You can copy breakpoints by dragging them while pressing KEY(Shift).
+Just press and hold KEY(Shift)+BUTTON(1) on a breakpoint,
+move it to the new position and release BUTTON(1) again.  That's all!
+
+To save and restore data displays, cut, copy and paste them via the
+LBL(Edit) menu.  Together with CODE(xclipboard), you can manage
+arbitrary collections of data displays.
+
+Do you want to stop this debugging session and resume later?
+Use LBL(File) | LBL(Save Session)!
+
+To debug a child process, put a call to SAMP(sleep) in the child right
+after the SAMP(fork) call.  Run the program and attach to the child process
+using LBL(File) | LBL(Attach to Process).
+
+To execute frequently used commands with one mouse click,
+define your own DDD buttons via LBL(Commands) | LBL(Edit Buttons).
+
+In the Breakpoint and Display Editors,
+you can toggle the selection with KEY(Ctrl)+BUTTON(1).
+This allows you to select non-contiguous ranges of items.
+
+To change the properties of multiple breakpoints at once,
+select them in the breakpoint editor (LBL(Source) | LBL(Edit Breakpoints))
+and click on LBL(Properties).  Just go ahead!
+
+Even while in the source window, you can enter and edit GDB commands.
+Try KEY(Ctrl+P), KEY(Ctrl+N), KEY(Ctrl+B), KEY(Ctrl+F) for cursor movement
+and finish entering commands with KEY_RETURN.
+
+You can record commands to be executed when a breakpoint is hit.
+In the LBL(Breakpoint Properties) panel, try LBL(Record) and LBL(End).
+
+You can easily resume a saved DDD VAR(session)
+by invoking DDD as KBD([ddd] =VAR(session)).
+
+
+! Professional tips.
+
+If you suspect memory corruption caused by problematic pointers, try
+linking with Electric Fence SAMP(efence) or the SAMP(dbmalloc) library.
+See the DDD WWW page for links.
+BY(J.H.M. Dassen, jdassen@ wi.leidenuniv.nl)
+
+Prevention is better than cure.  Document your assumptions using
+CODE(<assert.h>) or GNU NANA.  See the DDD WWW page for links.
+BY(J.H.M. Dassen, jdassen@ wi.leidenuniv.nl)
+
+The debugger isn't a substitute for good thinking.  But, in some
+cases, thinking isn't a substitute for a good debugger either.  The
+most effective combination is good thinking and a good debugger.
+QUOTE(Steve McConnell, Code Complete)
+
+When you're totally stuck, try to find a helpful ear.  In my experience,
+nothing helps you more in debugging than to try to explain your problem
+(what your code should do, and what it actually does) to someone else.
+BY(J.H.M. Dassen, jdassen@ wi.leidenuniv.nl)
+
+! If you have other questions, comments or suggestions, contact The King
+! via electronic mail to EMAIL(elvis@ graceland.gnu.ai.mit.edu).  The King will
+! try to help you out, although he may not have time to fix your problems.
+! QUOTE(Free Software Foundation, GNU Hello Manual)
+
