@@ -54,6 +54,9 @@ Volunteers for these and other projects are welcome!
     (i.e. comments and graphics that are associated with certain
     variable/function names in the code).
 
+080 Convert the DDD manual to texinfo, as in ICE, resulting in an
+    HTML manual.  See also 102.
+
 083 Include graphplace (or other graph layout) support.
 
 085 Include xDuel support.  See `http://www.math.tau.ac.il/~frangy/'
@@ -63,6 +66,8 @@ Volunteers for these and other projects are welcome!
     box.  With an additional VSL 'matches()' function that matches
     regexps, one may display different types in different
     colors, fonts, etc.
+
+102 Have a WWW tutorial for DDD.  See also 080.
 
 110 N. Dan Zou <zou@hooked.net> suggests a way to display the class
     structure of an existing program graphically.  [Should be
@@ -90,6 +95,9 @@ Volunteers for these and other projects are welcome!
     windows (for instance, open-backtrace(X, Y) would open the
     backtrace window at X, Y; open-backtrace() would open it in some
     default position).  See also #154, above.
+
+160 Support DEC `decladebug'.  Jens Albrecht
+    <Jens.Albrecht@informatik.uni-erlangen.de> has a trace.
 
 161 Daniel Lyddy <sprocket27@earthlink.net> suggests: Would it be
     feasible to allow the user to select multiple commands in the
@@ -296,37 +304,4 @@ Volunteers for these and other projects are welcome!
 362 Zdenek Sekera <zs@sgi.com> wants an option to delete arguments
     from the argument history.
 
-366 Support the ISO C++ istringstream, ostringstream, etc. classes.
-
-367 How can we display plots of struct { double re, im; } arrays?
-    Support plotting arrays of structs as well as plotting complex
-    values (Check `complex' in ISO C++ and COMPLEX in FORTRAN).
-
-370 Make sure the argument window does not grow too wide.
-
-371 Add command recording for debuggers other than GDB.
-
-372 Add user-defined commands for debuggers other than GDB.
-
-373 Allow `--display' as alias for `-display'.
-
-375 In the new DDD manual, have an image map for the DDD windows.
-
-376 In DBX (at least on AIX), `cont 0' continues with no signal.
-    There is also `cont sig 0' on SunOS DBX.
-
-377 Add tiny `+'/`-' buttons to structures to ease folding and
-     unfolding.
-
-378 Allow disassembling always N bytes, regardless of function
-    borders. (Useful for functions with ASM labels).
-
-379 If `main' has no source, show the first source found with
-    `File -> Open Source'.
-
-380 Add special Mocka hacks to access global data.
-
-381 Show initial copyright in source window; let the console show the
-    GDB copyright.
-
-382 (Insert new project ideas here)
+366 (Insert new project ideas here)

@@ -104,7 +104,6 @@ enum SettingsType { SETTINGS, INFOS, SIGNALS };
 static Widget            settings_panel = 0;
 static Widget            settings_form  = 0;
 static Widget            reset_settings_button = 0;
-static Widget            apply_settings_button = 0;
 static WidgetArray       settings_entries;
 static EntryTypeArray    settings_entry_types;
 static WidgetStringAssoc settings_values;
@@ -130,8 +129,7 @@ static WidgetArray       infos_entries;
 //-----------------------------------------------------------------------
 
 static void get_setting(ostream& os, DebuggerType type,
-			const string& base, string value,
-			unsigned long flags = SAVE_DEFAULT | SAVE_SESSION);
+			const string& base, string value);
 static void set_arg();
 
 
@@ -194,6 +192,16 @@ static void gdb_set_command(string set_command, string value)
     {
 	gdb_command(set_command);
     }
+}
+
+// TextField reply
+static void SetTextCB(Widget w, XtPointer client_data, XtPointer)
+{
+    String value_s = XmTextFieldGetString(w);
+    string value(value_s);
+    XtFree(value_s);
+
+    gdb_set_command((String)client_data, value);
 }
 
 // OptionMenu reply
@@ -386,22 +394,7 @@ static void update_reset_settings_button()
     for (int i = 0; i < settings_entries.size(); i++)
     {
 	Widget entry = settings_entries[i];
-
-	string value = settings_values[entry];
-	if (settings_entry_types[i] == TextFieldEntry)
-	{
-	    String value_s = XmTextFieldGetString(entry);
-	    value = value_s;
-	    XtFree(value_s);
-
-	    if (value != settings_values[entry])
-	    {
-		set_sensitive(reset_settings_button, True);
-		return;
-	    }
-	}
-
-	if (value != settings_initial_values[entry])
+	if (settings_initial_values[entry] != settings_values[entry])
 	{
 	    set_sensitive(reset_settings_button, True);
 	    return;
@@ -409,32 +402,6 @@ static void update_reset_settings_button()
     }
 
     set_sensitive(reset_settings_button, False);
-}
-
-static void update_apply_settings_button()
-{
-    if (apply_settings_button == 0)
-	return;
-
-    for (int i = 0; i < settings_entries.size(); i++)
-    {
-	if (settings_entry_types[i] != TextFieldEntry)
-	    continue;
-
-	Widget entry = settings_entries[i];
-
-	String value_s = XmTextFieldGetString(entry);
-	string value(value_s);
-	XtFree(value_s);
-
-	if (value != settings_values[entry])
-	{
-	    set_sensitive(apply_settings_button, True);
-	    return;
-	}
-    }
-
-    set_sensitive(apply_settings_button, False);
 }
 
 static void update_reset_signals_button()
@@ -473,21 +440,6 @@ void update_infos()
     if (reset_infos_button != 0)
 	set_sensitive(reset_infos_button, have_info);
 }
-
-static void UpdateSettingsButtonsNowCB(XtPointer, XtIntervalId *)
-{
-    update_apply_settings_button();
-    update_reset_settings_button();
-}
-
-// TextField reply
-static void UpdateSettingsButtonsCB(Widget w, XtPointer client_data, XtPointer)
-{
-    // The TextField value has not yet changed.  Call again later.
-    XtAppAddTimeOut(XtWidgetToApplicationContext(w), 0,
-		    UpdateSettingsButtonsNowCB, client_data);
-}
-
 
 // Register additional info button
 void register_info_button(Widget w)
@@ -1806,9 +1758,8 @@ static void add_button(Widget form, int& row, Dimension& max_width,
 	XtSetArg(args[arg], XmNbottomPosition,   row + 1);           arg++;
 	entry = verify(XmCreateTextField(form, set_command, args, arg));
 	XtManageChild(entry);
-
-	XtAddCallback(entry, XmNvalueChangedCallback, UpdateSettingsButtonsCB,
-		      NULL);
+	XtAddCallback(entry, XmNactivateCallback, 
+		      SetTextCB, XtPointer(set_command_s));
     }
     }
 
@@ -2039,33 +1990,18 @@ void update_settings()
 }
 
 // Reset settings
-static void ResetSettingsCB(Widget, XtPointer, XtPointer)
+static void ResetSettingsCB (Widget, XtPointer, XtPointer)
 {
     for (int i = 0; i < settings_entries.size(); i++)
     {
 	Widget entry = settings_entries[i];
-
-	string value = settings_values[entry];
-	if (settings_entry_types[i] == TextFieldEntry)
-	{
-	    String value_s = XmTextFieldGetString(entry);
-	    value = value_s;
-	    XtFree(value_s);
-
-	    if (value != settings_values[entry])
-	    {
-		value = settings_values[entry];
-		XmTextFieldSetString(entry, (String)value);
-	    }
-	}
-
-	if (value != settings_initial_values[entry])
+	if (settings_initial_values[entry] != settings_values[entry])
 	    gdb_set_command(XtName(entry), settings_initial_values[entry]);
     }
 }
 
 // Reset signals
-static void ResetSignalsCB(Widget, XtPointer, XtPointer)
+static void ResetSignalsCB (Widget, XtPointer, XtPointer)
 {
     for (int i = 0; i < signals_entries.size(); i++)
     {
@@ -2075,25 +2011,6 @@ static void ResetSignalsCB(Widget, XtPointer, XtPointer)
 	    bool set = (signals_initial_values[entry] == "yes");
 	    gdb_command(handle_command(entry, set));
 	}
-    }
-}
-
-// Apply settings
-static void ApplySettingsCB(Widget, XtPointer, XtPointer)
-{
-    for (int i = 0; i < settings_entries.size(); i++)
-    {
-	if (settings_entry_types[i] != TextFieldEntry)
-	    continue;
-
-	Widget entry = settings_entries[i];
-
-	String value_s = XmTextFieldGetString(entry);
-	string value(value_s);
-	XtFree(value_s);
-
-	if (value != settings_values[entry])
-	    gdb_set_command(XtName(entry), value);
     }
 }
 
@@ -2198,35 +2115,36 @@ static Widget create_panel(DebuggerType type, SettingsType stype)
 					       dialog_name, args, arg));
     Delay::register_shell(panel);
 
-    Widget apply_button = XmSelectionBoxGetChild(panel, XmDIALOG_OK_BUTTON);
-    set_sensitive(apply_button, False);
-
-    Widget reset_button = XmSelectionBoxGetChild(panel, XmDIALOG_APPLY_BUTTON);
-    XtManageChild(reset_button);
+    if (lesstif_version <= 79)
+	XtUnmanageChild(XmSelectionBoxGetChild(panel, XmDIALOG_APPLY_BUTTON));
 
     // Remove old prompt
     XtUnmanageChild(XmSelectionBoxGetChild(panel, XmDIALOG_TEXT));
     XtUnmanageChild(XmSelectionBoxGetChild(panel, XmDIALOG_SELECTION_LABEL));
 
     XtAddCallback(panel, XmNhelpCallback, ImmediateHelpCB, 0);
-    XtAddCallback(panel, XmNcancelCallback, UnmanageThisCB, XtPointer(panel));
+    XtAddCallback(panel, XmNokCallback, UnmanageThisCB, 
+    	      XtPointer(panel));
+
+    Widget cancel = XmSelectionBoxGetChild(panel, XmDIALOG_CANCEL_BUTTON);
 
     switch (stype)
     {
     case SETTINGS:
-	XtAddCallback(panel, XmNapplyCallback, ResetSettingsCB, 0);
-	XtAddCallback(panel, XmNokCallback, ApplySettingsCB, 0);
-	apply_settings_button = apply_button;
+	XtRemoveAllCallbacks(cancel, XmNactivateCallback);
+	XtAddCallback(cancel, XmNactivateCallback, ResetSettingsCB, 0);
+	XtVaSetValues(panel, XmNdefaultButton, Widget(0), NULL);
 	break;
 
     case INFOS:
-	XtAddCallback(panel, XmNapplyCallback, DeleteAllInfosCB, 0);
-	XtUnmanageChild(apply_button); // No text entries
+	XtRemoveAllCallbacks(cancel, XmNactivateCallback);
+	XtAddCallback(cancel, XmNactivateCallback, DeleteAllInfosCB, 0);
 	break;
 
     case SIGNALS:
-	XtAddCallback(panel, XmNapplyCallback, ResetSignalsCB, 0);
-	XtUnmanageChild(apply_button); // No text entries
+	XtRemoveAllCallbacks(cancel, XmNactivateCallback);
+	XtAddCallback(cancel, XmNactivateCallback, ResetSignalsCB, 0);
+	XtVaSetValues(panel, XmNdefaultButton, Widget(0), NULL);
 	break;
     }
 
@@ -2334,17 +2252,17 @@ static Widget create_panel(DebuggerType type, SettingsType stype)
     switch (stype)
     {
     case SETTINGS:
-	reset_settings_button = reset_button;
+	reset_settings_button = cancel;
 	update_reset_settings_button();
 	break;
 
     case INFOS:
-	reset_infos_button = reset_button;
+	reset_infos_button = cancel;
 	update_infos();
 	break;
 
     case SIGNALS:
-	reset_signals_button = reset_button;
+	reset_signals_button = cancel;
 	update_reset_signals_button();
 	break;
     }
@@ -2425,7 +2343,7 @@ static Widget create_settings(DebuggerType type)
 
 	// Get the command definitions, too.  These must be included
 	// in saving GDB state.
-	(void) get_defines(type);
+	get_defines(type);
     }
     else if (settings_panel != 0 && need_reload_settings)
     {
@@ -2542,8 +2460,7 @@ void reset_signals()
 }
 
 static void get_setting(ostream& os, DebuggerType type,
-			const string& base, string value,
-			unsigned long flags)
+			const string& base, string value)
 {
     if (value == "unlimited")
 	value = "0";
@@ -2557,52 +2474,38 @@ static void get_setting(ostream& os, DebuggerType type,
 	    base == "dbxenv output_log_file_name")
 	{
 	    // Do nothing (DBX) - dependent on the current machine etc.
-	    break;
 	}
-
-	if (base == "set remotelogfile" && value == "")
+	else if (base == "set remotelogfile" && value == "")
 	{
 	    // This is the default setting - do nothing (GDB)
-	    break;
 	}
-
-	if (base == "set remotedevice" && value == "")
+	else if (base == "set remotedevice" && value == "")
 	{
 	    // This is the default setting - do nothing (GDB)
-	    break;
 	}
-
-	if (base == "set solib-absolute-prefix" && value == "")
+	else if (base == "set solib-absolute-prefix" && value == "")
 	{
 	    // GDB 4.17 bug: `set solib-absolute-prefix' without arg
 	    // does not work.  Just leave it as default setting.
-	    break;
 	}
-
-	if (base.contains("set $cur", 0) ||
-	    base.contains("set $new", 0) ||
-	    base.contains("set $pid", 0))
+	else if (base.contains("set $cur", 0) ||
+		 base.contains("set $new", 0) ||
+		 base.contains("set $pid", 0))
 	{
 	    // Do nothing - dependent on the current file (DEC DBX)
-	    break;
 	}
-
-	if (base == "set $defaultin" ||
-	    base == "set $defaultout" ||
-	    base == "set $historyevent")
+	else if (base == "set $defaultin" ||
+		 base == "set $defaultout" ||
+		 base == "set $historyevent")
 	{
 	    // Do nothing - dependent on the current state (SGI DBX)
-	    break;
 	}
-
-	if (base.contains("set $", 0))
+	else if (base.contains("set $", 0))
 	{
 	    // Add setting (DBX).
 	    os << base << " = " << value << '\n';
-	    break;
 	}
-
-	if (base.contains("set ", 0))
+	else if (base.contains("set ", 0))
 	{
 	    // Add setting (GDB).
 
@@ -2616,43 +2519,18 @@ static void get_setting(ostream& os, DebuggerType type,
 		value.prepend("0d");
 
 	    os << base << " " << value << '\n';
-	    break;
 	}
-
-	if (base.contains("dbxenv ", 0))
+	else if (base.contains("dbxenv ", 0))
 	{
 	    // Add setting (DBX).
 	    os << base << " " << value << '\n';
-	    break;
 	}
-
-	if (base == "dir")
+	else
 	{
-	    if (flags & SAVE_SESSION)
-	    {
-		// `dir' values are only saved within a session.
-
-		os << base << "\n"	// Clear old value
-		   << base << " " << value << '\n';
-	    }
-	    break;
+	    // `dir' and `path' values are not saved, since they are
+	    // dependent on the current machine and the current
+	    // executable (GDB).
 	}
-
-#if 0				// FIXME: How do we reset the path within GDB?
-	if (base == "path")
-	{
-	    if (flags & SAVE_SESSION)
-	    {
-		// `path' values are only saved within a session.
-
-		os << base << "\n"	// Clear old value
-		   << base << " " << value << '\n';
-	    }
-	    break;
-	}
-#endif
-
-	// Unknown setting -- ignore
 	break;
 
     case PERL:
@@ -2667,26 +2545,11 @@ static void get_setting(ostream& os, DebuggerType type,
 
 	if (!taboo)
 	    os << base << '=' << value << '\n';
-
 	break;
     }
 
-    case JDB:
-	if (base == "use")
-	{
-	    if (flags & SAVE_SESSION)
-	    {
-		// `use' values are only saved within a session.
-		os << base << ' ' << value << '\n';
-	    }
-	    break;
-	}
-
-	// Any other setting (which ones?)
-	os << base << ' ' << value << '\n';
-	break;
-
     case XDB:
+    case JDB:
     case PYDB:
 	// Add setting
 	os << base << ' ' << value << '\n';
@@ -2695,7 +2558,7 @@ static void get_setting(ostream& os, DebuggerType type,
 }
 
 // Fetch GDB settings string
-string get_settings(DebuggerType type, unsigned long flags)
+string get_settings(DebuggerType type)
 {
     Widget settings = create_settings(type);
     if (settings == 0)
@@ -2707,14 +2570,14 @@ string get_settings(DebuggerType type, unsigned long flags)
 	Widget entry = settings_entries[i];
 	string value = settings_values[entry];
 
-	get_setting(command, type, XtName(entry), value, flags);
+	get_setting(command, type, XtName(entry), value);
     }
 
     return string(command);
 }
 
 // Fetch GDB signal handling string
-string get_signals(DebuggerType type, unsigned long /* flags */)
+string get_signals(DebuggerType type)
 {
     if (type != GDB)
 	return "";		// Not supported yet
@@ -2836,7 +2699,7 @@ static void update_defines()
 }
 
 // Get current definitions
-string get_defines(DebuggerType type, unsigned long /* flags */)
+string get_defines(DebuggerType type)
 {
     if (type != GDB)
 	return "";		// Not supported yet
@@ -3059,7 +2922,7 @@ void UpdateDefinePanelCB(Widget w, XtPointer, XtPointer)
     string name = current_name();
 
     set_sensitive(record_w, !gdb->recording() && name != "");
-    set_sensitive(apply_w,  !gdb->recording() && defs.has(name));
+    set_sensitive(apply_w,  !gdb->recording() && name != "");
     set_sensitive(end_w,    gdb->recording());
     set_sensitive(edit_w,   !gdb->recording() && name != "");
 
@@ -3117,10 +2980,19 @@ static void RecordCommandDefinitionCB(Widget w, XtPointer, XtPointer)
     gdb_command("define " + name, w);
 }
 
+// Activate the button given in CLIENT_DATA
+static void ActivateCB(Widget, XtPointer client_data, 
+		       XtPointer call_data)
+{
+    XmAnyCallbackStruct *cbs = (XmAnyCallbackStruct *)call_data;
+    
+    Widget button = Widget(client_data);
+    XtCallActionProc(button, "ArmAndActivate", cbs->event, (String *)0, 0);
+}
+
 static void EndCommandDefinitionCB(Widget w, XtPointer, XtPointer)
 {
-    if (gdb->recording())
-	gdb_command("end", w);
+    gdb_command("end", w);
 }
 
 static void DoneEditCommandDefinitionCB(Widget w, XtPointer, XtPointer)
@@ -3201,21 +3073,16 @@ static void ToggleEditCommandDefinitionCB(Widget w, XtPointer client_data,
 }
 
 // Apply the given command
-static void ApplyCB(Widget w, XtPointer client_data, XtPointer call_data)
+static void ApplyCB(Widget, XtPointer, XtPointer)
 {
-    if (gdb->recording())
-	EndCommandDefinitionCB(w, client_data, call_data);
-
-    DoneEditCommandDefinitionCB(w, client_data, call_data);
-
     string cmd = current_name();
-    if (cmd != "")
-    {
-	if (XmToggleButtonGetState(arg_w))
-	    cmd += " " + source_arg->get_string();
+    if (cmd == "")
+	return;
 
-	gdb_command(cmd, w);
-    }
+    if (XmToggleButtonGetState(arg_w))
+	cmd += " " + source_arg->get_string();
+
+    gdb_command(cmd);
 }
 
 // Force argument to `()'
@@ -3317,6 +3184,7 @@ void dddDefineCommandCB(Widget w, XtPointer, XtPointer)
 	dialog = verify(XmCreatePromptDialog(find_shell(w),
 					     "define_command",
 					     args, arg));
+	XtVaSetValues(dialog, XmNdefaultButton, Widget(0), NULL);
 
 	// Remove old prompt
 	Widget text = XmSelectionBoxGetChild(dialog, XmDIALOG_TEXT);
@@ -3325,13 +3193,12 @@ void dddDefineCommandCB(Widget w, XtPointer, XtPointer)
 	    XmSelectionBoxGetChild(dialog, XmDIALOG_SELECTION_LABEL);
 	XtUnmanageChild(old_label);
 
-	apply_w = XmSelectionBoxGetChild(dialog, XmDIALOG_APPLY_BUTTON);
-	XtVaSetValues(dialog, XmNdefaultButton, apply_w, NULL);
-	XtManageChild(apply_w);
-
-	XtUnmanageChild(XmSelectionBoxGetChild(dialog, XmDIALOG_OK_BUTTON));
-
 	Delay::register_shell(dialog);
+
+	XtUnmanageChild(XmSelectionBoxGetChild(dialog, 
+					       XmDIALOG_CANCEL_BUTTON));
+	apply_w = XmSelectionBoxGetChild(dialog, XmDIALOG_APPLY_BUTTON);
+	XtManageChild(apply_w);
 
 	arg = 0;
 	XtSetArg(args[arg], XmNorientation, XmHORIZONTAL); arg++;
@@ -3360,14 +3227,10 @@ void dddDefineCommandCB(Widget w, XtPointer, XtPointer)
 		      XtPointer(dialog));
 	XtAddCallback(dialog, XmNokCallback, DoneEditCommandDefinitionCB, 
 		      XtPointer(0));
-
 	XtAddCallback(dialog, XmNapplyCallback, ApplyCB, NULL);
-
-	XtAddCallback(dialog, XmNcancelCallback, EndCommandDefinitionCB, NULL);
-	XtAddCallback(dialog, XmNcancelCallback, UnmanageThisCB, 
-		      XtPointer(dialog));
-
 	XtAddCallback(dialog, XmNhelpCallback, ImmediateHelpCB, NULL);
+	XtAddCallback(name_w, XmNactivateCallback, ActivateCB, 
+		      XtPointer(record_w));
 
 	set_need_load_defines(true);
 	update_defines();

@@ -157,8 +157,6 @@ void ddd_cleanup()
     ddd_is_exiting = true;
 
     kill_exec_tty();
-    kill_command_tty();
-
     if (gdb)
     {
 	gdb->shutdown();

@@ -1,37 +1,14 @@
 DDD News						-*- text -*-
 ********
 
-DDD 3.2 [in development]
-========================
-
-DDD 3.2 brings not much yet.
-
-- Breakpoint commands are also supported for DBX, Perl, and XDB.
-- `Breakpoint Properties', `Define Command', and `Debugger Settings'
-  have an `Apply' button that applies changes to text fields.
-- In TTY mode, you can edit and complete the command line as in GDB.
-  (Uses GNU readline library.)
-- DDD uses the locale as specified by the environment (such as $LANG).
-  This allows input of locale characters in DDD dialogs; error
-  messages may also come up in your locale.  If you experience any
-  problems, set LANG=C when invoking DDD.
-- Ctrl+E moves the cursor to the end of the line.  For a `Run'
-  shortcut, use F2/F3 or Shift+Ctrl+E.
-- [Perl] DDD supports temporary breakpoints in Perl.
-- [GDB] DDD saves the GDB source directory path with the current session.
-- [JDB] DDD saves the JDB class path only with the current session.
-- [DBX] DEC `ladebug' is supported.
-
-DDD 3.2 also incorporates all changes listed below.
-
-
 DDD 3.1.6
 =========
 
-DDD 3.1.6 fixes more minor problems in DDD 3.1.
+DDD 3.1.6 brings support for recent tools and components.
 
 - DDD passes all options after `--' to the inferior debugger.
-- [Build] Minor code fixes for recent EGCS and GCC versions.
+- [Build] DDD supports EGCS 1.1.2 as well as GCC 2.95 and later
+- [Build] DDD supports LessTif 0.88.9 and later.
 
 There are no new features in DDD 3.1.6.  You don't need to upgrade
 unless you suffer from one of these problems.

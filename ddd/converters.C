@@ -476,8 +476,8 @@ static Boolean CvtStringToXmString(Display *display,
     
     split(source, segments, n_segments, font_esc);
 
-    MString buf(0, true);
-    for (int i = 0; i < n_segments; i++)
+    MString buf;
+    for (int i = 0; i < n_segments && buf.xmstring() != 0; i++)
     {
 	string segment;
 
@@ -545,9 +545,6 @@ static Boolean CvtStringToXmString(Display *display,
 	if (segment.length() > 0)
 	    buf += MString(segment, charset);
     }
-
-    if (buf.isNull())
-	buf = MString("");
 
     XmString target = XmStringCopy(buf.xmstring());
     delete[] segments;

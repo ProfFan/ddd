@@ -136,22 +136,9 @@ Volunteers for fixing these and other bugs are welcome!
     likewise), DDD considers the pointer to be frozen, such that it
     continues execution.
 
-370 Is the command shell raised each time a new display is created?
-
 371 Reduce flickering when setting options.
 
 373 In `Define Command', changing the `()' toggle does not change
     defined buttons.
 
-374 Have an improved Motif 2.1 ComboBox layout.
-
-375 Improve Python support (in DDD 3.2)
-
-376 Improve the command tool movement in KDE.
-
-377 The Breakpoint dialog has a generic title.
-
-378 Using Motif 2.1, `Ignore Count' in Breakpoint Properties
-    has a bad orientation.
-
-379 (Insert new bugs here)
+374 (Insert new bugs here)
