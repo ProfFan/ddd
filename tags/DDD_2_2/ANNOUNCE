@@ -1,0 +1,313 @@
+DDD 2.2 is available					-*- text -*-
+====================
+
+    Release 2.2 of the Data Display Debugger (DDD), a common graphical
+    front-end for GDB, DBX, and XDB debuggers, is now available at
+
+        ftp://ftp.ips.cs.tu-bs.de/pub/local/softech/ddd/ddd-2.2.tar.gz
+
+    Diffs from earlier versions are in
+
+        ftp://ftp.ips.cs.tu-bs.de/pub/local/softech/ddd/diffs/
+
+    Contributed DDD binaries for various architectures are in
+
+        ftp://ftp.ips.cs.tu-bs.de/pub/local/softech/ddd/bin/
+
+    The DDD WWW page is at
+
+        http://www.cs.tu-bs.de/softech/ddd/
+
+    Please try a closer FTP site first; see below for a list.
+
+
+What's new in DDD?
+==================
+
+    DDD 2.2 brings persistent sessions, an improved user interface,
+    attaching to running processes, display shortcuts, and more.
+
+    User-visible changes to DDD 2.1:
+    - Persistent sessions.
+      * You can now save the entire debugger and process state and
+        resume the session later.
+      * Saved state includes process memory and state, inferior
+        debugger settings, breakpoints, and data displays.
+      * X11R6 sessions are supported, too.  When used with a
+        session manager, DDD saves and restores its entire state.
+      * Persistent sessions work best with GDB; DBX and XDB are
+        partially supported, too.
+    - Improved user interface.
+      * DDD now requires less width and height.
+      * Source line numbers have been turned off (can be restored);
+        the breakpoint area extends to the first non-blank character.
+      * The `Disable ()' button for disabling displays has gone;
+        displays are now enabled or disabled via `Show ()/Hide ()'.
+      * The `Break at ()' and `Clear at ()' buttons have been merged
+        into one single dynamic button.
+      * The `Windows' menu is now called `View', complying with the
+        Motif style guide.
+      * Options are now grouped according to their functionality.  The
+        `Options' menu has gone.  Use `Edit' instead.
+      * The `Edit' menu has been completely rewritten, allowing for
+        better clipboard operations.  For instance, you can now copy
+        selected displays to the clipboard and paste them later.
+      * Several buttons provide new pulldown menus with useful functions.
+    - Improved command tool.
+      * The command tool is always auto-raised, i.e. placed on top of
+        the DDD windows.
+      * The command tool always comes with window manager decorations, 
+        such that you can easily move it around.
+      * The command tool sticks to the DDD source window: if you move
+        the DDD source window around, the command tool follows.
+    - Display shortcuts.  Once you have changed `p' to `(char *) p'
+      manually, DDD provides a menu shortcut for converting arbitrary
+      values to `(char *)'.
+    - Button editor.  User-defined buttons can now be defined,
+      changed, and deleted at run-time.
+    - Support for debugging processes running outside of DDD.  You can
+      attach to a running process, examine it, and resume execution.
+    - Helper customization.  You can now interactively select and
+      customize the applications to be used for the execution window,
+      for editing source code, for browsing the DDD WWW page, etc.
+    - Improved online manuals.
+      * Multiple manual browsers are supported.
+      * Manual browsers are realized as top-level windows.
+      * DDD no longer blocks while the manual is uncompressed and formatted.
+      * DDD stores manuals in `gzip' format, saving space in executables.
+    - New `What Now?' help.  Gives a hint on what you can do next,
+      depending on the current DDD state.  Useful for beginners.
+    - Improved data display.
+      * Displayed data is highlighted whenever it changes.
+      * Two-dimensional arrays are now laid out as tables.
+      * Numerical values are now aligned to the right.
+      * You can now incrementally `Show More' details of an object,
+        instead of showing all details at once.
+      * Processing displays can be interrupted by typing Ctrl+C.
+    - Drag and drop support.
+      * You can now alter the current execution position interactively
+        by dragging and dropping the execution arrow.  This allows you
+        to back up - perhaps with more breakpoints set-over a portion
+        of a program that has already executed, in order to examine
+        its execution in more detail.
+      * Breakpoints can be dragged and dropped, too.  This allows you
+        to move breakpoints to alternate positions, without changing
+        their properties.
+    - Improved display of breakpoints and execution positions.
+      * The current execution position is now properly cleared if
+        undetermined (no source, program terminated, etc.)
+      * If the program stopped due to a signal, this is indicated
+        by a lightning symbol within the current execution glyph.
+      * Faster scrolling.  While scrolling source or machine code at
+        high speed, glyphs are now unmapped.  Slow scrolling still
+        shows glyphs.
+    - Improved DBX and XDB support.
+      * DDD supports DBX and XDB breakpoint conditions.
+      * With SUN DBX 3.x, DDD also supports disabled breakpoints 
+        and ignore counts.
+    - User-defined DDD commands.  DDD now provides a simple facility
+      that allows the inferior debugger to execute DDD commands.  For
+      details, see `User-Defined Commands' in the DDD manual.
+    - For `Continue Until Here', DDD now sets a temporary breakpoint
+      and continues (instead of using the GDB `until' command).  If
+      the temporary breakpoint is not reached, it is deleted.
+    - When restarting DDD, all settings (data displays, execution
+      position, etc.) are preserved.
+    - When DDD becomes ready after a user command, it automatically
+      uniconifies itself.  Hence, you can iconify DDD while it runs a
+      program; DDD pops up again as soon as a breakpoint is hit.
+    - Characters typed into the data and source windows are now
+      forwarded to the debugger console.
+    - Resource files have been renamed.  All files are now located
+      under `~/.ddd/'.  The file `~/.dddinit' has been replaced by
+      `~/.ddd/init'; `~/.ddd_history' is now `~/.ddd/history'.  The
+      new directory `~/.ddd/sessions/' contains saved DDD sessions.
+    - Your window manager should now show multi-color DDD icons.
+      (requires XPM; can be disabled)
+    - During start-up, DDD shows a multi-color logo in a transient
+      window. (requires XPM; can be disabled)
+    - DDD now typically requires 35% less memory.  This was achieved
+      by compiling and optimizing DDD regular expressions at compile
+      time, rather than generating them at run time.
+
+    Supported platforms and configurations:
+    - Support for Linux with GNU libc 5.4.38 and later included.
+    - Support for XDB on HP-UX 10.x included.  Thanks to Robert
+      Wiegand <wiegand@kong.gsfc.nasa.gov>.
+    - Support for SUN DBX 3.2 included.
+
+    Bug fixes:
+    - DDD no longer hangs while receiving large chunks of data.
+    - DDD now also works with echoing TTY connections.
+    - Significant speed-ups in processing debugger and program output.
+    - Several memory leaks and X resource leaks have been tightened.
+    - DDD no longer requires the librx library.  Consequently, librx
+      errors can no more cause DDD to crash.
+    - A serious bug that caused timers to be inadvertently removed has
+      been fixed.  Bug effects included loss of console cursor, loss
+      of data display contents, and loss of scrolling capabilities.
+    - DDD now handles GDB `<repeats N times>' output correctly.
+    - And again, hundreds of minor improvements and bug fixes.  See
+      the ChangeLog for details.
+
+
+What is DDD, anyway?
+====================
+
+    The Data Display Debugger (DDD) is a common graphical user
+    interface to GDB, DBX, and XDB, the popular UNIX debuggers.
+    Besides ``usual'' features such as viewing source texts and
+    breakpoints, DDD provides a graphical data display, where data
+    structures are displayed as graphs.  A simple mouse click
+    dereferences pointers or reveals structure contents, updated each
+    time the program stops.  Using DDD, you can reason about your
+    application by viewing its data, not just by viewing it execute
+    lines of source code.
+
+    Other DDD features include: debugging of programs written in C,
+    C++, Ada, Fortran, Pascal, Modula-2, or Modula-3; machine-level
+    debugging; hypertext source navigation and lookup; breakpoint,
+    backtrace, and history editors; preferences and settings editors;
+    program execution in terminal emulator window; debugging on remote
+    host; on-line manual; interactive help on the Motif user
+    interface; GDB/DBX/XDB command-line interface with full editing,
+    history, and completion capabilities.  DDD has been designed to
+    compete with well-known commercial debuggers.
+    
+    Speaking of platforms: DDD configures, compiles and runs
+    out-of-the-box on every major UNIX platform, including AIX
+    (powerpc-ibm-aix3, rs6000-ibm-aix3), FreeBSD
+    (i386-intel-freebsd1), HP-UX (hppa1.1-hp-hpux9, m68k-hp-hpux9),
+    IRIX (mips-sgi-irix5), Linux (i[3456]86-unknown-linux,
+    i[3456]86-unknown-linuxaout), Alpha OSF (alpha-osf3), Solaris
+    (i386-sun-solaris2, sparc-sun-solaris2), SunOS (sparc-sun-sunos4),
+    and ULTRIX (mips-dec-ultrix4).
+
+    DDD is free software, protected by the GNU general public license.
+    It is actively maintained by its authors, Dorothea Luetkehaus and
+    Andreas Zeller at the Technische Universitaet Braunschweig,
+    Germany.
+
+
+What do I need to build DDD?
+============================
+
+
+    To build a complete DDD from sources, you need:
+
+       * The GNU C++ compiler (GCC/G++), preferably version 2.6.3 or
+	 later, and a matching C++ I/O library (libstdc++ or libg++).
+
+         Some other C++ compilers have been reported to compile DDD as
+         well.  Good results have been reported with Sun CC 4.0.  SGI
+         CC and AIX xlC compile DDD, but introduce some subtle errors.
+         Cfront 3.0 does not compile DDD.
+
+       * The X window library (Xlib) and X toolkit library (Xt),
+         X11R4 or later.
+
+       * A Motif Widget library, version 1.1 or later.  Best results
+         are achieved using OSF/Motif 2.0 or later.  DDD also compiles
+         and runs with LessTif, a free Motif clone, release 0.79 or
+         later, without loss of functionality.  LessTif is available
+         via `http://www.lesstif.org/'.
+
+       * Optionally, in addition to the Motif widget library, the
+         Athena Widget library (release 5 or later).  Having the
+         Athena Widget library is convenient for supporting
+         two-dimensional scrollbars and the `editres' protocol.
+
+       * Optionally, the XPM library (release 3.2 or later).  The XPM
+         library brings support for multi-color icons and logos.
+
+       * Lots of virtual memory.
+
+    To run DDD, you need an inferior command-line debugger.  Best
+    results are achieved with GDB, the GNU debugger.  (GDB 4.x is
+    required; best results are achieved with GDB 4.13 or later.)
+    Using GDB, you can debug programs written in C and C++; GNU Ada
+    (`gnat'), GNU Fortran (`g77') and GNU Modula-2 have been reported
+    to work as well.
+
+    As an alternative to GDB, DDD also supports the DBX debugger as
+    found on SUN, DEC, AIX, and IRIX systems.  Using DBX, you can
+    debug programs written in C, C++, Pascal, Fortran, and Modula-2.
+    DDD adapts automatically to a wide range of other DBX variants.
+
+    As another alternative, DDD also supports the XDB debugger as
+    found on HP-UX systems.  XDB usage has been tested for C programs
+    only, but may work for other languages as well.
+
+
+Where do I get more information?
+================================
+
+    The DDD WWW page (including screen shots) is available at
+
+        http://www.cs.tu-bs.de/softech/ddd/
+
+    A short DDD survey with several screen shots is available at
+
+        ftp://ftp.ips.cs.tu-bs.de/pub/local/softech/ddd/ddd-paper.ps.gz
+
+    The six-page paper gives a short introduction to the look-and-feel
+    of DDD and highlights some internal aspects.
+
+    The DDD manual is the official, up-to-date DDD reference.  It now
+    includes more than 40 screen shots.  Available at
+
+        ftp://ftp.ips.cs.tu-bs.de/pub/local/softech/ddd/doc/
+
+    The DDD users mailing list, 
+
+        ddd-users@ips.cs.tu-bs.de
+
+    is the right place to contact other DDD users for assistance and
+    hints.  New DDD releases are also announced here.  For more
+    information on this list, and for subscription, send a mail to
+
+        ddd-users-request@ips.cs.tu-bs.de
+
+    Please send suggestions and bug reports for DDD to
+
+        ddd-bugs@ips.cs.tu-bs.de
+
+    As the DDD developers are usually busy with other projects, don't
+    expect an immediate personal answer.  However, all bug reports are 
+    read and considered for the next DDD release.
+
+
+Getting DDD
+===========
+
+    DDD is available from a number of FTP sites:
+
+    * ftp://ftp.ips.cs.tu-bs.de/pub/local/softech/ddd/
+
+      Main FTP site; carries DDD sources (src/), patches (patches/),
+      diffs (diffs/), snapshots (current/), documentation (doc/), WWW
+      pages (www/) and various binaries (bin/).  Usually overloaded.
+      Mirrored in several places, including
+
+          ftp://uiarchive.cso.uiuc.edu/pub/packages/ddd/
+          ftp://richb-pc.acc.qc.edu/pub/ddd/
+          ftp://ftp.th-darmstadt.de/pub/programming/tools/ddd/
+          ftp://ftp.gre.ac.uk/pub/tools/debuggers/ddd/
+
+    * ftp://sunsite.unc.edu/pub/Linux/devel/debuggers/ddd/
+
+      FTP server for Linux and contributions.  Carries DDD sources and
+      Linux binaries.  Mirrored in several places; the file `MIRRORS'
+      contains a list.
+
+    * ftp://ftp.x.org/contrib/utilities/
+
+      FTP server for X11 and contributions.  Carries DDD sources.
+      Mirrored in several places; server sends a list when overloaded.
+
+
+Have fun with DDD!
+
+-- 
+Andreas Zeller      Technische Universitaet Braunschweig, Germany
+                    ddd@ips.cs.tu-bs.de http://www.cs.tu-bs.de/softech/ddd/
