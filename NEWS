@@ -1,28 +1,18 @@
 DDD News						-*- text -*-
 ********
 
-DDD 3.2 [in development]
-========================
+DDD 3.1.5
+=========
 
-DDD 3.2 brings not much yet.
+DDD 3.1.5 brings support for recent tools and components.
 
-- Breakpoint commands are also supported for DBX, Perl, and XDB.
-- `Breakpoint Properties', `Define Command', and `Debugger Settings'
-  have an `Apply' button that applies changes to text fields.
-- In TTY mode, you can edit and complete the command line as in GDB.
-  (Uses GNU readline library.)
-- DDD uses the locale as specified by the environment (such as $LANG).
-  This allows input of locale characters in DDD dialogs; error
-  messages may also come up in your locale.  If you experience any
-  problems, set LANG=C when invoking DDD.
-- Ctrl+E moves the cursor to the end of the line.  For a `Run'
-  shortcut, use F2/F3 or Shift+Ctrl+E.
-- [Perl] DDD supports temporary breakpoints in Perl.
-- [GDB] DDD saves the GDB source directory path with the current session.
-- [JDB] DDD saves the JDB class path only with the current session.
-- [DBX] DEC `ladebug' is supported.
+- [Linux] DDD supports TTYs on Linux with GNU libc 2.1.
+- [Solaris] DDD supports Motif 2.1 on Sun Solaris 7.
+- [XEmacs] DDD supports gud-mode in XEmacs 21.0.
+- [Build] DDD supports Bison 1.27 and Automake 1.4a.
 
-DDD 3.2 also incorporates all changes listed below.
+There are no new features in DDD 3.1.5.  You don't need to upgrade
+unless you use one of the listed tools and/or components.
 
 
 DDD 3.1.4

@@ -48,9 +48,7 @@
 // Breakpoint type
 enum BPType {
     BREAKPOINT,			// Breakpoint
-    WATCHPOINT,			// Watchpoint
-    TRACEPOINT,			// Tracepoint (as in GDB)
-    ACTIONPOINT,		// Actionpoint (`when' in DBX, action in Perl)
+    WATCHPOINT			// Watchpoint
 };
 
 // What to do when breakpoint is reached
@@ -151,7 +149,6 @@ public:
 
     // Breakpoint type.
     BPType type() const { return mytype; }
-    string title() const;
 
     // What to do when breakpoint is reached.
     BPDispo dispo() const { return mydispo; }

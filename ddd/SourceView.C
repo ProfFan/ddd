@@ -726,20 +726,6 @@ void SourceView::set_bp(const string& a, bool set, bool temp,
 		command += " " + cond;
 
 	    gdb_command(command, w);
-
-	    if (temp)
-	    {
-		// Perl actions include Perl commands, but not
-		// debugger commands.  Use an auto-command instead.
-		string del = "d " + address;
-		add_auto_command_prefix(del);
-		string clear = "a " + address;
-		add_auto_command_prefix(clear);
-
-		command = "a " + address + " " + del + "; " + clear;
-		gdb_command(command, w);
-	    }
-
 	    break;
 	}
 	}
@@ -997,7 +983,7 @@ bool SourceView::move_bp(int bp_nr, const string& a, Widget w, bool copy)
 	move_breakpoint_properties(bp_nr, new_bp_nr);
 
 	// Delete old breakpoint
-	delete_bp(bp_nr, w);
+	delete_bp(bp_nr);
     }
 
     return true;
@@ -1064,7 +1050,7 @@ void SourceView::_set_bps_cond(IntArray& _nrs, string cond,
 		move_breakpoint_properties(bp_nr, new_bp_nr);
 
 		// Delete old breakpoint
-		delete_bp(bp_nr, w);
+		delete_bp(bp_nr);
 
 		// Next breakpoint will get the next number
 		count++;
@@ -1224,7 +1210,6 @@ string SourceView::clear_command(string pos, bool clear_next, int first_bp)
 {
     string file = current_file_name;
     string line = pos;
-    MapRef ref;
 
     if (gdb->type() == DBX && !pos.contains(':') && !pos.matches(rxint))
 	pos = dbx_lookup(pos);
@@ -1248,62 +1233,7 @@ string SourceView::clear_command(string pos, bool clear_next, int first_bp)
 
 	case PERL:
 	    if (line_no > 0 && file_matches(file, current_file_name))
-	    {
-		// Clear the breakpoint
-		string command = "d " + line;
-
-		// Check whether there are any other breakpoints with actions
-		bool have_other_actions = false;
-		bool need_clear_actions = false;
-		BreakPoint *bp;
-		for (bp = bp_map.first(ref); bp != 0; bp = bp_map.next(ref))
-		{
-		    if (bp->type() == ACTIONPOINT)
-		    {
-			// We have an action without associated breakpoint.
-			// Be sure to clear this as soon as possible.
-			need_clear_actions = true;
-		    }
-
-		    if (!bp_matches(bp, file, line_no) &&
-			bp->type() == BREAKPOINT && 
-			bp->commands().size() > 0)
-		    {
-			// We have other breakpoints with actions.
-			have_other_actions = true;
-		    }
-		}
-
-		for (bp = bp_map.first(ref); bp != 0; bp = bp_map.next(ref))
-		{
-		    // If we have any associated actions, clear them all
-		    if (bp_matches(bp, file, line_no) && 
-			bp->commands().size() > 0)
-		    {
-			// This breakpoint has actions that must be cleared
-
-			if (have_other_actions)
-			{
-			    // Clear only this action
-			    command += "\na " + line;
-			}
-			else
-			{
-			    // Clear all actions (including this one)
-			    need_clear_actions = true;
-			}
-			break;
-		    }
-		}
-
-		if (!have_other_actions && need_clear_actions)
-		{
-		    // Clear all actions
-		    command += "\nA";
-		}
-
-		return command;
-	    }
+		return "d " + line;
 	    break;
 
 	case DBX:
@@ -1316,9 +1246,9 @@ string SourceView::clear_command(string pos, bool clear_next, int first_bp)
 	}
     }
 
-    // Delete all matching breakpoints
     int max_bp_nr = -1;
     string bps = "";
+    MapRef ref;
     for (BreakPoint* bp = bp_map.first(ref);
 	 bp != 0;
 	 bp = bp_map.next(ref))
@@ -1581,19 +1511,9 @@ bool SourceView::bp_matches(BreakPoint *bp, int line)
 
 bool SourceView::bp_matches(BreakPoint *bp, const string& file, int line)
 {
-    switch (bp->type())
-    {
-    case BREAKPOINT:
-    case ACTIONPOINT:
-    case TRACEPOINT:
-	return (line == 0 || bp->line_nr() == line) &&
-	    (bp->file_name() == "" || file_matches(bp->file_name(), file));
-
-    case WATCHPOINT:
-	return false;
-    }
-
-    return false;		// Never reached
+    return bp->type() == BREAKPOINT && 
+	(line == 0 || bp->line_nr() == line) &&
+	(bp->file_name() == "" || file_matches(bp->file_name(), file));
 }
 
 // ***************************************************************************
@@ -2826,11 +2746,8 @@ void SourceView::refresh_source_bp_disp()
     MapRef ref;
     for (BreakPoint* bp = bp_map.first(ref); bp != 0; bp = bp_map.next(ref))
     {
-	if ((bp->type() == BREAKPOINT || bp->type() == TRACEPOINT) && 
-	    bp_matches(bp))
-	{
+	if (bp_matches(bp))
 	    bps_in_line[bp->line_nr()] += bp->number();
-	}
     }
 
     // Show breakpoints in text
@@ -5060,7 +4977,6 @@ void SourceView::srcpopupAct (Widget w, XEvent* e, String *, Cardinal *)
     static int bp_nr;
     static string address;
     bool pos_found = get_line_of_pos(w, pos, line_nr, address, in_text, bp_nr);
-
     bool right_of_text = 
 	pos < XmTextPosition(current_text(w).length()) 
 	&& current_text(w)[pos] == '\n';
@@ -5729,7 +5645,17 @@ void SourceView::update_properties_panel(BreakpointPropertiesInfo *info)
     assert(bp != 0);
 
     // Set titles
-    string what = bp->title();
+    string what;
+    switch (bp->type())
+    {
+    case BREAKPOINT:
+	what = "Breakpoint";
+	break;
+
+    case WATCHPOINT:
+	what = "Watchpoint";
+	break;
+    }
 
     string label;
     if (info->nrs.size() == 1)
@@ -5846,11 +5772,10 @@ void SourceView::update_properties_panel(BreakpointPropertiesInfo *info)
     set_sensitive(XtParent(info->condition), gdb->has_breakpoint_conditions());
 
     bool can_record = gdb->type() == GDB && !gdb->recording();
-    bool can_edit   = gdb->has_breakpoint_commands() && !gdb->recording();
     set_sensitive(info->record,    can_record);
     set_sensitive(info->end,       gdb->recording());
-    set_sensitive(info->edit,      can_edit);
-    set_sensitive(info->editor,    can_edit);
+    set_sensitive(info->edit,      can_record);
+    set_sensitive(info->editor,    can_record);
 
     if (info->sync_commands)
     {
@@ -5975,12 +5900,8 @@ void SourceView::edit_bps(IntArray& breakpoint_nrs, Widget /* origin */)
 	verify(XmCreatePromptDialog(source_text_w,
 				    "breakpoint_properties",
 				    args, arg));
+    XtVaSetValues(info->dialog, XmNdefaultButton, Widget(0), NULL);
 
-    Widget apply = XmSelectionBoxGetChild(info->dialog, XmDIALOG_APPLY_BUTTON);
-    XtVaSetValues(info->dialog, XmNdefaultButton, apply, NULL);
-    XtManageChild(apply);
-
-    XtUnmanageChild(XmSelectionBoxGetChild(info->dialog, XmDIALOG_OK_BUTTON));
 
     // Remove old prompt
     Widget text = XmSelectionBoxGetChild(info->dialog, XmDIALOG_TEXT);
@@ -5990,6 +5911,12 @@ void SourceView::edit_bps(IntArray& breakpoint_nrs, Widget /* origin */)
     XtUnmanageChild(old_label);
 
     Delay::register_shell(info->dialog);
+
+    if (lesstif_version <= 79)
+	XtUnmanageChild(XmSelectionBoxGetChild(info->dialog, 
+					       XmDIALOG_APPLY_BUTTON));
+    XtUnmanageChild(XmSelectionBoxGetChild(info->dialog, 
+					   XmDIALOG_CANCEL_BUTTON));
 
     MMDesc commands_menu[] =
     {
@@ -6080,19 +6007,9 @@ void SourceView::edit_bps(IntArray& breakpoint_nrs, Widget /* origin */)
     MMadjustPanel(panel_menu);
 
     XtAddCallback(info->dialog, XmNokCallback,
-		  ApplyBreakpointPropertiesCB, XtPointer(info));
-    XtAddCallback(info->dialog, XmNokCallback,
-		  UnmanageThisCB, XtPointer(info->dialog));
-
-    XtAddCallback(info->dialog, XmNapplyCallback,
-		  ApplyBreakpointPropertiesCB, XtPointer(info));
-
-    XtAddCallback(info->dialog, XmNcancelCallback,
-		  UnmanageThisCB, XtPointer(info->dialog));
-
+		  UnmanageThisCB, info->dialog);
     XtAddCallback(info->dialog, XmNhelpCallback,    
 		  ImmediateHelpCB, NULL);
-
     XtAddCallback(info->dialog, XmNunmapCallback,
 		  DestroyThisCB, XtParent(info->dialog));
     XtAddCallback(info->dialog, XmNdestroyCallback,
@@ -6112,17 +6029,12 @@ void SourceView::SetBreakpointConditionCB(Widget w,
     XmAnyCallbackStruct *cbs = (XmAnyCallbackStruct *)call_data;
     switch (cbs->reason)
     {
-    case XmCR_OK:		// OK button
-    case XmCR_APPLY:		// Apply button
-
+    case XmCR_ACTIVATE:		// Pressed `RETURN'
     case XmCR_SINGLE_SELECT:	// Selection from ComboBox
     case XmCR_MULTIPLE_SELECT:
     case XmCR_EXTENDED_SELECT:
     case XmCR_BROWSE_SELECT:
 	break;
-
-    case XmCR_ACTIVATE:		// Return Key
-	return;			// Already handled by Apply button
 
     default:
 	return;			// Value changed
@@ -6134,30 +6046,6 @@ void SourceView::SetBreakpointConditionCB(Widget w,
     String cond = XmTextFieldGetString(info->condition);
     set_bps_cond(info->nrs, cond, w);
     XtFree(cond);
-}
-
-// Apply all property changes
-void SourceView::ApplyBreakpointPropertiesCB(Widget w,
-					    XtPointer client_data, 
-					    XtPointer call_data)
-{ 
-    BreakpointPropertiesInfo *info = 
-	(BreakpointPropertiesInfo *)client_data;
-
-    // End recording
-    if (gdb->recording())
-	EndBreakpointCommandsCB(w, client_data, call_data);
-
-    // Apply condition
-    String cond = XmTextFieldGetString(info->condition);
-    set_bps_cond(info->nrs, cond, w);
-    XtFree(cond);
-
-    if (XtIsManaged(XtParent(info->editor)))
-    {
-	// Apply commands
-	EditBreakpointCommandsCB(w, client_data, call_data);
-    }
 }
 
 // Set breakpoint ignore count
@@ -6222,23 +6110,21 @@ void SourceView::MakeBreakpointsTempCB(Widget, XtPointer client_data,
 
 
 // Delete Breakpoint
-void SourceView::DeleteBreakpointsCB(Widget w, XtPointer client_data, 
-				     XtPointer)
+void SourceView::DeleteBreakpointsCB(Widget, XtPointer client_data, XtPointer)
 {
     BreakpointPropertiesInfo *info = 
 	(BreakpointPropertiesInfo *)client_data;
 
-    delete_bps(info->nrs, w);
+    delete_bps(info->nrs);
 }
 
 // Enable Breakpoints
-void SourceView::EnableBreakpointsCB(Widget w, XtPointer client_data,
-				     XtPointer)
+void SourceView::EnableBreakpointsCB(Widget, XtPointer client_data, XtPointer)
 {
     BreakpointPropertiesInfo *info = 
 	(BreakpointPropertiesInfo *)client_data;
 
-    enable_bps(info->nrs, w);
+    enable_bps(info->nrs);
 }
 
 // Disable Breakpoints
@@ -6354,91 +6240,10 @@ void SourceView::set_bp_commands(IntArray& nrs, const StringArray& commands,
 		continue;	// Commands unchanged
 	}
 
-	string action = "";
-	if (gdb->type() != GDB)
-	{
-	    // Get action for non-GDB types - a semicolon-separated
-	    // list of commands
-	    for (int j = 0; j < commands.size(); j++)
-	    {
-		if (j > 0 && 
-		    !action.contains(";", -1) && !action.contains("; ", -1))
-		{
-		    action += "; ";
-		}
-
-		string command = commands[j];
-
-		if (is_graph_cmd(command) ||
-		    is_running_cmd(command, gdb) ||
-		    gdb->type() == PERL && command.contains(' ', 1))
-		{
-		    // If:
-		    // - this is a DDD command, or
-		    // - this is a running command, or
-		    // - this is a Perl debugger command,
-		    // make this a DDD auto-command.
-		    add_auto_command_prefix(command);
-		}
-
-		action += command;
-	    }
-	}
-
-	switch (gdb->type())
-	{
-	case GDB:
-	{
-	    gdb_command("commands " + itostring(nrs[i]), origin);
-	    for (int j = 0; j < commands.size(); j++)
-		gdb_command(commands[j], origin);
-	    gdb_command("end", origin);
-	    break;
-	}
-
-	case DBX:
-	{
-	    // Use `when' to set breakpoint commands.
-	    if (gdb->has_when_semicolon())
-		action += "; ";
-
-	    string cmd;
-	    if (bp->func() != "")
-		cmd = "when in " + bp->func();
-	    else
-	    {
-		gdb_command("file " + bp->file_name());
-		cmd = "when at " + itostring(bp->line_nr());
-	    }
-
-	    cmd += " { " + action + " }";
-	    gdb_command(cmd, origin);
-	    break;
-	}
-
-	case XDB:
-	{
-	    // Replace breakpoint by new one with command.
-	    string cmd = "b " + 
-		bp->file_name() + ":" + itostring(bp->line_nr()) + 
-		" {" + action + "}";
-	    gdb_command(cmd, origin);
-	    delete_bp(bp->number(), origin);
-	    break;
-	}
-
-	case PERL:
-	{
-	    // Just set an action.
-	    gdb_command("f " + bp->file_name(), origin);
-	    string cmd = "a " + itostring(bp->line_nr()) + " " + action;
-	    gdb_command(cmd, origin);
-	    break;
-	}
-
-	default:
-	    assert(!gdb->has_breakpoint_commands());
-	}
+	gdb_command("commands " + itostring(nrs[i]), origin);
+	for (int j = 0; j < commands.size(); j++)
+	    gdb_command(commands[j], origin);
+	gdb_command("end", origin);
     }
 }
 
@@ -6550,8 +6355,6 @@ void SourceView::LookupBreakpointCB(Widget, XtPointer client_data, XtPointer)
     switch (bp->type())
     {
     case BREAKPOINT:
-    case TRACEPOINT:
-    case ACTIONPOINT:
 	lookup("#" + itostring(breakpoint_nrs[0]));
 	break;
 
@@ -6588,8 +6391,6 @@ void SourceView::PrintWatchpointCB(Widget w, XtPointer client_data, XtPointer)
     switch (bp->type())
     {
     case BREAKPOINT:
-    case TRACEPOINT:
-    case ACTIONPOINT:
 	// How should we print a breakpoint?  (FIXME)
 	break;
 
@@ -8587,9 +8388,6 @@ void SourceView::update_glyphs_now()
 		 bp != 0;
 		 bp = bp_map.next(ref))
 	    {
-		if (bp->type() != BREAKPOINT)
-		    continue;
-
 		Widget& bp_glyph = k ? bp->code_glyph() : bp->source_glyph();
 		Widget text_w    = k ? code_text_w      : source_text_w;
 		bp_glyph = 0;
@@ -8609,6 +8407,9 @@ void SourceView::update_glyphs_now()
 		else
 		{
 		    // Find code position
+		    if (bp->type() != BREAKPOINT)
+			continue;
+
 		    pos = find_pc(bp->address());
 		}
 
@@ -8775,7 +8576,17 @@ MString SourceView::help_on_bp(int bp_nr, bool detailed)
     if (bp == 0)
 	return MString(0, true);
 
-    MString info = rm(bp->title() + " ") + tt(itostring(bp->number()));
+    MString info;
+    switch (bp->type())
+    {
+    case BREAKPOINT:
+	info = rm("Breakpoint ");
+	break;
+    case WATCHPOINT:
+	info = rm("Watchpoint ");
+	break;
+    }
+    info += tt(itostring(bp->number()));
 
     if (detailed)
     {
@@ -8795,11 +8606,9 @@ MString SourceView::help_on_bp(int bp_nr, bool detailed)
 	{
 	case BPKEEP:
 	    break;
-
 	case BPDEL:
 	    info += rm("; delete when hit");
 	    break;
-
 	case BPDIS:
 	    info += rm("; disable when hit");
 	    break;

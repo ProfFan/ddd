@@ -1,7 +1,7 @@
 // $Id$
 // Filter position information from GDB output.
 
-// Copyright (C) 1995-1999 Technische Universitaet Braunschweig, Germany.
+// Copyright (C) 1995-1998 Technische Universitaet Braunschweig, Germany.
 // Written by Dorothea Luetkehaus <luetke@ips.cs.tu-bs.de>
 // and Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
@@ -48,6 +48,7 @@ char PosBuffer_rcsid[] =
 #include "SourceView.h"
 #include "regexps.h"
 #include "index.h"
+#include "cmdtty.h"
 
 #if RUNTIME_REGEX
 // A regex for C addresses ("0xdead") and Modula-2 addresses ("0BEEFH");
@@ -168,6 +169,11 @@ void PosBuffer::filter (string& answer)
 
 	if (has_prefix(answer, "The current source language is "))
 	    gdb->program_language(answer);
+
+	if (terminated)
+	    annotate("exited");
+	if (signaled)
+	    annotate("signalled");
     }
     break;
 
@@ -367,6 +373,7 @@ void PosBuffer::filter_gdb(string& answer)
 	int pc_index = index(answer, rxstopped_addr, "Breakpoint");
 	if (pc_index >= 0)
 	{
+	    annotate("stopped");
 	    pc_index = answer.index(',');
 	    fetch_address(answer, pc_index, pc_buffer);
 	    fetch_in_function(answer, pc_index, func_buffer);
@@ -717,21 +724,7 @@ void PosBuffer::filter_dbx(string& answer)
 		func = func.before(" at ");
 	    func_buffer = func;
 	}
-
-	if (func_buffer != "")
-	{
-	    // With DEC's `ladebug', the function name is fully qualified,
-	    // as in `stopped at [void tree_test(void):277 0x120003f44]'
-	    // We use only the base name (`tree_test' in this case).
-
-	    // (We could avoid this if `ladebug' offered a way to look
-	    // up fully qualified names.  Does it? - AZ)
-	    if (func_buffer.contains('('))
-		func_buffer = func_buffer.before('(');
-	    while (func_buffer.contains(' '))
-		func_buffer = func_buffer.after(' ');
-	}
-
+		
 	if (line == "")
 	{
 	    line = answer.after("at line ", stopped_index);

@@ -257,8 +257,7 @@ DebuggerType guess_debugger_type(int argc, char *argv[], bool& sure)
     // 2. Check for executable binary as given.
 
     static bool have_gdb = (fallback == GDB || have_cmd("gdb"));
-    static bool have_dbx = 
-	(fallback == DBX || have_cmd("dbx") || have_cmd("ladebug"));
+    static bool have_dbx = (fallback == DBX || have_cmd("dbx"));
     static bool have_xdb = (fallback == XDB || have_cmd("xdb"));
 
     for (i = 1; i < argc; i++)
@@ -420,7 +419,6 @@ static struct table {
 {
     { GDB,  "gdb"  },
     { DBX,  "dbx"  },
-    { DBX,  "ladebug" },
     { XDB,  "xdb"  },
     { JDB,  "jdb"  },
     { PYDB, "pydb" },
@@ -445,12 +443,7 @@ bool get_debugger_type(const string& debugger_name, DebuggerType& type)
 
 char *default_debugger(DebuggerType type)
 {
-    int i;
-    for (i = 0; i < int(XtNumber(debuggers)); i++)
-	if (type == debuggers[i].type && have_cmd(debuggers[i].cmd))
-	    return debuggers[i].cmd;
-
-    for (i = 0; i < int(XtNumber(debuggers)); i++)
+    for (int i = 0; i < int(XtNumber(debuggers)); i++)
 	if (type == debuggers[i].type)
 	    return debuggers[i].cmd;
 

@@ -68,12 +68,6 @@ extern "C" FILE *popen(const char *command, const char *mode);
 extern "C" int pclose(FILE *stream);
 #endif
 
-#if WITH_READLINE
-extern "C" {
-#include "readline/readline.h"
-}
-#endif
-
 //-----------------------------------------------------------------------------
 // Show invocation
 //-----------------------------------------------------------------------------
@@ -380,10 +374,10 @@ static void show_configuration(ostream& os, bool version_only)
     // Optional stuff
     s = "@(#)Includes " DDD_NAME " core"
 #if WITH_BUILTIN_MANUAL
-	", Manual"
+	", manual"
 #endif
 #if WITH_BUILTIN_APP_DEFAULTS
-	", App-defaults"
+	", app-defaults"
 #endif
 #ifdef XpmFormat
 	", XPM " stringize(XpmFormat) "." stringize(XpmVersion) 
@@ -394,11 +388,6 @@ static void show_configuration(ostream& os, bool version_only)
 #endif
 	"\n";
     s.gsub(sccs, string(""));
-
-#if WITH_READLINE
-    s = s.through("core") + ", Readline " + rl_library_version + 
-	s.after("core");
-#endif
     os << s;
 
     string cinfo = config_info;
