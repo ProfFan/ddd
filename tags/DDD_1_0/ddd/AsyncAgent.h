@@ -1,0 +1,221 @@
+// $Id$
+// Asynchron Agent Interface
+
+// Copyright (C) 1993 Technische Universitaet Braunschweig, Germany.
+// Written by Andreas Zeller (zeller@ips.cs.tu-bs.de).
+// 
+// This file is part of the NORA Library.
+// 
+// The NORA Library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Library General Public
+// License as published by the Free Software Foundation; either
+// version 2 of the License, or (at your option) any later version.
+// 
+// The NORA Library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU Library General Public License for more details.
+// 
+// You should have received a copy of the GNU Library General Public
+// License along with the NORA Library -- see the file COPYING.LIB.
+// If not, write to the Free Software Foundation, Inc.,
+// 675 Mass Ave, Cambridge, MA 02139, USA.
+// 
+// NORA is an experimental inference-based software development
+// environment. Contact nora@ips.cs.tu-bs.de for details.
+
+#ifndef _Nora_AsyncAgent_h
+#define _Nora_AsyncAgent_h
+
+#ifdef __GNUG__
+#pragma interface
+#endif
+
+
+/*
+    AsyncAgent(app_context, p)
+    opens a three-way communication channel to the agent p (see Agent).
+
+    In order to cooperate with other event-driven libraries (especially X),
+    communication is handled asynchronously: every time that input data
+    (from the agent's stdout) or error data (from the agent's stderr)
+    is available, an input handler is called passing the agent as parameter.
+
+    The outputHandler is called whenever the agent is ready to read data
+    from its stdin. Its use is discouraged, since on some operating systems
+    the outputHandler is called even when the agent is not ready yet.
+
+    Upon terminate(), the agent is killed asynchronously, i.e. terminate()
+    does not wait for the agent to die.
+
+    Handlers are declared with addHandler().
+
+    Asynchronus communication is implemented using XtAppAddInput(3).
+*/
+
+
+#include "assert.h"
+#include <X11/Intrinsic.h>
+#include "Agent.h"
+
+class AsyncAgent;
+
+
+typedef void (*AsyncAgentHandler)(AsyncAgent *agent);
+
+struct AsyncAgentWorkProcInfo {
+    DECLARE_TYPE_INFO
+
+    AsyncAgent *agent;
+    unsigned type;
+    void *call_data;
+
+    AsyncAgentWorkProcInfo(AsyncAgent *a, unsigned t, void *c):
+	agent(a), type(t), call_data(c)
+    {}
+};
+
+struct AsyncAgentWorkProc {
+    DECLARE_TYPE_INFO
+
+    XtWorkProcId proc_id; 	        // id of running background proc
+    AsyncAgentWorkProcInfo *info;	// info
+    AsyncAgentWorkProc *next;		// next one
+
+    // Constructor
+    AsyncAgentWorkProc(XtWorkProcId i, AsyncAgentWorkProcInfo *inf,
+		       AsyncAgentWorkProc *n):
+	proc_id(i), info(inf), next(n)
+    {}
+};
+
+class AsyncAgent: public Agent {
+public:
+    DECLARE_TYPE_INFO
+
+    const unsigned NTypes = Agent::NTypes; // number of events
+
+protected:
+    // Handlers
+    const unsigned OutputReady     = 0;	// agent is ready for data
+    const unsigned InputReady      = 1;	// data from agent's stdout is ready
+    const unsigned ErrorReady      = 2;	// data from agent's stdin is ready
+    const unsigned OutputException = 3;	// I/O error on output
+    const unsigned InputException  = 4;	// I/O error on input
+    const unsigned ErrorException  = 5;	// I/O error on error
+
+private:
+    const unsigned NHandlers   = 6;     // number of handler types
+
+    XtAppContext _appContext;		// the application context
+
+    AsyncAgentHandler _handlers[NHandlers]; // handlers
+    XtInputId _ids[NHandlers];		// their ids
+
+    AsyncAgentWorkProc *workProcs;	// working procedures
+
+    // dispatch event
+    void dispatch(int *fid, XtInputId *id);
+
+    // used in childStatusChange()
+    int new_status;
+
+    void initHandlers();
+    void addDeathOfChildHandler();
+
+    // delete remaining work procedure(s)
+    void deleteWorkProc(AsyncAgentWorkProcInfo *info, bool remove = true);
+    void deleteAllWorkProcs();
+
+    // X Event Handlers
+    static void somethingHappened(XtPointer client_data,
+				  int *fid, XtInputId *id);
+    static void _childStatusChange(XtPointer client_data, XtIntervalId *iid);
+    static void childStatusChange(Agent *agent, void *client_data,
+				  void *call_data);
+    static Boolean callTheHandlers(XtPointer client_data);
+    static void callTheHandlersIfIdle(XtPointer client_data, XtIntervalId *id);
+    
+
+protected:
+    // set handler
+    AsyncAgentHandler setHandler(unsigned type, AsyncAgentHandler handler);
+
+    // resources
+    XtInputId id(unsigned type)
+    {
+	assert(type < NHandlers);
+	return _ids[type]; 
+    }
+
+    AsyncAgentHandler handler(unsigned type)
+    {
+	assert(type < NHandlers);
+	return _handlers[type];
+    }
+
+    virtual void waitToTerminate();
+
+    // Delayed event handling
+    virtual void callHandlersWhenIdle(int type, void *call_data = 0);
+    virtual bool isIdle() { return true; }
+
+    // Hook for channel closing
+    virtual void closeChannel(FILE *fp);
+
+private:
+    // remove input
+    void removeInput(unsigned type)
+    {
+	if (id(type))
+	{
+	    XtRemoveInput(id(type));
+            _ids[type] = 0;
+        }
+    }
+
+public:
+    // Constructors
+    AsyncAgent(XtAppContext app_context, char *pth, unsigned nTypes = NTypes):
+	Agent(pth, nTypes), _appContext(app_context), workProcs(0)
+    {
+	initHandlers();
+	addDeathOfChildHandler();
+    }
+
+    AsyncAgent(XtAppContext app_context, FILE *in = stdin, FILE *out = stdout,
+	FILE *err = 0, unsigned nTypes = NTypes):
+	Agent(in, out, err, nTypes), _appContext(app_context), workProcs(0)
+    {
+	initHandlers();
+    }
+
+    AsyncAgent(XtAppContext app_context, bool dummy,
+	unsigned nTypes = NTypes):
+	Agent(dummy, nTypes), _appContext(app_context), workProcs(0)
+    {
+	initHandlers();
+    }
+
+    // Destructor
+    ~AsyncAgent()
+    {
+	// make sure the work procedure won't be called
+	deleteAllWorkProcs();
+    }
+
+    // Duplicator
+    AsyncAgent(const AsyncAgent& c):
+	Agent(c), _appContext(c._appContext)
+    {
+	initHandlers();
+    }
+
+    // These need special management:
+    virtual void abort();
+
+    // resources
+    XtAppContext appContext()  { return _appContext; }
+};
+
+#endif
