@@ -1,4 +1,3 @@
-# $Id$
 """Support functions for pydb, the Python debugger that works with ddd"""
 
 import string
