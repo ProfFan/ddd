@@ -2,7 +2,7 @@ dnl $Id$
 dnl Process this file with autoconf to produce a configure script.
 dnl
 dnl Copyright (C) 1996-1998 Technische Universitaet Braunschweig, Germany.
-dnl Written by Andreas Zeller <zeller@gnu.org>.
+dnl Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 dnl 
 dnl This file is part of DDD.
 dnl 
@@ -23,8 +23,8 @@ dnl 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 dnl 
 dnl DDD is the data display debugger.
 dnl For details, see the DDD World-Wide-Web page, 
-dnl `http://www.gnu.org/software/ddd/',
-dnl or send a mail to the DDD developers <ddd@gnu.org>.
+dnl `http://www.cs.tu-bs.de/softech/ddd/',
+dnl or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 dnl
 dnl
 dnl
@@ -63,7 +63,6 @@ dnl
 dnl Not much to do here.  Configure the sub-directories.
 dnl
 dnl Use the C++ compiler for all checks.
-ICE_PROG_CC
 ICE_PROG_CXX
 AC_LANG_CPLUSPLUS
 dnl
@@ -78,13 +77,9 @@ dnl there is no need to build them.
 ddd_have_termcap=false
 ddd_have_libiberty=false
 ddd_have_rx=false
-ddd_have_readline=false
 dnl
 dnl By default, DDD needs no RX library.
 ddd_have_rx=true
-dnl
-dnl Check for -lreadline
-AC_CHECK_LIB(readline, rl_callback_read_char, ddd_have_readline=true)
 dnl
 dnl Check for -liberty.
 AC_CHECK_LIB(iberty, xstrerror, ddd_have_libiberty=true)
@@ -108,7 +103,6 @@ ddd_subdirs="ddd"
 test "$ddd_have_termcap"   != true && ddd_subdirs="termcap $ddd_subdirs"
 test "$ddd_have_libiberty" != true && ddd_subdirs="libiberty $ddd_subdirs"
 test "$ddd_have_rx"        != true && ddd_subdirs="librx $ddd_subdirs"
-test "$ddd_have_readline"  != true && ddd_subdirs="readline $ddd_subdirs"
 AC_MSG_RESULT($ddd_subdirs)
 AC_CONFIG_SUBDIRS($ddd_subdirs)
 dnl

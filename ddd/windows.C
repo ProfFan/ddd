@@ -2,7 +2,7 @@
 // DDD window management
 
 // Copyright (C) 1996-1998 Technische Universitaet Braunschweig, Germany.
-// Written by Andreas Zeller <zeller@gnu.org>.
+// Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -23,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 char windows_rcsid[] = 
     "$Id$";
@@ -816,8 +816,6 @@ int running_shells()
 	shells++;
     if (!popped_down(data_disp_shell))
 	shells++;
-    if (app_data.tty_mode)
-	shells++;
 
     return shells;
 }
@@ -835,20 +833,7 @@ void DDDCloseCB(Widget w, XtPointer client_data, XtPointer call_data)
     Widget shell = findTopLevelShellParent(w);
 
     if (shell == command_shell)
-    {
-	if (data_disp_shell == 0)
-	{
-	    gdbCloseDataWindowCB(w, client_data, call_data);
-	}
-
-	if (source_view_shell == 0)
-	{
-	    gdbCloseCodeWindowCB(w, client_data, call_data);
-	    gdbCloseSourceWindowCB(w, client_data, call_data);
-	}
-
 	gdbCloseCommandWindowCB(w, client_data, call_data);
-    }
     else if (shell == data_disp_shell)
 	gdbCloseDataWindowCB(w, client_data, call_data);
     else if (shell == source_view_shell)
@@ -866,8 +851,7 @@ void DDDCloseCB(Widget w, XtPointer client_data, XtPointer call_data)
 // Debugger console
 void gdbCloseCommandWindowCB(Widget w, XtPointer, XtPointer)
 {
-    if (!app_data.tty_mode && 
-	!have_data_window() && !have_source_window() && !have_code_window())
+    if (!have_data_window() && !have_source_window() && !have_code_window())
     {
 	DDDExitCB(w, XtPointer(EXIT_SUCCESS), 0);
 	return;
@@ -908,24 +892,14 @@ bool have_command_window()
 void gdbCloseSourceWindowCB(Widget w, XtPointer client_data, 
 			    XtPointer call_data)
 {
-    if (!app_data.tty_mode && 
-	!have_command_window() && !have_data_window() && !have_code_window())
+    if (!have_command_window() && !have_data_window() && !have_code_window())
     {
 	DDDExitCB(w, XtPointer(EXIT_SUCCESS), 0);
 	return;
     }
 
     // Popdown shell
-    if (source_view_shell)
-    {
-	popdown_shell(source_view_shell);
-    }
-    else if (!have_command_window() && 
-	     !have_data_window() && 
-	     !have_code_window())
-    {
-	popdown_shell(command_shell);
-    }
+    popdown_shell(source_view_shell);
 
     // Unmanage source
     unmanage_paned_child(source_view->source_form());
@@ -944,8 +918,7 @@ void gdbCloseSourceWindowCB(Widget w, XtPointer client_data,
 void gdbCloseCodeWindowCB(Widget w, XtPointer client_data, 
 			    XtPointer call_data)
 {
-    if (!app_data.tty_mode && 
-	!have_command_window() && !have_data_window() && !have_source_window())
+    if (!have_command_window() && !have_data_window() && !have_source_window())
     {
 	DDDExitCB(w, XtPointer(EXIT_SUCCESS), 0);
 	return;
@@ -971,10 +944,7 @@ void gdbOpenSourceWindowCB(Widget w, XtPointer client_data,
     Widget arg_cmd_w = XtParent(source_arg->top());
     manage_paned_child(arg_cmd_w);
 
-    if (source_view_shell)
-	popup_shell(source_view_shell);
-    else
-	popup_shell(command_shell);
+    popup_shell(source_view_shell);
 
     if (!app_data.command_toolbar)
 	gdbOpenToolWindowCB(w, client_data, call_data);
@@ -991,10 +961,7 @@ void gdbOpenCodeWindowCB(Widget w, XtPointer client_data,
     Widget arg_cmd_w = XtParent(source_arg->top());
     manage_paned_child(arg_cmd_w);
 
-    if (source_view_shell)
-	popup_shell(source_view_shell);
-    else
-	popup_shell(command_shell);
+    popup_shell(source_view_shell);
 
     if (!app_data.command_toolbar)
 	gdbOpenToolWindowCB(w, client_data, call_data);
@@ -1018,23 +985,13 @@ bool have_code_window()
 // Data window
 void gdbCloseDataWindowCB(Widget w, XtPointer, XtPointer)
 {
-    if (!app_data.tty_mode && 
-	!have_source_window() && !have_command_window() && !have_code_window())
+    if (!have_source_window() && !have_command_window() && !have_code_window())
     {
 	DDDExitCB(w, XtPointer(EXIT_SUCCESS), 0);
 	return;
     }
 
-    if (data_disp_shell)
-    {
-	popdown_shell(data_disp_shell);
-    }
-    else if (!have_source_window() && 
-	     !have_command_window() && 
-	     !have_code_window())
-    {
-	popdown_shell(command_shell);
-    }
+    popdown_shell(data_disp_shell);
 
     Widget arg_cmd_w = XtParent(source_arg->top());
     if (data_disp->graph_cmd_w == arg_cmd_w)
@@ -1058,10 +1015,7 @@ void gdbOpenDataWindowCB(Widget, XtPointer, XtPointer)
     manage_paned_child(data_disp->graph_cmd_w);
     manage_paned_child(data_disp->graph_form());
 
-    if (data_disp_shell)
-	popup_shell(data_disp_shell);
-    else
-	popup_shell(command_shell);
+    popup_shell(data_disp_shell);
 
     app_data.data_window = true;
 

@@ -2,7 +2,7 @@
 // Interactive Help Callbacks
 
 // Copyright (C) 1998 Technische Universitaet Braunschweig, Germany.
-// Written by Andreas Zeller <zeller@gnu.org>.
+// Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -23,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 char HelpCB_rcsid[] =
     "$Id$";
@@ -676,11 +676,7 @@ static void FindCB(Widget w, XtPointer client_data, XtPointer call_data,
     }
 
     if (next_occurrence < 0)
-    {
-	// FIXME: This should be in some status line.  Unfortunately,
-	// we don't have any...
 	post_warning(quote(key) + " not found.", "manual_find_error", w);
-    }
     else
     {
 	// LessTif 0.79 sometimes returns NULL in cbs->event.  Handle this.
@@ -2405,8 +2401,8 @@ static void HandleTipEvent(Widget w,
 // (Un)install toolbar tips for W
 static void InstallButtonTipEvents(Widget w, bool install)
 {
-    // Install handler only if either `tipString' or
-    // `documentationString' resource is specified
+    // If neither `tipString' nor `documentationString' resource is
+    // specified, don't install handler
     tip_resource_values tip_values;
     XtGetApplicationResources(w, &tip_values, 
 			      tip_subresources, XtNumber(tip_subresources), 
@@ -2415,26 +2411,23 @@ static void InstallButtonTipEvents(Widget w, bool install)
     XtGetApplicationResources(w, &doc_values, 
 			      doc_subresources, XtNumber(doc_subresources), 
 			      NULL, 0);
-    if (tip_values.tipString != 0 || doc_values.documentationString != 0)
+    if (tip_values.tipString == 0 && doc_values.documentationString == 0)
+	return;
+
+    EventMask event_mask = 
+	EnterWindowMask | LeaveWindowMask | ButtonPress | ButtonRelease 
+	| KeyPress | KeyRelease;
+    if (install)
     {
-	EventMask event_mask = 
-	    EnterWindowMask | LeaveWindowMask | ButtonPress | ButtonRelease 
-	    | KeyPress | KeyRelease;
-	if (install)
-	{
-	    XtAddEventHandler(w, event_mask, False, 
-			      HandleTipEvent, XtPointer(0));
+	XtAddEventHandler(w, event_mask, False, 
+			  HandleTipEvent, XtPointer(0));
 
-	}
-	else
-	{
-	    XtRemoveEventHandler(w, event_mask, False, 
-				 HandleTipEvent, XtPointer(0));
-	}
     }
-
-    XmStringFree(tip_values.tipString);
-    XmStringFree(doc_values.documentationString);
+    else
+    {
+	XtRemoveEventHandler(w, event_mask, False, 
+			     HandleTipEvent, XtPointer(0));
+    }
 }
 
 

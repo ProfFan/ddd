@@ -3,7 +3,7 @@
 # make new header file
 
 # Copyright (C) 1996 Technische Universitaet Braunschweig, Germany.
-# Written by Andreas Zeller <zeller@gnu.org>.
+# Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 # 
 # This file is part of ICE.
 # 
@@ -69,6 +69,6 @@ do
 	) > $file.h
 	$path/apply-license -f $user $file.h > /dev/null
 	rm $file.h.orig
- 	echo $file.h
+ 	${VISUAL:-vi} $file.h
     fi
 done

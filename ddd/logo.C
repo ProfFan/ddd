@@ -2,7 +2,7 @@
 // DDD logos and logo functions
 
 // Copyright (C) 1996-1998 Technische Universitaet Braunschweig, Germany.
-// Written by Andreas Zeller <zeller@gnu.org>.
+// Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -23,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 char logo_rcsid[] = 
     "$Id$";
@@ -911,10 +911,9 @@ void set_label(Widget w, const MString& new_label, char *image)
 
     assert(XtIsSubclass(w, xmLabelWidgetClass));
 
-    XmString old_label = 0;
+    XmString old_label;
     XtVaGetValues(w, XmNlabelString, &old_label, NULL);
-    if (old_label == 0 ||
-	XmStringCompare(new_label.xmstring(), old_label) == 0)
+    if (XmStringCompare(new_label.xmstring(), old_label) == 0)
     {
 	Arg args[10];
 	Cardinal arg = 0;

@@ -3,7 +3,7 @@
 
 // Copyright (C) 1995-1998 Technische Universitaet Braunschweig, Germany.
 // Written by Dorothea Luetkehaus <luetke@ips.cs.tu-bs.de>
-// and Andreas Zeller <zeller@gnu.org>
+// and Andreas Zeller <zeller@ips.cs.tu-bs.de>
 // 
 // This file is part of DDD.
 // 
@@ -24,8 +24,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 char DispBox_rcsid[] =
     "$Id$";
@@ -389,7 +389,7 @@ Box *DispBox::_create_value_box(const DispValue *dv, const DispValue *parent)
 		    // Two-dimensional array
 		    ListBox *table = new ListBox;
 
-		    if (dv->orientation() == Vertical)
+		    if (dv->vertical_aligned())
 		    {
 			// Sub-arrays are aligned vertically;
 			// each sub-array is laid out horizontally
@@ -453,7 +453,7 @@ Box *DispBox::_create_value_box(const DispValue *dv, const DispValue *parent)
 		    for (int i = 0; i < count; i++)
 			args += create_value_box(dv->child(i), dv);
 
-		    if (dv->orientation() == Vertical)
+		    if (dv->vertical_aligned())
 			vbox = eval("vertical_array", args);
 		    else
 			vbox = eval("horizontal_array", args);
@@ -495,52 +495,36 @@ Box *DispBox::_create_value_box(const DispValue *dv, const DispValue *parent)
 	String value           = (dv->type() == List ? 
 				  (String)"list_value" :
 				  (String)"struct_value");
-	String horizontal      = (dv->type() == List ? 
-				  (String)"horizontal_unnamed_list" :
-				  (String)"horizontal_unnamed_struct");
-	String vertical        = (dv->type() == List ? 
-				  (String)"vertical_unnamed_list" :
-				  (String)"vertical_unnamed_struct");
-
-	int count = dv->nchildren();
 
 	if (dv->collapsed())
 	    vbox = eval(collapsed_value);
-	else if (count == 0)
-	    vbox = eval(empty_value);
-	else if (!dv->member_names())
-	{
-	    // Create object with unnamed members
-	    VSLArgList args;
-	    for (int i = 0; i < count; i++)
-		args += create_value_box(dv->child(i), dv);
-
-	    if (dv->orientation() == Vertical)
-		vbox = eval(vertical, args);
-	    else
-		vbox = eval(horizontal, args);
-	}
 	else
 	{
-	    // Determine maximum member name width
-	    int max_member_name_width = 0;
-	    int i;
-	    for (i = 0; i < count; i++)
+	    int count = dv->nchildren();
+	    if (count == 0)
+		vbox = eval(empty_value);
+	    else
 	    {
-		string child_member_name = dv->child(i)->name();
-		Box *box = eval(member_name, child_member_name);
-		max_member_name_width = 
-		    max(max_member_name_width, box->size(X));
-		box->unlink();
+		// Determine maximum member name width
+		int max_member_name_width = 0;
+		int i;
+		for (i = 0; i < count; i++)
+		{
+		    string child_member_name = dv->child(i)->name();
+		    Box *box = eval(member_name, child_member_name);
+		    max_member_name_width = 
+			max(max_member_name_width, box->size(X));
+		    box->unlink();
+		}
+
+		// Create children
+		VSLArgList args;
+		for (i = 0; i < count; i++)
+		    args += create_value_box(dv->child(i), dv,
+					     max_member_name_width);
+
+		vbox = eval(value, args);
 	    }
-
-	    // Create children
-	    VSLArgList args;
-	    for (i = 0; i < count; i++)
-		args += create_value_box(dv->child(i), dv,
-					 max_member_name_width);
-
-	    vbox = eval(value, args);
 	}
 	break;
     }
@@ -613,20 +597,14 @@ Box *DispBox::create_value_box (const DispValue *dv,
 	switch (parent->type())
 	{
 	case List:
-	    if (parent->member_names())
-		vbox = eval("list_member", dv->name(), " = ", 
-			    vbox, member_name_width);
-	    else
-		vbox = eval("list_member", vbox);
+	    vbox = eval("list_member", dv->name(), " = ", 
+			vbox, member_name_width);
 	    break;
 
 	case Struct:
-	    if (parent->member_names())
-		vbox = eval("struct_member", 
-			    dv->name(), gdb->member_separator(), 
-			    vbox, member_name_width);
-	    else
-		vbox = eval("struct_member", vbox);
+	    vbox = eval("struct_member", 
+			dv->name(), gdb->member_separator(), 
+			vbox, member_name_width);
 	    break;
 
 	case Sequence:

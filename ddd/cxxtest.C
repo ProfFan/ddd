@@ -23,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 //--------------------------------------------------------------------------
 // This program defines some data structures and values that may be
@@ -34,10 +34,7 @@
 char cxxtest_rcsid[] =
     "$Id$";
 
-#if HAVE_CONFIG_H
 #include "config.h"
-#endif
-
 #include "bool.h"
 
 #include <iostream.h>
@@ -335,7 +332,6 @@ void reference_test(Date& date, Date*& date_ptr)
 void string_test()
 {
     char data[]="one plus two = three";	// Display this
-    (void) data;		// Use it
 }
 
 //--------------------------------------------------------------------------
@@ -385,7 +381,7 @@ void array_test()
 }
 
 //--------------------------------------------------------------------------
-#define numbers(x) (int)(sizeof((x)) / sizeof((x)[0]))
+#define numbers(x) (sizeof((x)) / sizeof((x)[0]))
 
 void shell_sort(int a[], int size)
 {
@@ -411,9 +407,8 @@ void plot_test()
 {
     static int ir[100];
 
-    int i;
-    for (i = 0; i < numbers(ir); i++)
-	ir[i] = rnd(100);
+    for (int k = 0; k < numbers(ir); k++)
+	ir[k] = rnd(100);
 
     shell_sort(ir, numbers(ir));
 
@@ -422,20 +417,11 @@ void plot_test()
     static double dr[10][100];
     double pi = 3.14159265358979323846;
 
-    int j;
-    for (i = 0; i < numbers(dr); i++)
-	for (j = 0; j < numbers(dr[0]); j++)
+    for (int i = 0; i < numbers(dr); i++)
+	for (int j = 0; j < numbers(dr[0]); j++)
 	    dr[i][j] = i * i * sin(j * 2 * pi / numbers(dr[0]) * 3);
 
     (void) dr;			// Plot this
-
-    int **array = new int *[10];
-    for (i = 0; i < 10; i++)
-    {
-	array[i] = new int[10];
-	for (j = 0; j < 10; j++)
-	    array[i][j] = i * j;
-    }
 }
 
 //--------------------------------------------------------------------------

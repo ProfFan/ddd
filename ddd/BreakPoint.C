@@ -3,7 +3,7 @@
 
 // Copyright (C) 1995-1998 Technische Universitaet Braunschweig, Germany.
 // Written by Dorothea Luetkehaus <luetke@ips.cs.tu-bs.de>
-// and Andreas Zeller <zeller@gnu.org>.
+// and Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -24,8 +24,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 char BreakPoint_rcsid[] =
     "$Id$";
@@ -55,7 +55,6 @@ char BreakPoint_rcsid[] =
 #include "GDBAgent.h"
 #include "regexps.h"
 #include "index.h"
-#include "value-read.h"
 
 #if RUNTIME_REGEX
 static regex rxnl_int ("\n[1-9]");
@@ -312,15 +311,11 @@ void BreakPoint::process_pydb(string& info_output)
 
 void BreakPoint::process_dbx(string& info_output)
 {
-    if (info_output.contains("PC==", 0) ||
-	info_output.contains("stop ", 0) ||
+    if (info_output.contains("stop ", 0) || 
 	info_output.contains("stopped ", 0))
     {
-	// Breakpoint
-
 	info_output = info_output.after(rxblanks_or_tabs);
 	strip_leading_space (info_output);
-
 	if (info_output.contains ("at ", 0))
 	{
 	    info_output = info_output.after(rxblanks_or_tabs);
@@ -359,43 +354,27 @@ void BreakPoint::process_dbx(string& info_output)
 	}
 	else if (info_output.contains ("in ", 0))
 	{
-	    string line = info_output.after("in ");
-	    if (line.contains('\n'))
-		line = line.before('\n');
+	    // `stop in FUNC'
+	    string func = info_output.after(rxblanks_or_tabs);
+	    if (func.contains('\n'))
+		func = func.before('\n');
+	    strip_space(func);
+	    myfunc = func;
 
-	    if (line.contains("\":"))
+	    myfile_name = "";
+	    myline_nr = 0;
+
+	    // Attempt to get exact position
+	    string pos = dbx_lookup(func);
+	    if (pos != "")
 	    {
-		// Ladebug output:
-		// `PC==x in TYPE FUNC(ARGS...) "FILE":LINE { COMMANDS }
+		string file_name = pos.before(":");
+		string line_s    = pos.after(":");
+		int new_line_nr  = get_positive_nr(line_s);
 
-		myfile_name = line.after("\"");
-		myfile_name = myfile_name.before("\"");
-		myline_nr   = get_positive_nr(line.after("\":"));
-		myfunc      = line.before("\"");
-		strip_space(myfunc);
-	    }
-	    else
-	    {
-		// DBX output:
-		// `stop in FUNC'
-		myfunc = line.before(rxblanks_or_tabs);
-		strip_space(myfunc);
-
-		myfile_name = "";
-		myline_nr = 0;
-
-		// Attempt to get exact position of FUNC
-		string pos = dbx_lookup(myfunc);
-		if (pos != "")
-		{
-		    string file_name = pos.before(":");
-		    string line_s    = pos.after(":");
-		    int new_line_nr  = get_positive_nr(line_s);
-
-		    myfile_name = file_name;
-		    if (new_line_nr != 0)
-			myline_nr = new_line_nr;
-		}
+		myfile_name = file_name;
+		if (new_line_nr != 0)
+		    myline_nr = new_line_nr;
 	    }
 	}
 	else
@@ -447,7 +426,6 @@ void BreakPoint::process_dbx(string& info_output)
 	    mycondition = cond;
 	}
     }
-
     info_output = info_output.after('\n');
 }
 
@@ -566,11 +544,8 @@ void BreakPoint::process_perl(string& info_output)
 	}
     }
 
-    static StringArray empty;
-    mycommands = empty;
     myline_nr = atoi(info_output);
     info_output = info_output.after('\n');
-    bool break_seen = false;
     while (info_output.contains("  ", 0))
     {
 	string info = info_output.before('\n');
@@ -585,42 +560,18 @@ void BreakPoint::process_perl(string& info_output)
 	    if (cond == "1")
 		cond = "";
 	    mycondition = cond;
-	    break_seen = true;
 	}
 	else if (info.contains("action: ", 0))
 	{
-	    string commands = info.after(':');
-	    strip_space(commands);
-
-	    if (commands.contains("d " + itostring(line_nr())))
-		mydispo = BPDEL; // Temporary breakpoint
-
-	    string command = "";
-	    while (commands != "")
-	    {
-		string token = read_token(commands);
-		if (token != ";")
-		    command += token;
-
-		if (token == ";" || commands == "")
-		{
-		    strip_space(command);
-		    if (command != "")
-		    {
-			mycommands += command;
-			command = "";
-		    }
-		}
-	    }
+	    string command = info.after(':');
+	    strip_space(command);
+	    mycommands += command;
 	}
 	else
 	{
 	    myinfos += info + '\n';
 	}
     }
-
-    if (!break_seen)
-	mytype = ACTIONPOINT;
 }
 
 static bool equal(const StringArray& s1, const StringArray& s2)
@@ -883,26 +834,6 @@ string BreakPoint::and_op()
     return " && ";
 }
 
-string BreakPoint::title() const
-{
-    switch (type())
-    {
-    case BREAKPOINT:
-	return "Breakpoint";
-
-    case TRACEPOINT:
-	return "Tracepoint";
-
-    case ACTIONPOINT:
-	return "Actionpoint";
-
-    case WATCHPOINT:
-	return "Watchpoint";
-    }
-
-    return "";			// Never reached
-}
-
 // True if COND is `false' or starts with `false and'
 bool BreakPoint::is_false(const string& cond)
 {
@@ -979,13 +910,6 @@ bool BreakPoint::get_state(ostream& os, int nr, bool as_dummy,
 	    os << gdb->watch_command(expr(), watch_mode()) << "\n";
 	    break;
 	}
-
-	case TRACEPOINT:
-	case ACTIONPOINT:
-	{
-	    // Not handled - FIXME
-	    break;
-	}
 	}
 
 	if (!as_dummy)
@@ -1041,13 +965,6 @@ bool BreakPoint::get_state(ostream& os, int nr, bool as_dummy,
 	case WATCHPOINT:
 	    os << "stop " << expr() << cond_suffix << '\n';
 	    break;
-
-	case TRACEPOINT:
-	case ACTIONPOINT:
-	{
-	    // Not handled - FIXME
-	    break;
-	}
 	}
 
 	if (!as_dummy)
@@ -1098,9 +1015,7 @@ bool BreakPoint::get_state(ostream& os, int nr, bool as_dummy,
 	    cond_suffix = " " + cond;
 
 	os << "f " << pos.before(':') << "\n";
-
-	if (type() == BREAKPOINT)
-	    os << "b " << pos.after(':')  << cond_suffix << "\n";
+	os << "b " << pos.after(':')  << cond_suffix << "\n";
 
 	if (commands().size() != 0)
 	{

@@ -23,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 #ifndef _DDD_DispValue_h
 #define _DDD_DispValue_h
@@ -43,14 +43,11 @@
 #include "DispValueT.h"
 #include "StringSA.h"
 #include "Box.h"
-#include <Xm/Xm.h>
 
 class Agent;
 class PlotAgent;
 
-typedef unsigned char DispValueOrientation;
-const unsigned char Vertical   = XmVERTICAL;
-const unsigned char Horizontal = XmHORIZONTAL;
+enum DispValueAlignment {Vertical, Horizontal};
 
 class DispValue {
     // General members
@@ -66,12 +63,11 @@ class DispValue {
     // Type-dependent members
     string _value;		// Value of basic types
     bool _dereferenced;		// True iff pointer is dereferenced
-    bool _member_names;	// True iff struct shows member names
     DispValueArray _children;	// Array or Struct members 
     int _index_base;		// First index
     bool _have_index_base;	// True if INDEX_BASE is valid
-    DispValueOrientation _orientation; // Array orientation
-    bool _has_plot_orientation;   // True if plotter set the orientation
+    DispValueAlignment _alignment; // Array alignment
+    bool _has_plot_alignment;   // True if plotter set the alignment
 
     // Plotting stuff
     PlotAgent *_plotter;	// Plotting agent
@@ -129,14 +125,6 @@ class DispValue {
 	}
 	_cached_box_change = 0;
     }
-
-private:
-    // If the names of all children have the form (PREFIX)(INDEX)(SUFFIX),
-    // return the common PREFIX and SUFFIX.
-    void get_index_surroundings(string& prefix, string& suffix) const;
-
-    // If the name has the form (PREFIX)(INDEX)(SUFFIX), return INDEX
-    string index(const string& prefix, const string& suffix) const;
 
 protected:
     int _links;			// #references (>= 1)
@@ -253,13 +241,13 @@ public:
     const string& name()       const { return print_name; }
     const string& addr()       const { return myaddr; }
     int repeats()              const { return myrepeats; }
-    bool has_plot_orientation()  const { return _has_plot_orientation; }
+    bool has_plot_alignment()  const { return _has_plot_alignment; }
 
     int& repeats()       { clear_cached_box(); return myrepeats; }
     string& full_name()  { clear_cached_box(); return myfull_name; }
     string& name()       { clear_cached_box(); return print_name; }
     bool& enabled()      { clear_cached_box(); return myenabled; }
-    bool& has_plot_orientation() { return _has_plot_orientation; }
+    bool& has_plot_alignment() { return _has_plot_alignment; }
 
     bool is_changed() const { return changed; }
     bool descendant_changed() const;
@@ -277,14 +265,10 @@ public:
 
     // Simple or Pointer
     const string& value() const { return _value; }
-
+    
     // Pointer
     bool dereferenced() const { return _dereferenced; }
     string dereferenced_name() const;
-
-    // Struct
-    bool member_names() const { return _member_names; }
-    void set_member_names(bool value);
 
     // Array, Struct, List, Sequence ...
     int nchildren() const { return _children.size(); }
@@ -309,8 +293,12 @@ public:
     // Type-specific modifiers
 
     // Array
-    void set_orientation(DispValueOrientation orientation);
-    DispValueOrientation orientation() const { return _orientation; }
+    void set_alignment(DispValueAlignment alignment);
+
+    bool vertical_aligned()   const { return _alignment == Vertical; }
+    bool horizontal_aligned() const { return _alignment == Horizontal; }
+    void align_vertical()     { set_alignment(Vertical); }
+    void align_horizontal()   { set_alignment(Horizontal); }
 
     // Pointer
     void dereference(bool set = true)

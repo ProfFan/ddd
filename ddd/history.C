@@ -2,7 +2,7 @@
 // DDD command history
 
 // Copyright (C) 1996-1998 Technische Universitaet Braunschweig, Germany.
-// Written by Andreas Zeller <zeller@gnu.org>.
+// Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -23,30 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
-
-// ------------------------------------------------------
-// Yesterday
-// (sung to Yesterday by the Beatles)
-// 
-// Yesterday, all my code still worked this way
-// Now it looks as though bugs are here to stay
-// Oh, I believe in yesterday.
-// 
-// Suddenly, it's not half as good as it used to be,
-// There's a release hanging over me.
-// Oh, failure came suddenly.
-// 
-// Why it had to break I don't know it wouldn't say.
-// I typed something wrong, now I long for yesterday.
-// 
-// Yesterday, coding was a kind of game to play.
-// Now I need a place to hide away.
-// Oh, I believe in yesterday.
-//
-// -- Ralf Hildebrandt <Ralf.Hildebrandt@gmx.de>
-// ------------------------------------------------------
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 char history_rcsid[] = 
     "$Id$";
@@ -100,17 +78,6 @@ char history_rcsid[] =
 #include <Xm/List.h>
 #include <Xm/SelectioB.h>
 
-#if WITH_READLINE
-// `history.h' has no complete declaration for `add_history',
-// so we install our own.
-#define add_history old_add_history
-extern "C" {
-#include "readline/history.h"
-}
-#undef add_history
-extern "C" void add_history(char *line);
-#endif
-
 #ifndef ARG_MAX
 #define ARG_MAX 4096
 #endif
@@ -149,17 +116,6 @@ static void update_combo_boxes();
 static void update_combo_boxes(const string& new_entry);
 
 
-#if WITH_READLINE
-// Initialize history
-struct HistoryInitializer {
-    HistoryInitializer()
-    {
-	using_history();
-    }
-};
-
-static HistoryInitializer history_initializer;
-#endif
 
 
 void set_gdb_history_file(const string& file)
@@ -258,10 +214,6 @@ void add_to_history(const string& line)
     add_to_arguments(line);
     update_arguments();
     update_combo_boxes(line);
-
-#if WITH_READLINE
-    add_history(line);
-#endif
 }
 
 // Load history from history file
@@ -278,10 +230,6 @@ void load_history(const string& file)
 
     static StringArray empty;
     gdb_history = empty;
-
-#if WITH_READLINE
-    clear_history();
-#endif
 
     assert(gdb_history.size() == 0);
 
@@ -335,10 +283,6 @@ void load_history(const string& file)
 	    {
 		gdb_history += line;
 		add_to_arguments(line);
-
-#if WITH_READLINE
-		add_history(line);
-#endif
 	    }
 
 	    first_command = false;
@@ -752,4 +696,3 @@ void tie_menu_to_recent_files(MMDesc *items)
     menus += (void *)items;
     update_recent_menu(items);
 }
-

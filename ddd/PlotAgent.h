@@ -2,7 +2,7 @@
 // Gnuplot interface
 
 // Copyright (C) 1998 Technische Universitaet Braunschweig, Germany.
-// Written by Andreas Zeller <zeller@gnu.org>.
+// Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -23,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 #ifndef _DDD_PlotAgent_h
 #define _DDD_PlotAgent_h
@@ -113,9 +113,7 @@ public:
     // Add plot point
     void add_point(const string& v, int dim);
     void add_point(int x, const string& v);
-    void add_point(double x, const string& v);
     void add_point(int x, int y, const string& v);
-    void add_point(double x, double y, const string& v);
 
     // Add a break
     void add_break();

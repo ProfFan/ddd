@@ -1,9 +1,9 @@
 // $Id$
 // GDB communication manager
 
-// Copyright (C) 1995-1999 Technische Universitaet Braunschweig, Germany.
+// Copyright (C) 1995-1998 Technische Universitaet Braunschweig, Germany.
 // Written by Dorothea Luetkehaus <luetke@ips.cs.tu-bs.de>
-// and Andreas Zeller <zeller@gnu.org>.
+// and Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -24,8 +24,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 char comm_manager_rcsid[] =
     "$Id$";
@@ -1269,8 +1269,7 @@ void send_gdb_command(string cmd, Widget origin,
     }
     else if (is_setting_cmd(cmd))
     {
-	(void) get_settings(gdb->type());
-
+	get_settings(gdb->type());
 	extra_data->refresh_setting     = true;
 	extra_data->set_command         = cmd;
 	extra_data->refresh_data        = true;
@@ -2117,9 +2116,6 @@ static void command_completed(void *data)
 
     if (cmd_data->user_callback != 0)
     {
-	// Filter out junk from GDB answer
-	filter_junk(cmd_data->user_answer);
-
 	// Invoke user-defined callback
 	cmd_data->user_callback(cmd_data->user_answer, cmd_data->user_data);
     }
@@ -2375,7 +2371,7 @@ bool is_known_command(const string& answer)
     if (ans.freq('\n') > 1)
     {
 	int last_nl = ans.index('\n', -1);
-	ans = ans.through('\n') + ans.from(last_nl + 1);
+	ans = ans.before('\n') + ans.from(last_nl + 1);
     }
 
     if (ans.contains("program is not active")) // DBX
@@ -2386,15 +2382,6 @@ bool is_known_command(const string& answer)
 
     if (ans.contains("invalid keyword"))      // DEC DBX
 	return false;
-
-    if (ans.contains("unable to parse input")) // Ladebug
-	return false;
-
-    if (ans.contains("isn\'t available"))     // Ladebug
-	return false;
-
-    if (ans.contains("there is no running program")) // Ladebug
-	return true;
 
     if (ans.contains("undefined command"))    // GDB
 	return false;
@@ -2602,8 +2589,6 @@ static void extra_completed (const StringArray& answers,
 			     void*  data)
 {
     int count = answers.size();
-    for (int i = 0; i < count; i++)
-	filter_junk(answers[i]);
 
     ExtraData* extra_data = (ExtraData *)data;
     int qu_count = 0;
@@ -2764,10 +2749,8 @@ static void extra_completed (const StringArray& answers,
 
 	file = answers[qu_count++];
 
-	// Simple sanity checks
+	// Simple sanity check
 	strip_trailing_space(file);
-	if (file.contains("file\n", 0))	// Ladebug echoes `file'
-	    file = file.after(rxwhite);
 	if (file.contains('\n'))
 	    file = file.before('\n');
 	if (file.contains(' '))

@@ -4,7 +4,7 @@ include(ifdef(`srcdir',srcdir()/colors.m4,colors.m4))dnl
 DDD_VSL_WARNING
 
 // Copyright (C) 1995-1998 Technische Universitaet Braunschweig, Germany.
-// Written by Andreas Zeller <zeller@gnu.org>.
+// Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -25,8 +25,8 @@ DDD_VSL_WARNING
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 // Includes
 #include <std.vsl>
@@ -153,10 +153,6 @@ collapsed_struct_value () ->
 empty_struct_value () ->
   struct_color(vcenter(rm("{}") & hfill()));
 
-// Unnamed struct
-horizontal_unnamed_struct (...) -> horizontal_array(...);
-vertical_unnamed_struct   (...) -> horizontal_array(...);
-
 // Struct member name
 struct_member_name (name) -> 
   struct_color(rm(name));
@@ -165,10 +161,6 @@ struct_member_name (name) ->
 struct_member (name, sep, value, name_width) -> 
   vcenter(rm(name) | hspace(name_width)) 
   & vcenter(rm(sep)) & rm(value);
-
-// Same, but with suppressed member name
-struct_member (value) -> 
-  rm(value);
 
 // List value
 list_value (...) -> 
@@ -182,10 +174,6 @@ collapsed_list_value () ->
 empty_list_value () -> 
   list_color(vcenter(rm("") & hfill()));
 
-// Unnamed list
-horizontal_unnamed_list (...) -> horizontal_array(...);
-vertical_unnamed_list  (...)  -> horizontal_array(...);
-
 // List member name
 list_member_name (name) -> 
   list_color(rm(name));
@@ -194,10 +182,6 @@ list_member_name (name) ->
 list_member (name, sep, value, name_width) -> 
   vcenter(rm(name) | hspace(name_width)) 
   & vcenter(rm(sep)) & rm(value) & hfill();
-
-// Same, but with suppressed member name
-list_member (value) -> 
-  rm(value);
 
 // Sequence
 sequence_value (...) -> 

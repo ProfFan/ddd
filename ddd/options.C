@@ -2,7 +2,7 @@
 // Save and edit DDD options
 
 // Copyright (C) 1996-1998 Technische Universitaet Braunschweig, Germany.
-// Written by Andreas Zeller <zeller@gnu.org>.
+// Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -23,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 char options_rcsid[] = 
     "$Id$";
@@ -36,6 +36,20 @@ char options_rcsid[] =
 #include "options.h"
 
 #include "config.h"
+
+#if HAVE_PTRACE
+extern "C" {
+#if HAVE_SYS_PTRACE_H
+#include <sys/ptrace.h>
+#endif
+#if !HAVE_PTRACE_DECL
+extern int ptrace(int request, int pid, int addr, int data);
+#endif
+#if HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
+}
+#endif
 
 #include "AppData.h"
 #include "DataDisp.h"
@@ -88,20 +102,6 @@ char options_rcsid[] =
 #endif
 
 #include <signal.h>
-
-#if HAVE_PTRACE
-extern "C" {
-#if HAVE_SYS_PTRACE_H
-#include <sys/ptrace.h>
-#endif
-#if !HAVE_PTRACE_DECL
-extern int ptrace(int request, int pid, int addr, int data);
-#endif
-#if HAVE_SYS_WAIT_H
-#include <sys/wait.h>
-#endif
-}
-#endif
 
 #if HAVE_LINK && !HAVE_LINK_DECL
 extern "C" int link (const char *oldname, const char *newname);
@@ -2008,29 +2008,6 @@ static string widget_value(Widget w, String name, bool check_default = false)
 			    check_default);
 }
 
-static string orientation_app_value(const string& name, unsigned char v,
-				    bool check_default = false)
-{
-    string value = "XmBAD_ORIENTATION";
-
-    switch (v)
-    {
-    case XmVERTICAL:
-	value = "XmVERTICAL";
-	break;
-
-    case XmHORIZONTAL:
-	value = "XmHORIZONTAL";
-	break;
-
-    case XmNO_ORIENTATION:
-	value = "XmNO_ORIENTATION";
-	break;
-    }
-
-    return app_value(name, value, check_default);
-}
-
 static string paned_widget_size(Widget w, bool height_only = false)
 {
     string s;
@@ -2378,9 +2355,8 @@ bool save_options(unsigned long flags)
     if (need_settings() || need_save_defines())
     {
 	string settings;
-
-	settings += get_settings(gdb->type(), flags);
-	settings += get_defines(gdb->type(), flags);
+	settings += get_settings(gdb->type());
+	settings += get_defines(gdb->type());
 
 	settings.gsub(app_data.auto_command_prefix, "@AUTO@");
 
@@ -2530,13 +2506,6 @@ bool save_options(unsigned long flags)
     os << bool_app_value(XtNdetectAliases,  app_data.detect_aliases)   << '\n';
     os << bool_app_value(XtNclusterDisplays,app_data.cluster_displays) << '\n';
     os << bool_app_value(XtNalign2dArrays,  app_data.align_2d_arrays)  << '\n';
-
-    os << orientation_app_value(XtNarrayOrientation, 
-				app_data.array_orientation) << '\n';
-    os << orientation_app_value(XtNstructOrientation, 
-				app_data.struct_orientation) << '\n';
-    os << bool_app_value(XtNshowMemberNames,
-			 app_data.show_member_names) << '\n';
 
     // Tips
     os << "\n! Tips.\n";

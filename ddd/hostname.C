@@ -2,7 +2,7 @@
 // Return `official' name of host
 
 // Copyright (C) 1995 Technische Universitaet Braunschweig, Germany.
-// Written by Andreas Zeller <zeller@gnu.org>.
+// Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -23,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 char hostname_rcsid[] = 
     "$Id$";
@@ -89,11 +89,11 @@ extern "C" {
 #define MAXHOSTNAMELEN 1024
 #endif
 
-// Return local host name
+// Return the host name
 char *hostname()
 {
     static char *name = 0;
-    if (name != 0)
+    if (name)
 	return name;
 
     char buffer[MAXHOSTNAMELEN];
@@ -126,11 +126,9 @@ char *hostname()
     }
 
     if (okay)
-	name = strcpy(new char[strlen(buffer) + 1], buffer);
+	return name = strcpy(new char[strlen(buffer) + 1], buffer);
     else
-	name = "unknown";
-
-    return name;
+	return name = "unknown";
 }
 
 // Return the number of '.' in STR

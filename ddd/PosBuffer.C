@@ -1,9 +1,9 @@
 // $Id$
 // Filter position information from GDB output.
 
-// Copyright (C) 1995-1999 Technische Universitaet Braunschweig, Germany.
+// Copyright (C) 1995-1998 Technische Universitaet Braunschweig, Germany.
 // Written by Dorothea Luetkehaus <luetke@ips.cs.tu-bs.de>
-// and Andreas Zeller <zeller@gnu.org>.
+// and Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -24,8 +24,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 char PosBuffer_rcsid[] =
     "$Id$";
@@ -569,7 +569,6 @@ void PosBuffer::filter_dbx(string& answer)
     // When reaching a breakpoint, DBX issues the breakpoint
     // number before the status line.  Check for this and
     // initialize defaults from breakpoint position.
-    strip_leading_space(answer);
     if (answer.contains('(', 0) || answer.contains('[', 0))
     {
 	// Get breakpoint position
@@ -646,36 +645,30 @@ void PosBuffer::filter_dbx(string& answer)
 	// "[new_tree:113 ,0x400858] \ttree->right = NULL;"
 		
 	line = answer.from(dbxpos_index);
-	if (line.contains("[#", 0))
-	{
-	    // This is a Ladebug breakpoint, no position info.
-	}
-	else
-	{
-	    // Note that the function name may contain "::" sequences.
-	    while (line.contains("::"))
-		line = line.after("::");
-	    line = line.after(":");
-	    line = line.through(rxint);
-	    if (line != "")
-	    {
-		if (answer.index('\n', dbxpos_index) >= 0)
-		{
-		    already_read = PosComplete;
 
-		    // Strip position info and line
-		    strip_leading_space(answer);
-		    if (answer.contains('[', 0))
-			answer = answer.after("\n");
-		}
-		else
-		{
-		    // Wait for `\n' such that we can delete the line
-		    answer_buffer = answer;
-		    answer = "";
-		    already_read = PosPart;
-		    return;
-		}
+	// Note that the function name may contain "::" sequences.
+	while (line.contains("::"))
+	    line = line.after("::");
+	line = line.after(":");
+	line = line.through(rxint);
+	if (line != "")
+	{
+	    if (answer.index('\n', dbxpos_index) >= 0)
+	    {
+		already_read = PosComplete;
+
+		// Strip position info and line
+		strip_leading_space(answer);
+		if (answer.contains('[', 0))
+		    answer = answer.after("\n");
+	    }
+	    else
+	    {
+		// Wait for `\n' such that we can delete the line
+		answer_buffer = answer;
+		answer = "";
+		already_read = PosPart;
+		return;
 	    }
 	}
     }
@@ -731,21 +724,7 @@ void PosBuffer::filter_dbx(string& answer)
 		func = func.before(" at ");
 	    func_buffer = func;
 	}
-
-	if (func_buffer != "")
-	{
-	    // With DEC's `ladebug', the function name is fully qualified,
-	    // as in `stopped at [void tree_test(void):277 0x120003f44]'
-	    // We use only the base name (`tree_test' in this case).
-
-	    // (We could avoid this if `ladebug' offered a way to look
-	    // up fully qualified names.  Does it? - AZ)
-	    if (func_buffer.contains('('))
-		func_buffer = func_buffer.before('(');
-	    while (func_buffer.contains(' '))
-		func_buffer = func_buffer.after(' ');
-	}
-
+		
 	if (line == "")
 	{
 	    line = answer.after("at line ", stopped_index);

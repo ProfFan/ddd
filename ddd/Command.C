@@ -2,7 +2,7 @@
 // DDD interface to GDB commands
 
 // Copyright (C) 1996-1997 Technische Universitaet Braunschweig, Germany.
-// Written by Andreas Zeller <zeller@gnu.org>.
+// Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -23,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 // Whenever I think of DDD, I'm reminded of that song by Trio that was 
 // featured in those Volkswagen commercials -- "Da Da Da".
@@ -82,38 +82,26 @@ static bool had_user_command = false;
 // Auto command management
 //-----------------------------------------------------------------------------
 
-// Return auto-command for CMD
-static string auto_command(const string& cmd)
-{
-    return gdb->echo_command(app_data.auto_command_prefix + cmd + "\n");
-}
-
-// Add auto-command prefix to CMD
-void add_auto_command_prefix(string& cmd)
-{
-    cmd = auto_command(cmd);
-}
-
-// Strip auto-command prefix from CMD
+// Strip auto-command prefix
 void strip_auto_command_prefix(string& cmd)
 {
-    // Neither of these ever changes, so make them static
-    static string dummy = "XYZZY";
-    static string echo = auto_command(dummy);
-    static string echo_prefix = echo.before(dummy);
-    static string echo_suffix = echo.after(dummy);
+    // Neither of these ever changes, so make it static
+    static string echo = gdb->echo_command(app_data.auto_command_prefix);
 
     int i;
-    while ((i = cmd.index(echo_prefix)) >= 0)
+    while ((i = cmd.index(echo)) >= 0)
     {
-	cmd.at(i, echo_prefix.length()) = "";
-	if (echo_suffix != "")
-	{
-	    int suffix = cmd.index(echo_suffix, i);
-	    if (suffix >= 0)
-		cmd.at(suffix, echo_suffix.length()) = "";
-	}
+	cmd.at(i, echo.length()) = "";
+	int nl = cmd.index("\\n", i);
+	if (nl >= 0)
+	    cmd.at(nl, 2) = "";
     }
+}
+
+// Add it
+void add_auto_command_prefix(string& cmd)
+{
+    cmd = gdb->echo_command(app_data.auto_command_prefix + cmd + "\n");
 }
 
 

@@ -1,5 +1,4 @@
 .gdbhist
-3.1
 ChangeLog
 ChangeLog-95
 ChangeLog-96
@@ -14,7 +13,6 @@ i586-pc-linux-gnu
 lesstif
 linux
 linux-lesstif
-linux-lesstif-current
 linux-motif
 sparc-sun-sunos4.1.4
 sun

@@ -1,9 +1,10 @@
 #! /bin/sh
 # $Id$
 # Create DDD release-of-the-day.  
+# If `-final' is given, make an official release.
 
-# Copyright (C) 1997-1999 Technische Universitaet Braunschweig, Germany.
-# Written by Andreas Zeller <zeller@gnu.org>.
+# Copyright (C) 1997-1998 Technische Universitaet Braunschweig, Germany.
+# Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 # 
 # This file is part of DDD.
 # 
@@ -18,23 +19,18 @@
 # See the GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public
-# License along with DDD -- see the file COPYING.
+# License along with ICE -- see the file COPYING.
 # If not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 # 
 # DDD is the data display debugger.
 # For details, see the DDD World-Wide-Web page, 
-# `http://www.gnu.org/software/ddd/',
-# or send a mail to the DDD developers <ddd@gnu.org>.
+# `http://www.cs.tu-bs.de/softech/ddd/',
+# or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 # This script checks out the current DDD development tree, as
 # stored in CVS, and creates a DDD release-of-the-day (`ROTD').
-
-# Usage: `make-current [-final] [-local] [CVS options]'
-# -final: make an official release (else: release-of-the-day).
-# -local: install in local dir (else: on FTP server if not final)
-# CVS options: given to CVS checkout (for checking out older versions).
-# To make a `fix' release, use `make-current -final -r DDD_X_Y_fixes'.
+# If `-final' is given, create an official release.
 
 # Check args
 final=false;
@@ -53,8 +49,8 @@ fi
 
 # Setup environment
 tmpdir=$HOME/tmp/ddd$$
-# CVSROOT=/usr/local/share/CVS; export CVSROOT
-# PATH=/usr/local/bin:/usr/local/gnubin:$PATH; export PATH
+CVSROOT=/usr/local/share/CVS; export CVSROOT
+PATH=/usr/local/bin:/usr/local/gnubin:$PATH; export PATH
 
 if $local; then
   target=`pwd`
@@ -64,8 +60,10 @@ fi
 
 # Check whether the ChangeLog file has changed (i.e. we need a new ROTD)
 install=$local
-test $CVSROOT/CVSROOT/ddd-log -nt $target/ChangeLog.tail && install=true
-test ! -f $target/ChangeLog.tail && install=true
+/usr/local/gnubin/test $CVSROOT/CVSROOT/ddd-log -nt $target/ChangeLog.tail \
+    && install=true
+/usr/local/gnubin/test ! -f $target/ChangeLog.tail \
+    && install=true
 
 $install || exit 0; # No installation required
 
@@ -85,11 +83,10 @@ date=$year-$month-$day
 
 if $final; then
   # This is a final release; use the expiration date from the file.
-  eval `cvs checkout "$@" -p ddd/ddd/configure.in 2> /dev/null | \
-   egrep '^(EXPIRES|VERSION|NICKNAME)='`
+  eval `co -p $CVSROOT/ddd/ddd/configure.in 2> /dev/null | \
+        egrep '^(EXPIRES|VERSION)='`
   expires=$EXPIRES
   date=$VERSION
-  nickname=$NICKNAME
 else
   # Let this release expire in 30-60 days.  It is unlikely we won't make
   # any changes until then.
@@ -108,7 +105,6 @@ else
     11) expires=$next_year-01-01;;
     12) expires=$next_year-02-01;;
   esac
-  nickname="daily"
 fi
 
 # We are working in `/tmp/ddd'.  In case of trouble, clean up.
@@ -133,8 +129,8 @@ mkdir ddd
 chgrp ddd ddd
 chmod g+s ddd
 
-# Get the DDD development tree out of CVS, expanding RCS keywords.
-cvs checkout -kkv -P "$@" ddd
+# Get the DDD development tree out of CVS.
+cvs checkout -P ddd
 cd ddd
 
 if $final; then
@@ -155,16 +151,14 @@ fi
 
 # Configure the package.
 ln -s $CVSROOT/CVSROOT/ddd-log ChangeLog
-ln -s $CVSROOT/CVSROOT/ddd-log-98 ChangeLog-98
 ln -s $CVSROOT/CVSROOT/ddd-log-97 ChangeLog-97
 ln -s $CVSROOT/CVSROOT/ddd-log-96 ChangeLog-96
 ln -s $CVSROOT/CVSROOT/ddd-log-95 ChangeLog-95
 (cd ddd && aclocal)
 autoconf -l ddd
 (cd ddd && autoconf)
-(cd readline && autoconf)
 (cd termcap && autoconf)
-sh ./configure -v
+sh ./configure --x-libraries=/usr/X11R5/lib --x-includes=/usr/X11R5/include -v
 
 # Create an empty `ddd/Makedeps' such that old MAKEs won't fail.
 touch ddd/Makedeps
@@ -177,7 +171,7 @@ touch ddd/Makedeps
 # Add a RELEASE tag
 if $final; then
   echo "ddd-$date: released `date`" > ./.RELEASE
-  cvs commit -m"ddd-$date \"$nickname\" released" .RELEASE
+  cvs commit -m"ddd-$date released" .RELEASE
 fi
 
 # Create distribution.
@@ -187,20 +181,12 @@ if [ -f ddd-$date.tar.gz ]; then
   if $final; then
     # Tag our CVS files
     tag=DDD_`echo $date | sed 's/[^a-zA-Z0-9]/_/g'`
-    cvs tag -F "$tag" .
-    case "$tag" in
-      DDD_*_*_*)
-	# Already a `fix' release
-	;;
-      *)
-	# Create a `fixes' branch
-	cvs tag -F -b ${tag}_fixes . ;;
-    esac
+    cvs tag -F $tag .
   fi
 
   # Move dist file into target area
   rm -f $target/ddd-*.tar.gz
-  mv ddd-*.tar.gz $target
+  mv ddd-$date.tar.gz ddd-$date-pics.tar.gz $target
 
   if $local; then
     :
@@ -219,7 +205,7 @@ else
   if $local; then
     :
   else
-    Mail -s "make-current failed at `date`" ddd@gnu.org \
+    Mail -s "make-current failed at `date`" ddd@ips.cs.tu-bs.de \
      < $target/.current.log
   fi
 fi

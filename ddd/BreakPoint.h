@@ -23,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 #ifndef _DDD_BreakPoint_h
 #define _DDD_BreakPoint_h
@@ -48,9 +48,7 @@
 // Breakpoint type
 enum BPType {
     BREAKPOINT,			// Breakpoint
-    WATCHPOINT,			// Watchpoint
-    TRACEPOINT,			// Tracepoint (as in GDB)
-    ACTIONPOINT,		// Actionpoint (`when' in DBX, action in Perl)
+    WATCHPOINT			// Watchpoint
 };
 
 // What to do when breakpoint is reached
@@ -151,7 +149,6 @@ public:
 
     // Breakpoint type.
     BPType type() const { return mytype; }
-    string title() const;
 
     // What to do when breakpoint is reached.
     BPDispo dispo() const { return mydispo; }

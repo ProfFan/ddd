@@ -23,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 char mydialogs_rcsid[] =
     "$Id$";
@@ -272,8 +272,7 @@ static void freeXmStringTable (XmStringTable xmlist, int list_length)
 	xmlist++;
     }
 
-    // Some Motif versions want this to be freed, others (notably
-    // Lesstif) do not.  Play it safe, at the risk of a minor memory leak.
+    // It seems XMLIST is already owned
     // XtFree((char *)xmlist);
 }
 

@@ -3,7 +3,7 @@
 # make new C file
 
 # Copyright (C) 1996 Technische Universitaet Braunschweig, Germany.
-# Written by Andreas Zeller <zeller@gnu.org>.
+# Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 # 
 # This file is part of ICE.
 # 
@@ -59,6 +59,6 @@ do
 	) > $file.C
 	$path/apply-license -f $user $file.C > /dev/null
 	rm $file.C.orig
-	echo $file.C
+	${VISUAL:-vi} $file.C
     fi
 done

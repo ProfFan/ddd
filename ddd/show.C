@@ -2,7 +2,7 @@
 // DDD info functions
 
 // Copyright (C) 1996-1998 Technische Universitaet Braunschweig, Germany.
-// Written by Andreas Zeller <zeller@gnu.org>.
+// Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -23,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 char show_rcsid[] = 
     "$Id$";
@@ -66,12 +66,6 @@ extern "C" FILE *popen(const char *command, const char *mode);
 #endif
 #if !HAVE_PCLOSE_DECL
 extern "C" int pclose(FILE *stream);
-#endif
-
-#if WITH_READLINE
-extern "C" {
-#include "readline/readline.h"
-}
 #endif
 
 //-----------------------------------------------------------------------------
@@ -314,11 +308,8 @@ static void show_configuration(ostream& os, bool version_only)
     string s;
 
     // Version info
-    s = string("@(#)GNU " DDD_NAME " " DDD_VERSION " (" DDD_HOST ")\n") +
-	"@(#)Copyright (C) 1999 " 
-	"Technische Universitaet Braunschweig, Germany.\n" +
-        "@(#)Copyright (C) 1999 "
-	"Universitaet Passau, Germany.\n";
+    s = "@(#)" DDD_NAME " " DDD_VERSION " (" DDD_HOST "), "
+	"Copyright (C) 1999 TU Braunschweig.\n";
     s.gsub(sccs, string(""));
     os << s;
 
@@ -383,10 +374,10 @@ static void show_configuration(ostream& os, bool version_only)
     // Optional stuff
     s = "@(#)Includes " DDD_NAME " core"
 #if WITH_BUILTIN_MANUAL
-	", Manual"
+	", manual"
 #endif
 #if WITH_BUILTIN_APP_DEFAULTS
-	", App defaults"
+	", app-defaults"
 #endif
 #ifdef XpmFormat
 	", XPM " stringize(XpmFormat) "." stringize(XpmVersion) 
@@ -397,11 +388,6 @@ static void show_configuration(ostream& os, bool version_only)
 #endif
 	"\n";
     s.gsub(sccs, string(""));
-
-#if WITH_READLINE
-    s = s.through("core") + ", Readline " + rl_library_version + 
-	s.after("core");
-#endif
     os << s;
 
     string cinfo = config_info;
@@ -591,18 +577,13 @@ int ddd_man(ostream& os)
 {
 #if WITH_BUILTIN_MANUAL
     static const char MANUAL[] =
-#include "ddd.info.txt.gz.C"
+#include "ddd.man.txt.gz.C"
 	;
 
     return uncompress(os, MANUAL, sizeof(MANUAL) - 1);
 #else
-
-    // Try `info ddd', `man ddd' and `man xddd'.
-    string cmd = 
-	"info --subnodes -o - -f " ddd_NAME " 2> /dev/null || "
-	"man " ddd_NAME " || man x" ddd_NAME;
-
-    FILE *fp = popen(sh_command(cmd), "r");
+    // Try `man ddd' and `man xddd'.
+    FILE *fp = popen(sh_command("man " ddd_NAME " || man x" ddd_NAME), "r");
     if (fp == 0)
 	return -1;
 
@@ -651,12 +632,11 @@ void GDBManualCB(Widget w, XtPointer, XtPointer)
     if (gdb->type() == PERL)
 	key = "perldebug";
 
-    // Ordinary way: try `man dbx', etc.
     string cmd = "man " + key + " 2>&1";
 
     if (gdb->type() == GDB)
     {
-	// Try `info gdb' first
+	// Try `info' first
 	cmd.prepend("info --subnodes -o - -f " + key + " 2> /dev/null || ");
     }
 

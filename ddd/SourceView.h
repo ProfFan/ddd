@@ -3,7 +3,7 @@
 
 // Copyright (C) 1995-1997 Technische Universitaet Braunschweig, Germany.
 // Written by Dorothea Luetkehaus <luetke@ips.cs.tu-bs.de>
-// and Andreas Zeller <zeller@gnu.org>.
+// and Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -24,8 +24,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 //-----------------------------------------------------------------------------
 // This class creates the source view window and provides necessary
@@ -116,7 +116,6 @@ class SourceView {
     static void BreakpointCmdCB          (Widget, XtPointer, XtPointer);
 
     static void EditBreakpointPropertiesCB (Widget, XtPointer, XtPointer);
-    static void ApplyBreakpointPropertiesCB(Widget, XtPointer, XtPointer);
     static void SetBreakpointIgnoreCountCB (Widget, XtPointer, XtPointer);
     static void SetBreakpointConditionCB   (Widget, XtPointer, XtPointer);
     static void EnableBreakpointsCB        (Widget, XtPointer, XtPointer);

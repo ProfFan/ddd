@@ -23,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 char string_functions_rcsid[] =
     "$Id$";
@@ -62,16 +62,11 @@ string itostring (int nr)
 // Remove leading parentheses
 static void read_leading_parentheses(string& s)
 {
-    while (s.length() > 0 && (isspace(s[0]) || 
-			      s[0] == '(' || 
-			      s[0] == '[' || 
-			      s[0] == '#'))
-    {
+    while (s.length() > 0 && (isspace(s[0]) || s[0] == '(' || s[0] == '['))
 	s = s.after(0);
-    }
 }
 
-// Remove trailing parentheses
+// Remove trainling parentheses
 static void read_trailing_parentheses(string& s)
 {
     while (s.length() > 0 && (isspace(s[0]) || s[0] == ')' || s[0] == ']'))

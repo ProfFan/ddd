@@ -2155,20 +2155,20 @@ string_COMPARE_ALL(char, const subString&)
 #undef string_COMPARE_ALL
 
 // A helper needed by at, before, etc.
-inline subString string::_substr(int first, int len)
+inline subString string::_substr(int first, int l)
 {
-    if (first < 0 || len <= 0 || (unsigned)(first + len) > length())
+    if (first < 0 || (unsigned)(first + l) > length())
 	return subString(_nilstring, 0, 0);
     else 
-	return subString(*this, first, len);
+	return subString(*this, first, l);
 }
 
-inline const subString string::_substr(int first, int len) const
+inline const subString string::_substr(int first, int l) const
 {
-    if (first < 0 || len <= 0 || (unsigned)(first + len) > length())
+    if (first < 0 || (unsigned)(first + l) > length())
 	return subString(_nilstring, 0, 0);
     else 
-	return subString(*this, first, len);
+	return subString(*this, first, l);
 }
 
 #endif // _ICE_strclass_h

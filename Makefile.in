@@ -2,7 +2,7 @@
 # DDD top-level Makefile.
 
 # Copyright (C) 1996-1998 Technische Universitaet Braunschweig, Germany.
-# Written by Andreas Zeller <zeller@gnu.org>.
+# Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 # 
 # This file is part of DDD.
 # 
@@ -23,8 +23,8 @@
 # 
 # DDD is the data display debugger.
 # For details, see the DDD World-Wide-Web page, 
-# `http://www.gnu.org/software/ddd/',
-# or send a mail to the DDD developers <ddd@gnu.org>.
+# `http://www.cs.tu-bs.de/softech/ddd/',
+# or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 ### CUSTOMIZATION SECTION --- Please check the settings below.
 # Typical values are enclosed in ().
@@ -36,7 +36,7 @@ SHELL = /bin/sh
 srcdir = @srcdir@
 VPATH = @srcdir@
 
-## Subdirectories.  (readline termcap libiberty ddd)
+## Subdirectories.  (libiberty termcap ddd)
 SUBDIRS = @subdirs@
 
 ## Architecture.
@@ -114,7 +114,7 @@ $(OTHER_TARGETS): FORCE
 ## DDD-only targets
 
 DDD_TARGETS = \
-	love check debug it depend strip dvi ps pdf man html tags \
+	love check debug it depend strip dvi ps man html tags \
 	install install-prog install-lib install-man install-info \
 	install-c++-lib install-c++-includes \
 	uninstall uninstall-prog uninstall-lib uninstall-man uninstall-info \
@@ -138,7 +138,7 @@ scratch: clean all depend it
 
 # Build a DDD distribution.
 .PHONY: dist
-dist:	diststuff disttouch distclean snapshot htmldist picsdist
+dist:	diststuff disttouch distclean snapshot picsdist
 
 # Create architecture-independent files in DDD subdirectory.
 .PHONY: diststuff
@@ -179,7 +179,6 @@ snapshot:
 	    find $(srcdir) -name RCS -prune \
 		-o -name CVS -prune \
 		-o -name PICS -prune \
-		-o -name html -prune \
 		-o -name proto-toplev -prune \
 		-o -name etc -prune \
 		-o -name tests -prune \
@@ -206,37 +205,6 @@ snapshot:
 		--file - ) | gzip -v -9 > $$ddd-$$VER.tar.gz; \
 	)
 	rm -fr proto-toplev
-
-
-# Create a HTML manual distribution.
-.PHONY: htmldist
-htmldist:
-	rm -fr proto-toplev; mkdir proto-toplev
-	( \
-	    srcroot=`cd $(srcdir); pwd`; export srcroot; \
-	    ddd=`sed -n < ddd/configure.in 's/^ddd *= *//p'`; \
-	    VER=`sed -n < ddd/configure.in 's/^VERSION *= *//p'`; \
-	    VER=`echo $$VER | sed 's/[^0-9]*\([0-9][^ ]*\) .*/\1/'`; \
-	    echo "==> Making $$ddd-$$VER-html-manual.tar.gz"; \
-	    rm -f $$ddd-$$VER-pics.tar.gz; \
-	    ln -s $$srcroot proto-toplev/$$ddd-$$VER; \
-	    find $(srcdir)/doc/html -name RCS -prune \
-		-o -name CVS -prune \
-		-o -name proto-toplev -prune \
-		-o -name '.[a-zA-Z0-9]*' -prune \
-		-o -name '*.o' -prune \
-		-o -name '*.a' -prune \
-		-o -name '*~' -prune \
-		-o -name '*#' -prune \
-		-o -type f -print -o -type l -print | \
-	        sed "s,^$(srcdir)/,$$ddd-$$VER/," | sort \
-		> proto-toplev/FILES; \
-	    ( cd proto-toplev; gtar --create --dereference \
-		--verbose --files-from FILES \
-		--file - ) | gzip -v -9 > $$ddd-$$VER-html-manual.tar.gz; \
-	)
-	rm -fr proto-toplev
-
 
 # Create a picture distribution.
 .PHONY: picsdist
@@ -266,7 +234,6 @@ picsdist:
 		--file - ) | gzip -v -9 > $$ddd-$$VER-pics.tar.gz; \
 	)
 	rm -fr proto-toplev
-
 
 ## Configuration stuff.
 

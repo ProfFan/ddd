@@ -3,7 +3,7 @@
 
 /*
     Copyright (C) 1996 Technische Universitaet Braunschweig, Germany.
-    Written by Andreas Zeller <zeller@gnu.org>.
+    Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 
     This file is part of ICE.
 
@@ -65,7 +65,7 @@ static char *shorten(s, length)
 
     /* fetch abbrev */
     for (; i > 0 && i + a + t >= length; i--)
-	if (!islower(s[i]))
+	if (isupper(s[i]))
 	    abbrev[BUFSIZ - ++a] = s[i];
 
     /* cut after upper-case-letter, if it's not the first */
@@ -96,13 +96,8 @@ int main(argc, argv)
     if (argc > 1)
 	length = atoi(argv[1]);
 
-    while (fgets(s, sizeof(s), stdin) != NULL)
-    {
-	if (strlen(s) > 0 && s[strlen(s) - 1] == '\n')
-	    s[strlen(s) - 1] = '\0';
-
+    while (gets(s) != NULL)
 	puts(shorten(s, length));
-    }
 
     return 0;
 }

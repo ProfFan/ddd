@@ -5,7 +5,7 @@
 # If -f is given, add license to files that did not have one.
 
 # Copyright (C) 1997 Technische Universitaet Braunschweig, Germany.
-# Written by Andreas Zeller <zeller@gnu.org>.
+# Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 # 
 # This file is part of ICE.
 # 
@@ -56,6 +56,7 @@ if [ -f /usr/5bin/sed ]; then
 fi
 
 year=`date +%Y 2> /dev/null || gdate +%Y`
+domain=`domainname | sed 's/[^\.]*\.//'`
 fullname=`ypmatch $logname passwd | cut -d: -f5 | cut -d, -f1`
 
 for file in "$@"; do
@@ -82,7 +83,7 @@ for file in "$@"; do
   mailname2=
   if [ "$written_by" = "" -o $force_name = true ]; then
     fullname1=$fullname
-    mailname1=zeller@gnu.org
+    mailname1=$logname@$domain
   else
     fullname1=`echo "$written_by" | sed 's/.*Written by *\([^<]*\) *<.*/\1/
 s/ $//g'`
@@ -152,11 +153,11 @@ environment. Contact nora@'"$domain"' for details.';;
     ICE)      project_detail='ICE is the incremental configuration environment.\
 For details, see the ICE World-Wide-Web page, \
 `http://www.cs.tu-bs.de/softech/ice/'"'"',\
-or send a mail to the ICE developers <ice@ips.cs.tu-bs.de>.';;
+or send a mail to the ICE developers <ice@'"$domain"'>.';;
     DDD)      project_detail='DDD is the data display debugger.\
 For details, see the DDD World-Wide-Web page, \
-`http://www.gnu.org/software/ddd/'"'"',\
-or send a mail to the DDD developers <ddd@gnu.org>.';;
+`http://www.cs.tu-bs.de/softech/ddd/'"'"',\
+or send a mail to the DDD developers <ddd@'"$domain"'>.';;
     *)        project_detail='FOOBAR is fouled up beyond all recognition.\
 Contact foobar@kremvax.su.org for details.';;
   esac
@@ -173,7 +174,7 @@ Contact foobar@kremvax.su.org for details.';;
     license_file='COPYING'
   fi
 
-  text='Copyright (C) '$copyright' Universitaet Passau, Germany.'
+  text='Copyright (C) '$copyright' Technische Universitaet Braunschweig, Germany.'
   if [ "$fullname2" = "" ]; then
     text="$text"'\
 Written by '"$fullname1 <$mailname1>"'.'

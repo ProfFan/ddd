@@ -23,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 //-----------------------------------------------------------------------------
 // A GDBAgent creates a connection to an inferior GDB via a TTYAgent.
@@ -525,7 +525,7 @@ public:
     bool has_temporary_breakpoints() const
     {
 	return type() == GDB || type() == XDB || type() == PYDB || 
-	       has_when_command() || type() == PERL;
+	       has_when_command();
     }
 
     // True if debugger supports breakpoint conditions
@@ -533,13 +533,6 @@ public:
     {
 	return type() == GDB || type() == XDB || 
 	       type() == DBX || type() == PYDB || type() == PERL;
-    }
-
-    // True if debugger supports breakpoint commands
-    bool has_breakpoint_commands() const
-    {
-	return type() == GDB || type() == XDB || 
-	       has_when_command() || type() == PERL;
     }
 
     // True if debugger has typed pointers, as in `(TYPE)0x0'

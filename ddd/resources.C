@@ -2,8 +2,7 @@
 // DDD application resources
 
 // Copyright (C) 1996-1998 Technische Universitaet Braunschweig, Germany.
-// Copyright (C) 1999 Universitaet Passau, Germany.
-// Written by Andreas Zeller <zeller@gnu.org>.
+// Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -24,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 char resources_rcsid[] = 
     "$Id$";
@@ -962,7 +961,7 @@ XtResource ddd_resources[] = {
 	sizeof(String),
 	XtOffsetOf(AppData, www_page),
 	XtRString,
-	XtPointer("http://www.gnu.org/software/ddd/")
+	XtPointer("http://www.cs.tu-bs.de/softech/ddd/")
     },
 
     {
@@ -1626,36 +1625,6 @@ XtResource ddd_resources[] = {
 	XmRBoolean,
 	sizeof(Boolean),
 	XtOffsetOf(AppData, align_2d_arrays),
-	XmRImmediate,
-	XtPointer(True)
-    },
-
-    {
-	XtNarrayOrientation,
-	XtCOrientation,
-	XtROrientation,
-	sizeof(unsigned char),
-	XtOffsetOf(AppData, array_orientation),
-	XmRImmediate,
-	XtPointer(XmVERTICAL)
-    },
-
-    {
-	XtNstructOrientation,
-	XtCOrientation,
-	XtROrientation,
-	sizeof(unsigned char),
-	XtOffsetOf(AppData, struct_orientation),
-	XmRImmediate,
-	XtPointer(XmVERTICAL)
-    },
-
-    {
-	XtNshowMemberNames,
-	XtCShowMemberNames,
-	XmRBoolean,
-	sizeof(Boolean),
-	XtOffsetOf(AppData, show_member_names),
 	XmRImmediate,
 	XtPointer(True)
     },

@@ -2,7 +2,7 @@
 # Adapt BISON output for C++ usage
 
 # Copyright (C) 1995-1999 Technische Universitaet Braunschweig, Germany.
-# Written by Andreas Zeller <zeller@gnu.org>.
+# Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 # 
 # This file is part of the ICE Library.
 # 

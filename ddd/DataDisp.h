@@ -23,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 #ifndef _DDD_DataDisp_h
 #define _DDD_DataDisp_h
@@ -209,8 +209,7 @@ class DataDisp {
     static Widget create_display_dialog(Widget parent, String name,
 					NewDisplayInfo& info);
 
-    static void rotate_value(DispValue *dv, bool all = false);
-    static void rotate_node(DispNode *dn, bool all = false);
+    static void toggle_rotate(DispValue *dv, bool all = false);
 
     static void select_node(DispNode *dn, int src = 0);
 
@@ -413,6 +412,11 @@ private:
     // Tons of helpers
     static void new_data_displayOQC      (const string& answer, void* data);
     static void new_data_display_extraOQC(const string& answer, void* data);
+    static void new_data_displaysSQA     (string display_expression, 
+					  void *data);
+    static void new_data_displaysOQAC    (const StringArray& answers, 
+					  const VoidArray& qu_datas,
+					  void* data);
 
     static void new_user_displayOQC  (const string& answer, void* data);
 
@@ -432,9 +436,6 @@ private:
 
     static void select_with_all_descendants(GraphNode *node);
     static void select_with_all_ancestors(GraphNode *node);
-
-    static int unfold_expressions(const string& display_expression,
-				  StringArray& expressions);
 
     // Get display number and name from ANSWER; store them in NR and NAME
     static void read_number_and_name(string& answer, string& nr, string& name);
@@ -507,7 +508,7 @@ private:
     // Clustering stuff
     static void insert_data_node(DispNode *dn, int depend_nr,
 				 bool clustered, bool plotted);
-    static int new_cluster(const string& name = "", bool plotted = false);
+    static int new_cluster();
     static int current_cluster();
 
     static DispValue *update_hook(string& value);

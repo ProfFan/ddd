@@ -2,7 +2,7 @@
 // Synchronous GDB questions
 
 // Copyright (C) 1996 Technische Universitaet Braunschweig, Germany.
-// Written by Andreas Zeller <zeller@gnu.org>.
+// Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -23,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 #ifndef _DDD_question_h
 #define _DDD_question_h
@@ -45,9 +45,6 @@ string gdb_question(const string& command, int timeout = 0,
 const string NO_GDB_ANSWER(char(-1));
 
 extern bool gdb_question_running; // Is gdb_question running?
-
-// Helper: weed out GDB `verbose' stuff.
-void filter_junk(string& answer);
 
 #endif // _DDD_question_h
 // DON'T ADD ANYTHING BEHIND THIS #endif

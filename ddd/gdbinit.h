@@ -2,7 +2,7 @@
 // GDB initialization
 
 // Copyright (C) 1996 Technische Universitaet Braunschweig, Germany.
-// Written by Andreas Zeller <zeller@gnu.org>.
+// Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -23,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 #ifndef _DDD_gdbinit_h
 #define _DDD_gdbinit_h
@@ -51,12 +51,7 @@ extern DebuggerType guess_debugger_type(int argc, char *argv[], bool& sure);
 extern bool get_debugger_type(const string& debugger_name, DebuggerType& type);
 
 // Return default program for TYPE
-extern char *default_debugger(const string& debugger_name, DebuggerType type);
-
-inline char *default_debugger(DebuggerType type)
-{
-    return default_debugger("", type);
-}
+extern char *default_debugger(DebuggerType type);
 
 #endif // _DDD_gdbinit_h
 // DON'T ADD ANYTHING BEHIND THIS #endif

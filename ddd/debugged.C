@@ -2,7 +2,7 @@
 // Are we being debugged?
 
 // Copyright (C) 1998 Technische Universitaet Braunschweig, Germany.
-// Written by Andreas Zeller <zeller@gnu.org>.
+// Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -23,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 char debugged_rcsid[] = 
     "$Id$";
@@ -62,6 +62,5 @@ static string parent_name()
 bool being_debugged()
 {
     static string name = parent_name();
-    return (name == "gdb" || name == "dbx" || 
-	    name == "ladebug" || name == "xdb");
+    return name == "gdb" || name == "dbx" || name == "xdb";
 }

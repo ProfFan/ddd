@@ -7,10 +7,10 @@ Note: For problems occurring when *building* DDD, see the file `PROBLEMS'.
 This is a list of known (i.e. reproducible) DDD bugs, which should be
 fixed in some future DDD release.  
 
-If you find a bug, be sure to report it to <bug-ddd@gnu.org>
+If you find a bug, be sure to report it to <ddd-bugs@ips.cs.tu-bs.de>
 such that we may fix it (or include it in this list :-)
 
-If you want to fix some of these, please ask <ddd@gnu.org>
+If you want to fix some of these, please ask <ddd@ips.cs.tu-bs.de>
 whether there are already people working on that bug.
 
 Projects marked with an `*' are to be fixed in the next DDD release.
@@ -136,22 +136,9 @@ Volunteers for fixing these and other bugs are welcome!
     likewise), DDD considers the pointer to be frozen, such that it
     continues execution.
 
-370 Is the command shell raised each time a new display is created?
-
 371 Reduce flickering when setting options.
 
 373 In `Define Command', changing the `()' toggle does not change
     defined buttons.
 
-374 Have an improved Motif 2.1 ComboBox layout.
-
-375 Improve Python support (in DDD 3.2)
-
-378 Using Motif 2.1, `Ignore Count' in Breakpoint Properties
-    has a bad orientation.
-
-379 Adapt DDD to JDB as of JDK 1.2.
-
-380 Support GDB 4.18 follow-fork-mode.
-
-382 (Insert new bugs here)
+374 (Insert new bugs here)

@@ -2,7 +2,7 @@
 # Java test program makefile
 
 # Copyright (C) 1998 Technische Universitaet Braunschweig, Germany.
-# Written by Andreas Zeller <zeller@gnu.org>.
+# Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 # 
 # This file is part of the DDD Library.
 # 
@@ -23,8 +23,8 @@
 # 
 # DDD is the data display debugger.
 # For details, see the DDD World-Wide-Web page, 
-# `http://www.gnu.org/software/ddd/',
-# or send a mail to the DDD developers <ddd@gnu.org>.
+# `http://www.cs.tu-bs.de/softech/ddd/',
+# or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 # What we use to compile Java files.
 JAVAC = javac
@@ -32,14 +32,8 @@ JAVAC = javac
 # The flags we use to compile Java files.
 JFLAGS = -g
 
-# Native-code compiler
-GCJ = gcj
-
-# Its flags
-GCJFLAGS = -g
-
 # Default rule
-all:	jtest-java
+all:	jtest
 	@:
 .PHONY: all
 
@@ -49,15 +43,7 @@ all:	jtest-java
 .java.class:
 	$(JAVAC) $(JFLAGS) $<
 
-.java.o:
-	$(GCJ) -c $(GCJFLAGS) $<
-
 # Our app
-.PHONY: jtest-java
-jtest-java: jtest.class Date.class Holiday.class List.class Tree.class
+.PHONY: jtest
+jtest: 	jtest.class Date.class Holiday.class List.class Tree.class
 	@:
-
-# The binary
-JTEST_OBJECTS = jtest.o	Date.o Holiday.o List.o Tree.o
-jtest:	$(JTEST_OBJECTS)
-	$(GCJ) -o $@ --main=jtest $(JTEST_OBJECTS)

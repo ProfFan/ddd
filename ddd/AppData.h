@@ -2,7 +2,7 @@
 // DDD application data
 
 // Copyright (C) 1996-1998 Technische Universitaet Braunschweig, Germany.
-// Written by Andreas Zeller <zeller@gnu.org>.
+// Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -23,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 #ifndef _DDD_AppData_h
 #define _DDD_AppData_h
@@ -321,10 +321,6 @@
 #define XtCDeleteAliasDisplays   "DeleteAliasDisplays"
 #define XtNalign2dArrays         "align2dArrays"
 #define XtCAlign2dArrays         "Align2dArrays"
-#define XtNarrayOrientation      "arrayOrientation"
-#define XtNstructOrientation     "structOrientation"
-#define XtNshowMemberNames       "showMemberNames"
-#define XtCShowMemberNames       "ShowMemberNames"
 #define XtNexpandRepeatedValues  "expandRepeatedValues"
 #define XtCExpandRepeatedValues  "ExpandRepeatedValues"
 #define XtNbumpDisplays          "bumpDisplays"
@@ -555,9 +551,6 @@ struct AppData {
     Boolean   typed_aliases;
     Boolean   delete_alias_displays;
     Boolean   align_2d_arrays;
-    unsigned char array_orientation;
-    unsigned char struct_orientation;
-    Boolean   show_member_names;
     Boolean   expand_repeated_values;
     Boolean   bump_displays;
     Boolean   hide_inactive_displays;

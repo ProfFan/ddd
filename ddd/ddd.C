@@ -2,9 +2,8 @@
 // DDD main program (and much more)
 
 // Copyright (C) 1995-1998 Technische Universitaet Braunschweig, Germany.
-// Copyright (C) 1999 Universitaet Passau, Germany.
 // Written by Dorothea Luetkehaus <luetke@ips.cs.tu-bs.de>
-// and Andreas Zeller <zeller@gnu.org>.
+// and Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -25,8 +24,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 char ddd_rcsid[] =
     "$Id$";
@@ -274,10 +273,6 @@ char ddd_rcsid[] =
 #include <time.h>
 #include <signal.h>
 
-#if HAVE_LOCALE_H
-#include <locale.h>
-#endif
-
 #include <limits.h>
 #ifndef ARG_MAX
 #define ARG_MAX 4096
@@ -285,12 +280,6 @@ char ddd_rcsid[] =
 
 #if HAVE_EXCEPTIONS && HAVE_EXCEPTION
 #include <exception>
-#endif
-
-#if WITH_READLINE
-extern "C" {
-#include "readline/readline.h"
-}
 #endif
 
 
@@ -360,6 +349,9 @@ static void PopdownStatusHistoryEH(Widget, XtPointer, XEvent *, Boolean *);
 // Argument callback
 static void ActivateCB(Widget, XtPointer client_data, XtPointer call_data);
 
+// Drag and drop
+static void CheckDragCB(Widget, XtPointer client_data, XtPointer call_data);
+
 // Verify whether buttons are active
 static void verify_buttons(MMDesc *items);
 
@@ -400,7 +392,7 @@ static void setup_environment();
 static void setup_options(int& argc, char *argv[],
 			  StringArray& saved_options, string& gdb_name,
 			  bool& no_windows);
-static void setup_command_tty();
+static void setup_tty();
 static void setup_ddd_version_warnings();
 static void setup_motif_version_warnings();
 static void setup_auto_command_prefix();
@@ -451,9 +443,6 @@ static XrmOptionDescRec options[] = {
 
 { "--dbx",                  XtNdebugger,             XrmoptionNoArg,  "dbx" },
 { "-dbx",                   XtNdebugger,             XrmoptionNoArg,  "dbx" },
-
-{ "--ladebug",              XtNdebugger,            XrmoptionNoArg, "ladebug"},
-{ "-ladebug", 		    XtNdebugger,            XrmoptionNoArg, "ladebug"},
 
 { "--xdb",                  XtNdebugger,             XrmoptionNoArg,  "xdb" },
 { "-xdb",                   XtNdebugger,             XrmoptionNoArg,  "xdb" },
@@ -1737,12 +1726,6 @@ int main(int argc, char *argv[])
     // this point, all global data objects already have been properly
     // initialized.
 
-#ifdef LC_ALL
-    // Let DDD locales be controlled by the locale-specific
-    // environment variables -- especially $LANG.
-    setlocale(LC_ALL, "");
-#endif
-
     // Save environment for restart.
     register_argv(argv);
     register_environ();
@@ -2065,8 +2048,7 @@ int main(int argc, char *argv[])
 	if (!app_data.auto_debugger)
 	{
 	    cerr << "Unknown debugger type " << quote(app_data.debugger)
-		 << ", using " << quote(default_debugger(app_data.debugger,
-							 debugger_type))
+		 << ", using " << quote(default_debugger(debugger_type))
 		 << "instead\n";
 	}
     }
@@ -2076,8 +2058,7 @@ int main(int argc, char *argv[])
 	if (gdb_name != "")
 	    app_data.debugger_command = gdb_name;
 	else
-	    app_data.debugger_command = 
-		default_debugger(app_data.debugger, debugger_type);
+	    app_data.debugger_command = default_debugger(debugger_type);
     }
 
     // Set host specification
@@ -2149,6 +2130,18 @@ int main(int argc, char *argv[])
     help_value_doc_delay  = app_data.value_doc_delay;
     help_clear_doc_delay  = app_data.clear_doc_delay;
     help_clear_tip_delay  = app_data.clear_tip_delay;
+
+#if XmVersion >= 2000
+    // Setup drag and drop callback
+    Widget display_w = verify(XmGetXmDisplay(XtDisplay(toplevel)));
+    if (XmIsDisplay(display_w))
+    {
+	XtAddCallback(display_w, XmNdragStartCallback,
+		      CheckDragCB, NULL);
+    }
+#else
+    CheckDragCB(0, 0, 0);		// Use it
+#endif
 
     // Re-register own converters.  Motif may have overridden some of
     // these, so register them again.
@@ -2233,12 +2226,26 @@ int main(int argc, char *argv[])
     XtSetArg(args[arg], XmNargc,           original_argc); arg++;
     XtSetArg(args[arg], XmNargv,           original_argv); arg++;
 
-    // Make command shell a popup shell.  
-    // The toplevel window is never realized.
-    command_shell = verify(XtCreatePopupShell("command_shell",
-					      applicationShellWidgetClass,
-					      toplevel, args, arg));
+    if (!app_data.separate_source_window && !app_data.separate_data_window)
+    {
+	// One single window - use command shell as top-level shell
+	command_shell = 
+	    verify(XtAppCreateShell(NULL, DDD_CLASS_NAME,
+				    applicationShellWidgetClass,
+				    XtDisplay(toplevel), args, arg));
 
+	// From now on, use the command shell as parent
+	toplevel = command_shell;
+    }
+    else
+    {
+	// Separate windows - make command shell a popup shell.  
+	// The toplevel window is never realized.
+	command_shell =
+	    verify(XtCreatePopupShell("command_shell",
+				      applicationShellWidgetClass,
+				      toplevel, args, arg));
+    }
     WM_DELETE_WINDOW =
 	XmInternAtom(XtDisplay(toplevel), "WM_DELETE_WINDOW", False);
     XmAddWMProtocolCallback(command_shell, WM_DELETE_WINDOW, DDDCloseCB, 0);
@@ -2594,15 +2601,16 @@ int main(int argc, char *argv[])
 	app_data.tty_mode = True;
 
     // Close windows explicitly requested
-    if (!app_data.separate_data_window && 
-	!app_data.data_window && !app_data.annotate)
+    if (!app_data.data_window && 
+	(!app_data.annotate || !app_data.tty_mode))
     {
-	// We don't want the data window.
+	// We don't want the data window (unless in full name mode,
+	// where we always open a data window - because otherwise, no
+	// window would remain and we'd be gone).
 	gdbCloseDataWindowCB(gdb_w, 0, 0);
     }
 
-    if (!app_data.separate_source_window && 
-	(!app_data.source_window || app_data.annotate))
+    if (!app_data.source_window || app_data.annotate)
     {
 	// We don't need the source window, since we're invoked by Emacs.
 	gdbCloseSourceWindowCB(gdb_w, 0, 0);
@@ -2617,9 +2625,8 @@ int main(int argc, char *argv[])
 	gdbCloseCodeWindowCB(gdb_w, 0, 0);
     }
 
-    if ((!app_data.separate_source_window && have_source_window() || 
-	 !app_data.separate_data_window && have_data_window()) &&
-	(!app_data.debugger_console || app_data.tty_mode))
+    if ((!app_data.debugger_console || app_data.tty_mode) &&
+	(!app_data.separate_source_window || !app_data.separate_data_window))
     {
 	// We don't need the debugger console, since we have a TTY.
 	gdbCloseCommandWindowCB(gdb_w, 0, 0);
@@ -2727,14 +2734,20 @@ int main(int argc, char *argv[])
 	// Startup command shell iconified; others follow as needed
 	initial_popup_shell(command_shell);
     }
-    else if (!app_data.debugger_console || app_data.tty_mode)
+    else if ((!app_data.debugger_console || app_data.tty_mode) && 
+	     app_data.separate_source_window &&
+	     app_data.separate_data_window)
     {
 	// Debugger console is closed: wait for source to pop up
     }
-    else
+    else if (!app_data.tty_mode)
     {
 	// Popup the command shell only; other shells follow as needed
 	initial_popup_shell(command_shell);
+    }
+    else
+    {
+	// TTY mode: all shells follow as needed.
     }
 
     // Trace positions and visibility of all DDD windows
@@ -2757,7 +2770,7 @@ int main(int argc, char *argv[])
 #endif
 
     // Setup TTY interface
-    setup_command_tty();
+    setup_tty();
 
     // Raise core limit if needed; required for getting session info.
     // Note: this must be done before starting GDB.
@@ -3561,13 +3574,10 @@ Boolean ddd_setup_done(XtPointer)
 	install_button_tips();
 	fix_status_size();
 
-	if (running_shells() == 0 ||
-	    app_data.annotate && running_shells() == 1)
+	if (running_shells() == 0)
 	{
 	    // We have no shell (yet).  Be sure to popup at least one shell.
-	    if (app_data.annotate)
-		gdbOpenDataWindowCB(gdb_w, 0, 0);
-	    else if (app_data.source_window)
+	    if (app_data.source_window)
 		gdbOpenSourceWindowCB(gdb_w, 0, 0);
 	    else if (app_data.data_window)
 		gdbOpenDataWindowCB(gdb_w, 0, 0);
@@ -3604,6 +3614,33 @@ static void ActivateCB(Widget, XtPointer client_data, XtPointer call_data)
     
     Widget button = Widget(client_data);
     XtCallActionProc(button, "ArmAndActivate", cbs->event, (String *)0, 0);
+}
+
+//-----------------------------------------------------------------------------
+// Drag and drop
+//-----------------------------------------------------------------------------
+
+static void CheckDragCB(Widget, XtPointer, XtPointer call_data)
+{
+    if (call_data == 0)		// Use it
+	return;
+
+    // Some Linux Motif implementations have trouble dragging pixmaps.
+    // Disable this, such that we don't get drowned in bug reports.
+#if XmVersion >= 2000 && defined(__linux__)
+    XmDragStartCallbackStruct *cbs = (XmDragStartCallbackStruct *)call_data;
+    Widget w = cbs->widget;
+    // clog << "Dragging from " << longName(w) << "\n";
+
+    if (XtIsSubclass(w, xmLabelWidgetClass) 
+	|| XtIsSubclass(w, xmLabelGadgetClass))
+    {
+	unsigned char label_type = XmSTRING;
+	XtVaGetValues(w, XmNlabelType, &label_type, NULL);
+	if (label_type == XmPIXMAP)
+	    cbs->doit = False;
+    }
+#endif // XmNdragStartCallback
 }
 
 
@@ -6832,15 +6869,15 @@ static void setup_version_info()
 	+ rm(" for " DDD_NAME "; see the ") + cr()
 	+ rm(DDD_NAME " License for details.") + cr();
 
-#if 0
     helpOnVersionExtraText += cr()
 	+ rm("If you find " DDD_NAME " useful, please send "
 	     "us a picture postcard:") + cr()
 	+ cr()
-	+ rm("    Free Software Foundation") + cr()
-	+ rm("    59 Temple Place - Suite 330") + cr()
-	+ rm("    Boston, MA  02111-1307, USA") + cr();
-#endif
+	+ rm("    Technische Universit\344t Braunschweig") + cr()
+	+ rm("    Abteilung Softwaretechnologie") + cr()
+	+ rm("    B\374ltenweg 88") + cr()
+	+ rm("    D-38092 Braunschweig") + cr()
+	+ rm("    GERMANY") + cr();
 
     string log = session_log_file();
     if (log.contains(gethome(), 0))
@@ -6848,16 +6885,18 @@ static void setup_version_info()
 
     helpOnVersionExtraText += cr()
 	+ rm("Send bug reports to <")
-	+ tt("bug-ddd@gnu.org") + rm(">.") + cr()
+	+ tt(ddd_NAME "-bugs@ips.cs.tu-bs.de") + rm(">.") + cr()
 	+ rm("Always include the ") + tt(log) + rm(" file;")
 	+ rm(" see the " DDD_NAME " manual for details.") + cr()
 	+ rm("Send comments and suggestions to <")
-	+ tt("ddd@gnu.org") + rm(">.") + cr();
+	+ tt(ddd_NAME "@ips.cs.tu-bs.de") + rm(">.") + cr();
 
     helpOnVersionExtraText += cr()
 	+ rm(DDD_NAME " WWW page: ") + tt(app_data.www_page) + cr()
-	+ rm(DDD_NAME " mailing list: <")
-	+ tt("ddd-request@gnu.org") + rm(">") + cr();
+	+ rm(DDD_NAME " discussions: <")
+	+ tt(ddd_NAME "-users-request@ips.cs.tu-bs.de") + rm(">") + cr()
+	+ rm(DDD_NAME " announcements: <")
+	+ tt(ddd_NAME "-announce-request@ips.cs.tu-bs.de") + rm(">");
 }
 
 
@@ -7087,17 +7126,10 @@ static void setup_options(int& argc, char *argv[],
     }
 }
 
-static void setup_command_tty()
+static void setup_tty()
 {
     if (app_data.tty_mode)
     {
-#if WITH_READLINE
-	// Initialize Readline
-	rl_initialize();
-	rl_readline_name = DDD_NAME;
-#endif
-	
-	// Initialize TTY
 	init_command_tty();
 
 	// Issue init msg (using 7-bit characters)
@@ -7273,7 +7305,7 @@ static void setup_options()
     set_sensitive(signals_w,   gdb->type() == GDB);
 
     set_sensitive(set_debugger_gdb_w,  have_cmd("gdb"));
-    set_sensitive(set_debugger_dbx_w,  have_cmd("dbx") || have_cmd("ladebug"));
+    set_sensitive(set_debugger_dbx_w,  have_cmd("dbx"));
     set_sensitive(set_debugger_xdb_w,  have_cmd("xdb"));
     set_sensitive(set_debugger_jdb_w,  have_cmd("jdb"));
     set_sensitive(set_debugger_pydb_w, have_cmd("pydb"));

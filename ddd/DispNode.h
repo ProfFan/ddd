@@ -23,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 #ifndef _DDD_DispNode_h
 #define _DDD_DispNode_h
@@ -225,8 +225,7 @@ public:
 
 inline bool is_cluster(DispNode *dn)
 {
-    return dn->is_user_command() && 
-	dn->user_command().contains(CLUSTER_COMMAND, 0);
+    return dn->is_user_command() && dn->user_command() == CLUSTER_COMMAND;
 }
 
 #endif // _DDD_DispNode_h

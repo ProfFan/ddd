@@ -1,9 +1,8 @@
 dnl $Id$ -*- autoconf -*-
 dnl ICE and DDD autoconf macros
 dnl 
-dnl Copyright (C) 1995-1998 Technische Universitaet Braunschweig, Germany.
-dnl Copyright (C) 1999 Universitaet Passau, Germany.
-dnl Written by Andreas Zeller <zeller@gnu.org>.
+dnl Copyright (C) 1995-1999 Technische Universitaet Braunschweig, Germany.
+dnl Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 dnl 
 dnl This file is part of the ICE Library.
 dnl 
@@ -29,8 +28,8 @@ dnl or send a mail to the ICE developers at `ice@ips.cs.tu-bs.de'.
 dnl
 dnl DDD is the data display debugger.
 dnl For details, see the DDD World-Wide-Web page, 
-dnl `http://www.gnu.org/software/ddd/',
-dnl or send a mail to the DDD developers <ddd@gnu.org>.
+dnl `http://www.cs.tu-bs.de/softech/ddd/',
+dnl or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 dnl
 dnl
 dnl ICE_PROG_CC and ICE_PROG_CXX
@@ -64,16 +63,15 @@ fi
 dnl
 AC_DEFUN(ICE_PROG_CXX,
 [
-AC_REQUIRE([AC_ISC_POSIX])
 AC_REQUIRE([AC_PROG_CXX])
 dnl
+ice_save_LIBS="$LIBS"
 if test "$CXX" = gcc; then
 dnl
 dnl Using gcc as C++ compiler requires linkage with -lstdc++ or -lg++
 dnl
 AC_LANG_SAVE
 AC_LANG_CPLUSPLUS
-ice_save_LIBS="$LIBS"
 AC_CHECK_LIB(m, sin, LIBS="-lm $LIBS")
 AC_CHECK_LIB(stdc++, cout, LIBS="-lstdc++ $LIBS")
 case "$LIBS" in
@@ -145,7 +143,6 @@ dnl
 AC_DEFUN(ICE_WERROR,
 [
 AC_REQUIRE([AC_PROG_CXX])
-if test "$GXX" = yes; then
 AC_MSG_CHECKING(whether the C++ compiler (${CXX}) accepts -Werror)
 AC_CACHE_VAL(ice_cv_werror,
 [
@@ -162,7 +159,6 @@ AC_MSG_RESULT($ice_cv_werror)
 if test "$ice_cv_werror" = yes; then
 WERROR=-Werror
 fi
-fi
 AC_SUBST(WERROR)
 ])dnl
 dnl
@@ -177,7 +173,6 @@ AC_DEFUN(ICE_EXTERNAL_TEMPLATES,
 [
 AC_REQUIRE([AC_PROG_CXX])
 AC_REQUIRE([ICE_WERROR])
-if test "$GXX" = yes; then
 AC_MSG_CHECKING(whether the C++ compiler (${CXX}) accepts -fexternal-templates)
 AC_CACHE_VAL(ice_cv_external_templates,
 [
@@ -193,7 +188,6 @@ AC_LANG_RESTORE
 AC_MSG_RESULT($ice_cv_external_templates)
 if test "$ice_cv_external_templates" = yes; then
 EXTERNAL_TEMPLATES=-fexternal-templates
-fi
 fi
 AC_SUBST(EXTERNAL_TEMPLATES)
 ])dnl
@@ -212,7 +206,6 @@ AC_DEFUN(ICE_PERMISSIVE,
 [
 AC_REQUIRE([AC_PROG_CXX])
 AC_REQUIRE([ICE_WERROR])
-if test "$GXX" = yes; then
 AC_MSG_CHECKING(whether the C++ compiler (${CXX}) accepts -fpermissive)
 AC_CACHE_VAL(ice_cv_permissive,
 [
@@ -229,7 +222,6 @@ AC_MSG_RESULT($ice_cv_permissive)
 if test "$ice_cv_permissive" = yes; then
 PERMISSIVE=-fpermissive
 fi
-fi
 AC_SUBST(PERMISSIVE)
 ])dnl
 dnl
@@ -244,7 +236,6 @@ dnl
 AC_DEFUN(ICE_X_PERMISSIVE,
 [
 AC_REQUIRE([ICE_PERMISSIVE])
-if test "$GXX" = yes; then
 if test "$PERMISSIVE" != ""; then
 AC_MSG_CHECKING(whether compiling X headers requires $PERMISSIVE)
 AC_CACHE_VAL(ice_cv_x_permissive,
@@ -271,7 +262,6 @@ if test "$ice_cv_x_permissive" = yes; then
 X_PERMISSIVE=$PERMISSIVE
 fi
 fi
-fi
 AC_SUBST(X_PERMISSIVE)
 ])dnl
 dnl
@@ -287,7 +277,6 @@ AC_DEFUN(ICE_NO_IMPLICIT_TEMPLATES,
 [
 AC_REQUIRE([AC_PROG_CXX])
 AC_REQUIRE([ICE_WERROR])
-if test "$GXX" = yes; then
 AC_MSG_CHECKING(whether the C++ compiler (${CXX}) accepts -fno-implicit-templates)
 AC_CACHE_VAL(ice_cv_no_implicit_templates,
 [
@@ -304,7 +293,6 @@ AC_MSG_RESULT($ice_cv_no_implicit_templates)
 if test "$ice_cv_no_implicit_templates" = yes; then
 NO_IMPLICIT_TEMPLATES=-fno-implicit-templates
 fi
-fi
 AC_SUBST(NO_IMPLICIT_TEMPLATES)
 ])dnl
 dnl
@@ -320,7 +308,6 @@ AC_DEFUN(ICE_ELIDE_CONSTRUCTORS,
 [
 AC_REQUIRE([AC_PROG_CXX])
 AC_REQUIRE([ICE_WERROR])
-if test "$GXX" = yes; then
 AC_MSG_CHECKING(whether the C++ compiler (${CXX}) accepts -felide-constructors)
 AC_CACHE_VAL(ice_cv_elide_constructors,
 [
@@ -337,7 +324,6 @@ AC_MSG_RESULT($ice_cv_elide_constructors)
 if test "$ice_cv_elide_constructors" = yes; then
 ELIDE_CONSTRUCTORS=-felide-constructors
 fi
-fi
 AC_SUBST(ELIDE_CONSTRUCTORS)
 ])dnl
 dnl
@@ -352,7 +338,6 @@ AC_DEFUN(ICE_CONSERVE_SPACE,
 [
 AC_REQUIRE([AC_PROG_CXX])
 AC_REQUIRE([ICE_WERROR])
-if test "$GXX" = yes; then
 AC_MSG_CHECKING(whether the C++ compiler (${CXX}) accepts -fconserve-space)
 AC_CACHE_VAL(ice_cv_conserve_space,
 [
@@ -368,7 +353,6 @@ AC_LANG_RESTORE
 AC_MSG_RESULT($ice_cv_conserve_space)
 if test "$ice_cv_conserve_space" = yes; then
 CONSERVE_SPACE=-fconserve-space
-fi
 fi
 AC_SUBST(CONSERVE_SPACE)
 ])dnl
@@ -387,7 +371,6 @@ AC_DEFUN(ICE_WARN_EFFECTIVE_CXX,
 [
 AC_REQUIRE([AC_PROG_CXX])
 AC_REQUIRE([ICE_WERROR])
-if test "$GXX" = yes; then
 AC_MSG_CHECKING(whether the C++ compiler (${CXX}) accepts -Weffc++)
 AC_CACHE_VAL(ice_cv_warn_effective_cxx,
 [
@@ -404,7 +387,6 @@ AC_MSG_RESULT($ice_cv_warn_effective_cxx)
 if test "$ice_cv_warn_effective_cxx" = yes; then
 WARN_EFFECTIVE_CXX=-Weffc++
 WARN_NO_EFFECTIVE_CXX=-Wno-effc++
-fi
 fi
 AC_SUBST(WARN_EFFECTIVE_CXX)
 AC_SUBST(WARN_NO_EFFECTIVE_CXX)
@@ -424,7 +406,6 @@ AC_DEFUN(ICE_TRIGRAPHS,
 [
 AC_REQUIRE([AC_PROG_CXX])
 AC_REQUIRE([ICE_WERROR])
-if test "$GXX" = yes; then
 AC_MSG_CHECKING(whether the C++ compiler (${CXX}) accepts -trigraphs)
 AC_CACHE_VAL(ice_cv_trigraphs,
 [
@@ -441,7 +422,6 @@ AC_MSG_RESULT($ice_cv_trigraphs)
 if test "$ice_cv_trigraphs" = yes; then
 TRIGRAPHS=-trigraphs
 fi
-fi
 AC_SUBST(TRIGRAPHS)
 ])dnl
 dnl
@@ -456,7 +436,6 @@ AC_DEFUN(ICE_BIG_TOC,
 [
 AC_REQUIRE([AC_PROG_CXX])
 AC_REQUIRE([ICE_WERROR])
-if test "$GXX" = yes; then
 AC_MSG_CHECKING(whether the C++ compiler (${CXX}) accepts [-Wl,-bbigtoc])
 AC_CACHE_VAL(ice_cv_big_toc,
 [
@@ -473,7 +452,6 @@ AC_MSG_RESULT($ice_cv_big_toc)
 if test "$ice_cv_big_toc" = yes; then
 BIG_TOC="-Wl,-bbigtoc"
 fi
-fi
 AC_SUBST(BIG_TOC)
 ])dnl
 dnl
@@ -489,7 +467,6 @@ AC_DEFUN(ICE_MINIMAL_TOC,
 [
 AC_REQUIRE([AC_PROG_CXX])
 AC_REQUIRE([ICE_WERROR])
-if test "$GXX" = yes; then
 AC_MSG_CHECKING(whether the C++ compiler (${CXX}) accepts [-mminimal-toc])
 AC_CACHE_VAL(ice_cv_minimal_toc,
 [
@@ -505,7 +482,6 @@ AC_LANG_RESTORE
 AC_MSG_RESULT($ice_cv_minimal_toc)
 if test "$ice_cv_minimal_toc" = yes; then
 MINIMAL_TOC="-mminimal-toc"
-fi
 fi
 AC_SUBST(MINIMAL_TOC)
 ])dnl
@@ -549,7 +525,6 @@ AC_DEFUN(ICE_WARN_UNINITIALIZED,
 [
 AC_REQUIRE([AC_PROG_CXX])
 AC_REQUIRE([ICE_WERROR])
-if test "$GXX" = yes; then
 AC_MSG_CHECKING(whether the C++ compiler (${CXX}) accepts -Wuninitialized)
 AC_CACHE_VAL(ice_cv_warn_uninitialized,
 [
@@ -566,7 +541,6 @@ AC_MSG_RESULT($ice_cv_warn_uninitialized)
 if test "$ice_cv_warn_uninitialized" = yes; then
 WARN_UNINITIALIZED=-Wuninitialized
 WARN_NO_UNINITIALIZED=-Wno-uninitialized
-fi
 fi
 AC_SUBST(WARN_UNINITIALIZED)
 AC_SUBST(WARN_NO_UNINITIALIZED)
@@ -616,7 +590,6 @@ AC_DEFUN(ICE_CXX_ISYSTEM,
 [
 AC_REQUIRE([AC_PROG_CXX])
 AC_REQUIRE([ICE_WERROR])
-if test "$GXX" = yes; then
 AC_MSG_CHECKING(whether the C++ compiler (${CXX}) accepts -isystem)
 AC_CACHE_VAL(ice_cv_cxx_isystem,
 [
@@ -633,10 +606,6 @@ AC_MSG_RESULT($ice_cv_cxx_isystem)
 if test "$ice_cv_cxx_isystem" = yes; then
 ISYSTEM="-isystem "
 else
-ISYSTEM="-I"
-fi
-else
-dnl No GNU compiler
 ISYSTEM="-I"
 fi
 AC_SUBST(ISYSTEM)

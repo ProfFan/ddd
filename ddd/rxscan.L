@@ -2,8 +2,8 @@
 /* DDD regexp scanner */
 
 %{
-// Copyright (C) 1997-1999 Technische Universitaet Braunschweig, Germany.
-// Written by Andreas Zeller <zeller@gnu.org>.
+// Copyright (C) 1997-1998 Technische Universitaet Braunschweig, Germany.
+// Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -24,8 +24,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 char rxscan_rcsid[] = 
     "$Id$";
@@ -287,7 +287,7 @@ J	[A-Za-z_$][A-Za-z0-9_$.]*
 57\(\*{C}\*\){C}			RETURN(&rxm3comment);
 58{_}(sh{W}|!)?make({W}{C})?		RETURN(&rxmake_cmd);
 59members{w}of{w}.+:{w}?\n		RETURN(&rxmembers_of_nl);
-60-?{D}\.\.-?{D}			RETURN(&rxmore_than_one);
+60\[-?{D}\.\.-?{D}\]			RETURN(&rxmore_than_one);
 61[^ ]+:{D}\n				RETURN(&rxname_colon_int_nl);
 62{W}\n{W}				RETURN(&rxnl);
 63\n[1-9]		 		RETURN(&rxnl_int);
@@ -307,7 +307,7 @@ J	[A-Za-z_$][A-Za-z0-9_$.]*
 77[ ][]][0-9]*[1-9][[][-a-zA-Z0-9][-a-zA-Z0-9 ]*[a-zA-Z] RETURN(&rxjdbprompt_reverse);
 78Process{W}{D}:{_}			RETURN(&rxprocess1);
 79Process{W}{D}:			RETURN(&rxprocess2);
-80[(][^ )]*de?b[^)]*[)]{w}		RETURN(&rxprompt);
+80[(][^ )]*db[^)]*[)]{w}		RETURN(&rxprompt);
 81{C}[(]END[)].*			RETURN(&rxq);
 82@{_}{x}{_}:{C} 			RETURN(&rxreference);
 83{_}refresh({W}{C})?			RETURN(&rxrefresh_cmd);

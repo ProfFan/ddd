@@ -2,7 +2,7 @@
 // Gnuplot interface
 
 // Copyright (C) 1998 Technische Universitaet Braunschweig, Germany.
-// Written by Andreas Zeller <zeller@gnu.org>.
+// Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -23,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 char PlotAgent_rcsid[] = 
     "$Id$";
@@ -304,29 +304,7 @@ void PlotAgent::add_point(int x, const string& v)
     }
 }
 
-void PlotAgent::add_point(double x, const string& v)
-{
-    if (ndim > 2)
-	add_point(x, 0.0, v);
-    else
-    {
-	plot_os << x << '\t' << v << '\n';
-	add_x(x);
-	add_v(atof(v));
-    }
-}
-
 void PlotAgent::add_point(int x, int y, const string& v)
-{
-    assert(ndim == 3);
-
-    plot_os << x << '\t' << y << '\t' << v << '\n';
-    add_x(x);
-    add_y(y);
-    add_v(atof(v));
-}
-
-void PlotAgent::add_point(double x, double y, const string& v)
 {
     assert(ndim == 3);
 

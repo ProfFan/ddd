@@ -2,7 +2,7 @@
 // Own converters
 
 // Copyright (C) 1995-1997 Technische Universitaet Braunschweig, Germany.
-// Written by Andreas Zeller <zeller@gnu.org>.
+// Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -23,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 char converters_rcsid[] = 
     "$Id$";
@@ -476,8 +476,8 @@ static Boolean CvtStringToXmString(Display *display,
     
     split(source, segments, n_segments, font_esc);
 
-    MString buf(0, true);
-    for (int i = 0; i < n_segments; i++)
+    MString buf;
+    for (int i = 0; i < n_segments && buf.xmstring() != 0; i++)
     {
 	string segment;
 
@@ -545,9 +545,6 @@ static Boolean CvtStringToXmString(Display *display,
 	if (segment.length() > 0)
 	    buf += MString(segment, charset);
     }
-
-    if (buf.isNull())
-	buf = MString("");
 
     XmString target = XmStringCopy(buf.xmstring());
     delete[] segments;
@@ -758,8 +755,6 @@ static Boolean CvtStringToOrientation(Display*         display,
 	done(unsigned char, XmVERTICAL);
     else if (theOrientation == "horizontal")
 	done(unsigned char, XmHORIZONTAL);
-    else if (theOrientation == "no_orientation")
-	done(unsigned char, XmNO_ORIENTATION);
     else
     {
 	XtDisplayStringConversionWarning(display, fromVal->addr, 

@@ -2,7 +2,7 @@
 // General configuration file.
 
 // Copyright (C) 1995-1999 Technische Universitaet Braunschweig, Germany.
-// Written by Andreas Zeller <zeller@gnu.org>.
+// Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of the ICE Library.
 // 
@@ -165,9 +165,6 @@
 /* Define if you want the app-defaults file to be compiled into the
    executable. */
 #undef WITH_BUILTIN_APP_DEFAULTS
-
-/* Define if you want readline support in DDD. */
-#undef WITH_READLINE
 
 
 // @BOTTOM@

@@ -2,7 +2,7 @@
 // GDB initialization
 
 // Copyright (C) 1996-1999 Technische Universitaet Braunschweig, Germany.
-// Written by Andreas Zeller <zeller@gnu.org>.
+// Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -23,8 +23,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 char gdbinit_rcsid[] = 
     "$Id$";
@@ -257,8 +257,7 @@ DebuggerType guess_debugger_type(int argc, char *argv[], bool& sure)
     // 2. Check for executable binary as given.
 
     static bool have_gdb = (fallback == GDB || have_cmd("gdb"));
-    static bool have_dbx = 
-	(fallback == DBX || have_cmd("dbx") || have_cmd("ladebug"));
+    static bool have_dbx = (fallback == DBX || have_cmd("dbx"));
     static bool have_xdb = (fallback == XDB || have_cmd("xdb"));
 
     for (i = 1; i < argc; i++)
@@ -420,7 +419,6 @@ static struct table {
 {
     { GDB,  "gdb"  },
     { DBX,  "dbx"  },
-    { DBX,  "ladebug" },
     { XDB,  "xdb"  },
     { JDB,  "jdb"  },
     { PYDB, "pydb" },
@@ -443,20 +441,9 @@ bool get_debugger_type(const string& debugger_name, DebuggerType& type)
     return false;
 }
 
-char *default_debugger(const string& debugger_name, DebuggerType type)
+char *default_debugger(DebuggerType type)
 {
-    if (type == DBX && debugger_name == "ladebug")
-    {
-	// This happens when using the `--ladebug' option.
-	return "ladebug";
-    }
-
-    int i;
-    for (i = 0; i < int(XtNumber(debuggers)); i++)
-	if (type == debuggers[i].type && have_cmd(debuggers[i].cmd))
-	    return debuggers[i].cmd;
-
-    for (i = 0; i < int(XtNumber(debuggers)); i++)
+    for (int i = 0; i < int(XtNumber(debuggers)); i++)
 	if (type == debuggers[i].type)
 	    return debuggers[i].cmd;
 

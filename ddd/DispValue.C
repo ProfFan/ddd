@@ -3,7 +3,7 @@
 
 // Copyright (C) 1995-1998 Technische Universitaet Braunschweig, Germany.
 // Written by Dorothea Luetkehaus <luetke@ips.cs.tu-bs.de>
-// and Andreas Zeller <zeller@gnu.org>.
+// and Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -24,8 +24,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 char DispValue_rcsid[] =
     "$Id$";
@@ -147,9 +147,9 @@ DispValue::DispValue (DispValue* parent,
 		      DispValueType given_type)
     : mytype(UnknownType), myexpanded(true), myenabled(true),
       myfull_name(f_n), print_name(p_n), changed(false), myrepeats(1),
-      _value(""), _dereferenced(false), _member_names(true), _children(0),
-      _index_base(0), _have_index_base(false), _orientation(Horizontal),
-      _has_plot_orientation(false), _plotter(0), 
+      _value(""), _dereferenced(false), _children(0),
+      _index_base(0), _have_index_base(false), _alignment(Horizontal),
+      _has_plot_alignment(false), _plotter(0), 
       _cached_box(0), _cached_box_change(0),
       _links(1)
 {
@@ -165,11 +165,10 @@ DispValue::DispValue (const DispValue& dv)
       myenabled(dv.myenabled), myfull_name(dv.myfull_name),
       print_name(dv.print_name), myaddr(dv.myaddr),
       changed(false), myrepeats(dv.myrepeats),
-      _value(dv.value()), _dereferenced(false), 
-      _member_names(dv.member_names()), _children(dv.nchildren()), 
+      _value(dv.value()), _dereferenced(false), _children(dv.nchildren()), 
        _index_base(dv._index_base), 
-      _have_index_base(dv._have_index_base), _orientation(dv._orientation),
-      _has_plot_orientation(false), _plotter(0),
+      _have_index_base(dv._have_index_base), _alignment(dv._alignment),
+      _has_plot_alignment(false), _plotter(0),
       _cached_box(0), _cached_box_change(0),
       _links(1)
 {
@@ -383,7 +382,7 @@ void DispValue::init(DispValue *parent, int depth, string& value,
     {
 	string base = normalize_base(myfull_name);
 
-	_orientation = app_data.array_orientation;
+	_alignment = Vertical;
 
 #if LOG_CREATE_VALUES
 	clog << mytype << ": " << "\n";
@@ -485,9 +484,6 @@ void DispValue::init(DispValue *parent, int depth, string& value,
 	// FALL THROUGH
     case Struct:
     {
-	_orientation  = app_data.struct_orientation;
-	_member_names = app_data.show_member_names;
-
 	bool found_struct_begin   = false;
 	bool read_multiple_values = false;
 	
@@ -938,44 +934,16 @@ int DispValue::heightExpanded() const
     return d + 1;
 }
 
-void DispValue::set_orientation(DispValueOrientation orientation)
+void DispValue::set_alignment(DispValueAlignment alignment)
 {
-    if (_orientation == orientation)
+    if (_alignment == alignment)
 	return;
 
-    _orientation = orientation;
+    _alignment = alignment;
     clear_cached_box();
 
     if (type() == Simple && plotter() != 0)
 	plot();
-
-    // Save orientation for next time
-    switch (type())
-    {
-    case Array:
-	app_data.array_orientation = orientation;
-	break;
-
-    case List:
-    case Struct:
-	app_data.struct_orientation = orientation;
-	break;
-
-    default:
-	break;
-    }
-}
-
-void DispValue::set_member_names(bool value)
-{
-    if (_member_names == value)
-	return;
-
-    _member_names = value;
-    clear_cached_box();
-
-    // Save setting for next time
-    app_data.show_member_names = value;
 }
 
 
@@ -1179,8 +1147,10 @@ DispValue *DispValue::_update(DispValue *source,
     // Copy the basic settings
     ret->myexpanded = expanded();
     ret->dereference(dereferenced());
-    ret->set_orientation(orientation());
-    ret->set_member_names(member_names());
+    if (vertical_aligned())
+	ret->align_vertical();
+    if (horizontal_aligned())
+	ret->align_horizontal();
 
     unlink();
     return ret;
@@ -1320,70 +1290,18 @@ bool DispValue::can_plot1d() const
     return true;
 }
 
-// If the names of all children have the form (PREFIX)(INDEX)(SUFFIX),
-// return the common PREFIX and SUFFIX.
-void DispValue::get_index_surroundings(string& prefix, string& suffix) const
-{
-    assert (nchildren() > 0);
-
-    prefix = child(0)->full_name();
-    suffix = child(0)->full_name();
-
-    for (int i = 1; i < nchildren(); i++)
-    {
-	prefix = common_prefix(prefix, child(i)->full_name());
-	suffix = common_suffix(suffix, child(i)->full_name());
-    }
-}
-
-// If the name has the form (PREFIX)(INDEX)(SUFFIX), return INDEX
-string DispValue::index(const string& prefix, const string& suffix) const
-{
-    string idx = full_name();
-    idx = idx.from(int(prefix.length()));
-    idx = idx.before(int(idx.length() - suffix.length()));
-    strip_space(idx);
-
-    return idx;
-}
-
 bool DispValue::can_plot2d() const
 {
-    if (type() == Array)
-    {
-	for (int i = 0; i < nchildren(); i++)
-	{
-	    if (!child(i)->can_plot1d())
-		return false;
-	}
+    if (type() != Array)
+	return false;
 
-	return true;
+    for (int i = 0; i < nchildren(); i++)
+    {
+	if (!child(i)->can_plot1d())
+	    return false;
     }
 
-    if (nchildren() > 0)
-    {
-	// If we have a list of indexed names, then we can plot in 2d.
-
-	string prefix, suffix;
-	get_index_surroundings(prefix, suffix);
-	
-	for (int i = 0; i < nchildren(); i++)
-	{
-	    string idx = child(i)->index(prefix, suffix);
-	    if (!idx.matches(rxdouble) && !idx.matches(rxint))
-		return false;
-	}
-
-	for (int i = 0; i < nchildren(); i++)
-	{
-	    if (!child(i)->can_plot1d())
-		return false;
-	}
-
-	return true;
-    }
-
-    return false;
+    return true;
 }
 
 bool DispValue::can_plot3d() const
@@ -1421,17 +1339,12 @@ string DispValue::make_title(const string& name)
 	return name;
 
     string title = user_command(name);
-
-    if (title.contains(CLUSTER_COMMAND " ", 0))
-	return title.after(CLUSTER_COMMAND " ");
-
     if (title.contains("graph ", 0))
 	title = title.after("graph ");
     else if (title.contains("info ", 0))
 	title = title.after("info ");
     else if (title.contains(" "))
 	title = title.before(" ");
-
     if (title.length() > 0)
 	title = toupper(title[0]) + title.after(0);
 
@@ -1510,15 +1423,15 @@ string DispValue::num_value() const
 
 void DispValue::plot1d(PlotAgent *plotter, int ndim) const
 {
-    plotter->start_plot(make_title(full_name()), ndim);
+    plotter->start_plot(full_name(), ndim);
 
     string val = num_value();
 
-    if (!has_plot_orientation())
+    if (!has_plot_alignment())
     {
-	// Determine initial orientation.
+	// Determine initial alignment.
 	// By default, this is plotted horizontally.
-	DispValueOrientation orientation = Horizontal;
+	DispValueAlignment alignment = Horizontal;
 
 	// But if this is an integral value that lies within the index
 	// limits of a previously plotted array, plot it vertically.
@@ -1528,51 +1441,34 @@ void DispValue::plot1d(PlotAgent *plotter, int ndim) const
 	    if (plotter->min_x() < plotter->max_x() &&
 		v >= plotter->min_x() && v <= plotter->max_x())
 	    {
-		orientation = Vertical;
+		alignment = Vertical;
 	    }
 	}
 	
-	((DispValue *)this)->_orientation = orientation;
-	((DispValue *)this)->_has_plot_orientation = true;
+	((DispValue *)this)->_alignment = alignment;
+	((DispValue *)this)->_has_plot_alignment = true;
     }
 
-    plotter->add_point(val, orientation() == Horizontal ? 0 : 1);
+    plotter->add_point(val, horizontal_aligned() ? 0 : 1);
     plotter->end_plot();
 }
 
 void DispValue::plot2d(PlotAgent *plotter, int ndim) const
 {
-    if (type() == Array)
-    {
-	plotter->start_plot(make_title(full_name()), ndim);
+    plotter->start_plot(full_name(), ndim);
 
-	int index;
-	if (_have_index_base)
-	    index = _index_base;
-	else
-	    index = gdb->default_index_base();
-
-	for (int i = 0; i < nchildren(); i++)
-	{
-	    DispValue *c = child(i);
-	    for (int ii = 0; ii < c->repeats(); ii++)
-	    {
-		plotter->add_point(index++, c->num_value());
-	    }
-	}
-    }
+    int index;
+    if (_have_index_base)
+	index = _index_base;
     else
+	index = gdb->default_index_base();
+
+    for (int i = 0; i < nchildren(); i++)
     {
-	string prefix, suffix;
-	get_index_surroundings(prefix, suffix);
-
-	plotter->start_plot(prefix + "x" + suffix, ndim);
-
-	for (int i = 0; i < nchildren(); i++)
+	DispValue *c = child(i);
+	for (int ii = 0; ii < c->repeats(); ii++)
 	{
-	    DispValue *c = child(i);
-	    string idx = c->index(prefix, suffix);
-	    plotter->add_point(atof(idx), c->num_value());
+	    plotter->add_point(index++, c->num_value());
 	}
     }
 
@@ -1581,7 +1477,7 @@ void DispValue::plot2d(PlotAgent *plotter, int ndim) const
 
 void DispValue::plot3d(PlotAgent *plotter, int ndim) const
 {
-    plotter->start_plot(make_title(full_name()), ndim);
+    plotter->start_plot(full_name(), ndim);
 
     int index;
     if (_have_index_base)

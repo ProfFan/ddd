@@ -1,9 +1,9 @@
 // $Id$
 // Communicate with separate GDB process
 
-// Copyright (C) 1995-1999 Technische Universitaet Braunschweig, Germany.
+// Copyright (C) 1995-1998 Technische Universitaet Braunschweig, Germany.
 // Written by Dorothea Luetkehaus <luetke@ips.cs.tu-bs.de>
-// and Andreas Zeller <zeller@gnu.org>.
+// and Andreas Zeller <zeller@ips.cs.tu-bs.de>.
 // 
 // This file is part of DDD.
 // 
@@ -24,8 +24,8 @@
 // 
 // DDD is the data display debugger.
 // For details, see the DDD World-Wide-Web page, 
-// `http://www.gnu.org/software/ddd/',
-// or send a mail to the DDD developers <ddd@gnu.org>.
+// `http://www.cs.tu-bs.de/softech/ddd/',
+// or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
 
 char GDBAgent_rcsid[] =
     "$Id$";
@@ -324,21 +324,14 @@ string GDBAgent::title() const
     {
     case GDB:
 	return "GDB";
-
     case DBX:
-	if (path().contains("ladebug") || prompt().contains("ladebug"))
-	    return "Ladebug";
 	return "DBX";
-
     case XDB:
 	return "XDB";
-
     case JDB:
 	return "JDB";
-
     case PYDB:
 	return "PYDB";
-
     case PERL:
 	return "Perl";
     }
@@ -636,9 +629,8 @@ bool GDBAgent::ends_with_prompt (const string& ans)
 	// Marc Lepage <mlepage@kingston.hummingbird.com> says that
 	// DBX on Solaris 2.5 has a prompt like `(dbx N) '.  We're
 	// liberal here and allow anything in the form `(NAME) ',
-	// where the first word in NAME must contain a `db' or `deb'.
-	// (`deb' is there to support DEC's `ladebug')
-	static regex rxprompt("[(][^ )]*de?b[^)]*[)] ");
+	// where the first word in NAME must contain a `db'.
+	static regex rxprompt("[(][^ )]*db[^)]*[)] ");
 #endif
 	if (possible_prompt.matches(rxprompt))
 	{
@@ -1115,7 +1107,7 @@ void GDBAgent::strip_control(string& answer) const
 	    break;
 
 	case '\033':		// aka `\e'
-	    // XDB `more' and Ladebug send VT100 escape sequences like `\e[m',
+	    // XDB `more' sends VT100 escape sequences like `\e[m',
 	    // `\e[22;1H', `\e[7m', `\e[K', regardless of TERM
 	    // settings.  We simply weed out everything up to and
 	    // including to the next letter.
