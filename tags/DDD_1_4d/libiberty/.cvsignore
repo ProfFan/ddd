@@ -1,0 +1,12 @@
+Makefile
+config.h
+config.status
+dummy
+errors
+lconfig.h
+lneeded-list
+needed-list
+needed.awk
+needed2.awk
+stamp-picdir
+xhost-mkfrag
