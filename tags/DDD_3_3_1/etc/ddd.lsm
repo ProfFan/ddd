@@ -1,0 +1,25 @@
+Begin3
+Title:          ddd
+Version:        3.2
+Entered-date:   27JAN00
+Description:    DDD, the Data Display Debugger, is a popular graphical
+                user interface to command-line debuggers like GDB,
+                DBX, JDB, XDB, the Perl debugger, or the Python
+                debugger.  DDD provides a graphical data display where
+                complex data structures can be explored incrementally
+                and interactively.  See the DDD WWW page
+                `http://www.gnu.org/software/ddd/' for details.
+Keywords:       DDD, GUI, Debugger, GDB, Visualization
+Author:         luetke@ips.cs.tu-bs.de (Dorothea Luetkehaus)
+                zeller@gnu.org (Andreas Zeller)
+Maintained-by:  ddd@gnu.org (DDD Maintainers)
+Primary-site:   ftp.gnu.org /gnu/ddd/
+                4787k ddd-3.2.tar.gz              (Source + Manual)
+		 497k ddd-3.2-pics.tar.gz         (Manual screenshot sources)
+		3408k ddd-3.2-html-manual.tar.gz  (Manual in HTML format)
+Alternate-site: gatekeeper.dec.com /pub/GNU/ddd/
+Original-site:  ftp.gnu.org /gnu/ddd/
+Platforms:      Requires Motif (LessTif >= 0.89 or OSF/Motif >= 1.2)
+                and a C++ compiler (GCC >= 2.7.2)
+Copying-policy: GPL
+End
