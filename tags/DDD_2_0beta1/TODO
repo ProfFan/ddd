@@ -1,0 +1,234 @@
+# $Id$ -*- Text -*-
+# The DDD projects.
+
+This is a list of frequently suggested DDD features, which should be
+realized in some future DDD release.  If you want to realize one or
+more of these projects, please ask us (ddd@ips.cs.tu-bs.de) whether
+there are already people working on that project.  Similar, if you
+have a project idea, be sure to send it to us such that we may realize
+it (or include it in this list :-)
+
+Projects marked with an `*' represent work in progress.
+Volunteers for these and other projects are welcome!
+
+001. Have DDD ported to a free widget set -- Athena or lwlib, for
+     example.  DDD could then be included in the GNU distribution.
+
+003. Support full annotation mode (`gdb --annotate=2').  This would
+     make prompt recognition easier and allow full trace of the current
+     GDB status.  Disadvantage: won't work with earlier GDBs and requires
+     a major redesign.
+
+004. Have interactive help -- a wrapper to the GDB `help' command.
+
+006. With GDB 4.14 and later, define `graph display' command such that
+     a special code is issued which causes DDD to show the display.
+     Thus, one could use `graph display' in own definitions.
+     See also 067, below.
+
+008. Have buttons arranged such that they do not disappear when the
+     window is narrowed.
+
+009. Recognize shared data structures (that is, two displays
+     referencing the same object).  This could be achieved by
+     comparing display addresses.  See also the mails of
+     markusd@cs.tu-berlin.de (Markus Dahm) and finster@ave.ac.agit.de
+     (Harald Finster).  Possible renderings include:
+     a) Merge two objects into one (maybe temporary?)
+     b) Move one object on top of the other
+     c) Draw a special `identity edge' between the two objects.
+
+017. Have the graph editor scroll automatically when the pointer drags
+     something out of the visible part of the window.
+
+021. In the manual index, use special fonts for bold keywords.
+     [Requires Motif 2.0 and CMText.]
+
+025. Have auto-unfolding for recursive data structures.  Dereferencing
+     a pointer P * would automatically select all P * members in the
+     referenced structure.
+
+026. Have optional abstraction levels, hiding implementation details.
+     Every data type would be assigned an individual VSL function
+     determining its representation.
+
+031. Have a three-dimensional data display (using red/green glasses) :-)
+
+033. Call for bug report if `make' fails.  But how?
+
+034. Call for bug report if a fatal X error occurs.
+
+037. Group dereference.  If multiple pointers are selected,
+     dereference them all.
+
+044. Disable pointer grabs from the debugged application as soon as
+     the debugger prompt reappears.  But how?
+
+049. albrecht@igpm.rwth-aachen.de (Harald Albrecht):
+     The dialog windows (especially the backtrace dialog) should not
+     exceed a specific size (at least, they should not be larger than
+     the screen :-).  Also, the DDD dialogs should be iconified on
+     their own, without always laying on top of the main windows.
+
+050. Include algorithm animation; for instance, in a way similar to
+     LENS (see ftp.cc.gatech.edu:pub/people/stasko).  Suggested by
+     bruce@liverpool.ac.uk (Bruce Stephens).
+
+056. Have current arguments (`info args') and local variables (`info
+     locals') be displayed.
+
+060. When using a dynamic version of libstdc++, configure fails
+     to add its location to the -R flag.
+
+067. Andy Gill (andy@dcs.gla.ac.uk) wants more options to
+     `graph display': ``for example,
+
+        graph display[x=100,y=100,rotate] foo
+
+     where foo is an array. This means put the object at location
+     (x=100,y=100), and rotate the array.  Using this in conjunction
+     with with the TODO 006 means that when restarting a program that
+     you are debugging you could have a script of what vars you are
+     looking at, and where you want them to go on your
+     canvas. Furthermore, there could be an option on the graph window
+     that let you dump such scripts automatically generated from the
+     current layout on the canvas.''  See also 076.
+
+069. Yves Arrouye <Yves.Arrouye@marin.fdn.fr> states:
+
+     3. Add a way to cast a display. What I mean is that when I debug some
+        code with a `generic' C function which takes a void* and a tag that
+        indicates the kind of stuff the void* is really, I'd like to be able
+        to cast the displayed void* (maybe by editing the text
+        field---dangerous---or simply by having a 'Cast' item in the popup
+        menu). The fastest way to do that actually is to select `Dependent
+        display', type the cast there, and then delete the original display
+        (because what we want is in the casted display).
+
+     4. Let one colorize the displays. By using regexps on types or
+        names of the fields, it would already be extremely useful (or
+        with a match on the typed expression, having a list of regexps
+        to match, the first match giving color, so that given blue for
+        ` pr_.*' and red for `^int .*' one would see `int pr_var' in
+        blue but all other int variables in red). Does VSL support
+        colors ?
+
+070. Matthias Kurz <mk@baerlap.north.de> suggests an option to set
+     debuggee arguments when invoking DDD.  A simple way of
+     implementing that would be: if more than one argument is given,
+     or if the 1st argument is neither a core file nor a process ID,
+     use the remaining arguments as debugee execution arguments.  [In
+     DDD, this is difficult to implement while conserving remote mode.
+     This should be an extension to GDB, not to DDD.  - AZ]
+
+071. Matthias Kurz <mk@baerlap.north.de> suggests code annotations
+     (i.e. comments and graphics that are associated with certain
+     variable/function names in the code).
+
+073. While the debuggee is running, show some image sequence in the DDD
+     window (similar to Netscape :-)
+
+074. Have a `ddd-announce' mailing list, where only DDD announcements
+     are posted.  (Hmm.  Might be time for a USENET newsgroup
+     `comp.debuggers.ddd.announce' :-)
+
+075. Andre Cormeau <ac@enci.ucalgary.ca> says:
+
+     Apparently ddd does not fully support fortran. A problem is in
+     variable names, with capital letters and underscores (not strict
+     f77).  I need to change the variable names to small caps and add
+     underscores to the end of the names, which is a bit annoying
+     after a while.  Is there a filter to do this out there?
+     [This is a problem in the underlying debugger.  -AZ]
+
+076. Henrik Seidel <henrik@satchmo.physik.tu-berlin.de> says:
+
+     I am missing a feature which would be very useful (but, maybe,
+     difficult to implement). Maybe it is already there and I just
+     don't see it: I would love to be able to save the layout and the
+     variables of the graphic display, so that I can use the same
+     layout if I continue debugging the program tomorrow. More
+     important, I do not like it so much that I have to re-establish
+     the graphic display each time I recompile. Currently, after
+     recompiling all variables displayed in the previous version of
+     the program are now undefined, probably because addresses have
+     changed. Is there a trick to make them be defined again? If not,
+     it might be a good idea to save the displayed variables not by
+     their address but, more source-code oriented, by their scope and
+     name. That way, it shouldn't be too difficult to save the
+     displayed variables and find the corresponding variables even
+     after recompiling.  See also 067.
+
+077. Have a way to show all display detail.  Maybe by selecting `show' on a
+     title?
+
+078. Have mirror sites for the DDD WWW page.  Maybe via the DDD FTP
+     mirrors?
+
+080. Include the FAQ in the DDD manual.  Better yet, include all
+     top-level documentation in the DDD manual (including news,
+     problems, etc.) and generate it from this single source.
+
+082. For remote debugging, use an on-line `rlogin' connection,
+     invoking the inferior debugger from the remote shell.
+
+083. Include graphplace (or other graph layout) support.
+
+085. Include xDuel support.  See `http://www.math.tau.ac.il/~frangy/'
+     for details.
+
+086. Move the status line to the bottom and give one-liner
+     explanations about items pointed at.
+
+088. Some suggestions by Oyvind Yrke <oyvind@stavanger.geoquest.slb.com>:
+
+     o When setting a breakpoint, it should be possible to select from
+       a list matching a regexp.  This feature would be particularly
+       useful when working with c++ code with overloading, templates
+       and member functions.
+
+     o In data display, it would be extremely useful to select which
+       fields of a (big) struct should be displayed.  In the current
+       version, you have to display the whole struct, or display
+       individual elements in separate boxes which wastes space.
+
+     o Ability to group variables as selections that can be
+       enabled/disabled separately.  For big applications, the data
+       display quickly gets overcrowded.  Disabling data display of
+       these variables will not save much screen space.  So if I can
+       select some of the variable boxes in the data display, and save
+       them for later retrieval would be use very useful.
+
+     o Display of variables are disabled when stepping into a new
+       function, i.e. variables in functions "above" the current frame
+       are not displayed.  Although I can circumvent this problem by
+       typing the full path (e.g.  graph display
+       /some/deeply/nested/directory/file.c:a, this is quite
+       inconvenient.  The function/file prefix should probably be
+       omitted (at least as an option), since otherwise the data
+       display would be messed up with very long variable names as in
+       SunOS dbxtool/debugger.  Displaying an element of an array in
+       dbxtool as you iterate through the array looks like
+
+         '/a_very/long/path/'funcname'data['/a_very/long/path'funcname'i] = 17
+
+       Some sort of user customization is probably needed here to
+       avoid lengthy names (e.g. by specifying how many directories
+       should be displayed).  An alternative is to have a status line
+       in the data window too specifying the full path of the data box
+       where the cursor is pointing.
+        
+     o Since you supply ddd binaries, why not supply gdb binaries as
+       well?
+
+089. Have an `info source' popup menu that pops up when pointing at
+     blank space.  (Info/Reload/Edit)
+
+094. Have a VSL 'string()' function that extracts the string from a
+     box.  With an additional VSL 'matches()' function that matches
+     regexps, one may display different types in different
+     colors, fonts, etc.
+
+095. Have a colored DDD icon (requires Xpm).
+
+096. (Insert your project idea here)
