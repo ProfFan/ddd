@@ -132,7 +132,6 @@ public:
 
     string      init_perl;	  // Perl restart commands
     string      init_bash;	  // Bash restart commands
-    string      init_make;	  // Make restart commands
 
     XtIntervalId position_timer;  // Still waiting for partial position
     XtIntervalId display_timer;   // Still waiting for partial display
@@ -485,11 +484,6 @@ void start_gdb(bool config)
 	settings = str(app_data.jdb_settings);
 	break;
 
-    case MAKE:
-	init     = str(app_data.make_init_commands);
-	settings = str(app_data.make_settings);
-	break;
-
     case PERL:
 	init     = str(app_data.perl_init_commands);
 	settings = str(app_data.perl_settings);
@@ -652,10 +646,9 @@ void start_gdb(bool config)
 	extra_data->refresh_breakpoints = true;
 	break;
 
-    case BASH:
-    case MAKE:
     case PERL:
-	// Bash, Make and Perl start immediately with execution.
+    case BASH:
+	// Perl and Bash starts immediately with execution.
 	cmd_data->new_exec_pos = true;
 
 	cmds += gdb->pwd_command();
@@ -1013,7 +1006,6 @@ void send_gdb_command(string cmd, Widget origin,
 		switch (gdb->type())
 		{
 		case GDB:
-		case MAKE:
 		case PYDB:
 		    // Translate `list' to `info line'.
 		    cmd = "info line " + arg;
@@ -1158,26 +1150,11 @@ void send_gdb_command(string cmd, Widget origin,
 	case BASH:
 	    if (!is_reset_cmd)
 	    {
-		// We're restarting bash.  Make sure the state is preserved.
+		// We're restarting Perl.  Make sure the state is preserved.
 		unsigned long flags = DONT_RELOAD_FILE;
 		get_restart_commands(cmd_data->init_bash, flags);
 		cmd_data->init_bash += get_settings(gdb->type());
 		cmd_data->init_bash.prepend(app_data.bash_init_commands);
-
-		cmd_data->new_exec_pos = true;
-	    }
-	    extra_data->refresh_initial_line = false;
-	    extra_data->refresh_data = false;
-	    break;
-
-	case MAKE:
-	    if (!is_reset_cmd)
-	    {
-		// We're restarting GNU Make. Make sure the state is preserved.
-		unsigned long flags = DONT_RELOAD_FILE;
-		get_restart_commands(cmd_data->init_make, flags);
-		cmd_data->init_make += get_settings(gdb->type());
-		cmd_data->init_make.prepend(app_data.bash_init_commands);
 
 		cmd_data->new_exec_pos = true;
 	    }
@@ -1789,7 +1766,6 @@ void send_gdb_command(string cmd, Widget origin,
 	break;
 
     case BASH:
-    case MAKE:
     case PERL:
 	if (extra_data->refresh_pwd)
 	    cmds += gdb->pwd_command();
@@ -2202,7 +2178,6 @@ static void command_completed(void *data)
 
 	    case BASH:
 	    case GDB:
-	    case MAKE:
 		// GDB always issues file names on positions...
 		break;
 
@@ -2600,8 +2575,6 @@ bool is_known_command(const string& answer)
     }
 
     if (gdb->type() == BASH) {
-      // Note: Current versions of the bash don't use this.
-      // This can be removed at some convenient cleanup point.
       if (ans.contains("help subcommands fully not done")) 
 	return false;
     } else if (gdb->type() == PERL) {
@@ -2628,7 +2601,7 @@ bool is_known_command(const string& answer)
     if (ans.contains("there is no running program")) // Ladebug
 	return true;
 
-    if (ans.contains("undefined command"))    // BASH, GDB, MAKE
+    if (ans.contains("undefined command"))    // GDB
 	return false;
 
     if (ans.contains("ambiguous command"))    // GDB
@@ -2970,7 +2943,6 @@ static void extra_completed (StringArray& answers,
 	case DBG:
 	case DBX:
 	case JDB:
-	case MAKE:
 	case PERL:
 	case PYDB:
 	{

@@ -34,8 +34,8 @@ dnl The product version, in the form `MAJOR-NUMBER.MINOR-NUMBER[.PATCHLEVEL]'
 dnl A version in the form `YYYY-MM-DD' is a release-of-the-day, i.e. a
 dnl snapshot of the current development tree.
 dnl
-AC_INIT([ddd],[3.3.12-test2],[ddd@gnu.org])
-NICKNAME="Custard"
+AC_INIT([ddd],[3.3.11],[ddd@gnu.org])
+NICKNAME="Rhubarb"
 AC_SUBST(NICKNAME)
 DDD_NAMES
 dnl
@@ -859,8 +859,6 @@ ICE_CHECK_DECL(ptrace, unistd.h sys/ptrace.h)
 AH_TEMPLATE([HAVE_PTRACE_DECL],[Define if ptrace is declared in unistd.h sys/ptrace.h.])
 ICE_CHECK_DECL(ptsname, stdlib.h)
 AH_TEMPLATE([HAVE_PTSNAME_DECL],[Define if ptsname is declared in stdlib.h.])
-ICE_CHECK_DECL(putenv, stdlib.h)
-AH_TEMPLATE([HAVE_PUTENV_DECL],[Define if putenv is declared in stdlib.h.])
 ICE_CHECK_DECL(raise, signal.h)
 AH_TEMPLATE([HAVE_RAISE_DECL],[Define if raise is declared in signal.h.])
 ICE_CHECK_DECL(rand, stdlib.h)

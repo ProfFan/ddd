@@ -405,7 +405,6 @@ static string gdbSettingsValue(const string& command)
     {
     case BASH:
     case GDB:
-    case MAKE:
 	if (command.contains("set ", 0))
 	{
 	    string value = gdb_question("show " + command.after(rxwhite));
@@ -604,7 +603,7 @@ static MString gdbDefaultValueText(Widget widget, XEvent *event,
     // effects.
     MString clear = for_documentation ? rm(" ") : MString(0, true);
     if (bp_help.xmstring() == 0 && !expr.matches(rxchain) 
-	&& !(BASH == gdb->type() || MAKE == gdb->type()))
+	&& gdb->type() != BASH)
 	return clear;
 
     // Change EVENT such that the popup tip will remain at the same
@@ -1535,7 +1534,6 @@ static void create_buttons_dialog(Widget parent)
     case DBX:  str = &app_data.dbx_display_shortcuts;  break;
     case GDB:  str = &app_data.gdb_display_shortcuts;  break;
     case JDB:  str = &app_data.jdb_display_shortcuts;  break;
-    case MAKE: str = &app_data.make_display_shortcuts; break;
     case PERL: str = &app_data.perl_display_shortcuts; break;
     case PYDB: str = &app_data.pydb_display_shortcuts; break;
     case XDB:  str = &app_data.xdb_display_shortcuts;  break;
@@ -1615,7 +1613,6 @@ void refresh_button_editor()
     case DBX:  str = &app_data.dbx_display_shortcuts;  break;
     case GDB:  str = &app_data.gdb_display_shortcuts;  break;
     case JDB:  str = &app_data.jdb_display_shortcuts;  break;
-    case MAKE: str = &app_data.make_display_shortcuts; break;
     case PERL: str = &app_data.perl_display_shortcuts; break;
     case PYDB: str = &app_data.pydb_display_shortcuts; break;
     case XDB:  str = &app_data.xdb_display_shortcuts;  break;

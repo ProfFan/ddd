@@ -595,11 +595,10 @@ void SourceView::set_bp(const string& a, bool set, bool temp,
 	// Set bp
 	switch (gdb->type())
 	{
-	case DBG:
 	case GDB:
 	case BASH:
-	case MAKE:
 	case PYDB:
+	case DBG:
 	    if (temp)
 		gdb_command("tbreak " + address, w);
 	    else
@@ -810,10 +809,9 @@ void SourceView::temp_n_cont(const string& a, Widget w)
 	break;
 #endif
     
-    case BASH: 
+    case BASH: // Is this correct? 
     case DBG:  // Is this correct? 
     case DBX:
-    case MAKE: 
     case JDB:
     case PYDB:
     {
@@ -908,7 +906,6 @@ bool SourceView::move_pc(const string& a, Widget w)
 	case BASH:
 	case DBG:
 	case JDB:
-	case MAKE:
 	case PERL:
 	case PYDB:
 	    break;		// Never reached
@@ -1323,7 +1320,6 @@ string SourceView::clear_command(string pos, bool clear_next, int first_bp)
 	    break;
 
 	case DBG:
-	case MAKE:
 	case XDB:
 	    break;
 	}
@@ -2136,10 +2132,6 @@ String SourceView::read_from_gdb(const string& file_name, long& length,
     string command;
     switch (gdb->type())
     {
-    case BASH:
-	command = "list 1 " HUGE_LINE_NUMBER;
-	break;
-
     case DBG: // Is this correct? DBG "list" sommand seems not to do anything
     case GDB:
 	command = "list " + file_name + ":1," HUGE_LINE_NUMBER;
@@ -2154,12 +2146,12 @@ String SourceView::read_from_gdb(const string& file_name, long& length,
 	command = "l 1-" HUGE_LINE_NUMBER;
 	break;
 
-    case JDB:
-	command = "list " + file_name;
+    case BASH:
+	command = "list 1 " HUGE_LINE_NUMBER;
 	break;
 
-    case MAKE:  // Don't have a "list" function yet.
-        command = "";
+    case JDB:
+	command = "list " + file_name;
 	break;
 
     case XDB:
@@ -3185,57 +3177,11 @@ void SourceView::find_word_bounds (Widget text_w,
     int offset = pos - line_pos;
     if (offset == 0 || offset < indent_amount(text_w))
     {
-	// Do not select words in breakpoint area.
+	// Do not select words in breakpoint area
 	return;
     }
 
-    // We first check the special case in BASH and MAKE where we are 
-    // looking at a $ which often surrounds an identifier. 
-    // The exception to this is $$. 
-    // We also dispose of the special automatic variables of GNU make: 
-    // $@, $<, etc and special variables of BASH: $*, $@, $? $$, etc.
-    if ( '$' == text[endpos] && endpos < XmTextPosition(text.length()) 
-	 && (endpos - 1 <= 0 || '$' != text[endpos-1]) )
-    {
-      if ( gdb->program_language() == LANGUAGE_BASH ) {
-	if ( text[endpos+1] == '{' )
-	  // Advance position over ${
-	  startpos = endpos += 2;
-	else if (is_bash_special(text[endpos+1])) {
-	  // Found a Bash special variable
-	  startpos = endpos;
-	  endpos  =  endpos+2;
-	  return;
-	}
-      } else if ( gdb->program_language() == LANGUAGE_MAKE ) {
-	if ( text[endpos+1] == '(' )
-	  // Advance position over $(
-	  startpos = endpos += 2;
-	else if (is_make_automatic(text[endpos+1])) {
-	  // Found a GNU Make automatic variable
-	  startpos = endpos;
-	  endpos  =  endpos+2;
-	  return;
-	}
-      }
-    } else if (endpos - 1 > 0 || '$' == text[endpos-1]) {
-      /* Previous character was a $ - check it out. */
-      if ( gdb->program_language() == LANGUAGE_MAKE &&
-	   is_make_automatic(text[endpos]) ) {
-	// Found a GNU Make automatic variable
-	startpos = endpos-1;
-	endpos  =  endpos+1;
-	return;
-      } else if ( gdb->program_language() == LANGUAGE_BASH &&
-	   is_bash_special(text[endpos]) ) {
-	// Found a Bash special variable
-	startpos = endpos-1;
-	endpos  =  endpos+1;
-	return;
-      }
-    }
-
-    // Find end of word - Start scanning for a non-identifier
+    // Find end of word
     while (endpos < XmTextPosition(text.length()) && isid(text[endpos]))
 	endpos++;
 
@@ -3257,8 +3203,17 @@ void SourceView::find_word_bounds (Widget text_w,
 	    break;
 	}
 	else if (gdb->program_language() == LANGUAGE_BASH &&
-		 startpos > 2 && text[startpos - 1] == '{' &&
-		 text[startpos - 2] == '$')
+		 startpos > 1 &&
+		 is_bash_prefix(text[startpos - 1]))
+	{
+	  // Include $variable rather than variable
+	  startpos -= 1;
+	  break;
+	}
+	else if (gdb->program_language() == LANGUAGE_BASH &&
+		 startpos > 2 && text[startpos -1] == '{' &&
+		 is_bash_prefix(text[startpos - 2])
+		 )
 	{
 	  // Include ${...} rather than ...
 	  int brace_count=1;
@@ -3273,30 +3228,6 @@ void SourceView::find_word_bounds (Widget text_w,
 		brace_count--;
 		if (brace_count==0) {
 		  startpos -= 2; // Go back over ${
-		  endpos=new_endpos+1;
-		  break;
-		}
-	      }
-	    }
-	  break;
-	}
-	else if (gdb->program_language() == LANGUAGE_MAKE &&
-		 startpos > 2 && text[startpos -1] == '(' &&
-		 text[startpos - 2] == '$')
-	{
-	  // Include $(...) rather than ...
-	  int brace_count=1;
-	  int new_endpos=startpos;
-	  for (new_endpos=startpos+1; 
-	       new_endpos < XmTextPosition(text.length()) 
-		 && new_endpos-startpos < 30; 
-	       new_endpos++) 
-	    {
-	      if (text[new_endpos] == '(') brace_count++;
-	      if (text[new_endpos] == ')') {
-		brace_count--;
-		if (brace_count==0) {
-		  startpos -= 2; // Go back over $(
 		  endpos=new_endpos+1;
 		  break;
 		}
@@ -4049,7 +3980,7 @@ void SourceView::process_info_bp (string& info_output,
     {
     case GDB:
     case BASH:
-	// If there is no breakpoint info, process it as GDB message.
+	// If this is no breakpoint info, process it as GDB message
 	if (!info_output.contains("Num", 0) && 
 	    !info_output.contains("No breakpoints", 0))
 	    check_remainder(info_output);
@@ -4059,7 +3990,6 @@ void SourceView::process_info_bp (string& info_output,
     case DBX:
     case XDB:
     case JDB:
-    case MAKE:
     case PYDB:
     case PERL:
 	break;
@@ -4082,10 +4012,9 @@ void SourceView::process_info_bp (string& info_output,
 	switch(gdb->type())
 	{
 	case BASH:
-	case DBG:
 	case GDB:
-	case MAKE:
 	case PYDB:
+	case DBG:
 	    if (!has_nr(info_output))
 	    {
 		// Skip this line
@@ -4280,7 +4209,6 @@ void SourceView::process_info_line_main(string& info_output)
     case BASH:
     case DBG:
     case GDB:
-    case MAKE:
     case JDB:
     case PERL:
     case PYDB:
@@ -4426,10 +4354,9 @@ void SourceView::lookup(string s, bool silent)
 	    case BASH:
 	    case DBG: 
 	    case DBX:
-	    case MAKE:
 	    case PERL:
-	    case PYDB:
 	    case XDB:
+	    case PYDB:
 		show_position(full_path(current_file_name) 
 			      + ":" + itostring(line));
 		break;
@@ -4505,8 +4432,6 @@ void SourceView::lookup(string s, bool silent)
 	    break;
 	}
 
-	case MAKE: break;  // Not implimented yet.
-	  
 	case DBX:
 	case JDB:
 	{
@@ -4578,9 +4503,8 @@ void SourceView::add_position_to_history(const string& file_name, int line,
     case BASH:
     case DBG:
     case DBX:
-    case MAKE:
-    case PERL:
     case XDB:
+    case PERL:
 	break;
     }
 
@@ -4687,7 +4611,6 @@ void SourceView::process_pwd(string& pwd_output)
 	case DBG:
 	case DBX:		// 'PATH'
 	case JDB:
-	case MAKE:
 	case PERL:
 	case XDB:
 	    if (pwd.contains('/', 0) && !pwd.contains(" "))
@@ -4988,7 +4911,6 @@ string SourceView::current_source_name()
     case BASH:
     case DBG:
     case DBX:
-    case MAKE:
     case PERL:
     case PYDB:
     case XDB:
@@ -6063,10 +5985,9 @@ static string cond_filter(const string& cmd)
 	// No conditions in JDB
 	break;
 
-    case DBG:
     case BASH:
-    case MAKE:
     case PERL:
+    case DBG:
     {
 	// FIXME
 	break;
@@ -7013,9 +6934,8 @@ void SourceView::SelectFrameCB (Widget w, XtPointer, XtPointer call_data)
     switch (gdb->type())
     {
     case BASH:
-    case DBG:
     case GDB:
-    case MAKE:
+    case DBG:
 	// GDB frame output is caught by our routines.
 	gdb_command(gdb->frame_command(count - cbs->item_position));
 	break;
@@ -7223,7 +7143,6 @@ void SourceView::process_frame(string& frame_output)
 	case BASH:
  	case DBG:
 	case GDB:
-	case MAKE:
 	case PYDB:
 	    frame_nr = frame_output.after(0);
 	    break;
@@ -7302,14 +7221,13 @@ void SourceView::process_frame(int frame)
 	int pos = 1;
 	switch (gdb->type())
 	{
-	case BASH:
-	case DBG:
-	case DBX:
 	case GDB:
+	case DBX:
 	case JDB:
-	case MAKE:
 	case PYDB:
+	case BASH:
 	case PERL:
+	case DBG:
 	    pos = count - frame;
 	    break;
 
@@ -7620,10 +7538,9 @@ void SourceView::process_threads(string& threads_output)
     case BASH:
     case DBG:
     case DBX:
-    case MAKE:
+    case XDB:
     case PERL:
     case PYDB:
-    case XDB:
     {
         if (gdb->type() == DBX && gdb->isSunDBX())
         {
@@ -7681,10 +7598,9 @@ void SourceView::refresh_threads(bool all_threadgroups)
     }
     case BASH:
     case DBG:
-    case MAKE:
+    case XDB:
     case PERL:
     case PYDB:
-    case XDB:
 	// No threads.
 	break;
     }
@@ -9938,7 +9854,6 @@ bool SourceView::get_state(std::ostream& os)
     case BASH:
     case DBG:
     case DBX:
-    case MAKE:
     case JDB:
     case PERL:
 	break;			// FIXME

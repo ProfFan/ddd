@@ -67,9 +67,6 @@ bool is_perl_file(const string& file_name);
 // True if FILE_NAME is a BASH file
 bool is_bash_file(const string& file_name);
 
-// True if FILE_NAME is a MAKE file
-bool is_make_file(const string& file_name);
-
 // True if FILE_NAME is a PHP file
 bool is_php_file(const string& file_name);
 

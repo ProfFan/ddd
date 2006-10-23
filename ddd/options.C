@@ -1439,7 +1439,7 @@ static bool _get_core(const string& session, unsigned long flags,
 
 #if HAVE_SYMLINK
 	    // Try a symlink link from target to current core file
-	    if (symlink((char *)info.core.chars(), (char *)target.chars()) == 0)
+	    if (symlink(info.core.chars(), target.chars()) == 0)
 		return true;
 #endif
 
@@ -1828,10 +1828,6 @@ static void reload_options()
 
     case GDB:
 	settings = str(app_data.gdb_settings);
-	break;
-
-    case MAKE:
-	settings = str(app_data.make_settings);
 	break;
 
     case JDB:
@@ -2317,7 +2313,6 @@ bool get_restart_commands(string& restart, unsigned long flags)
 
 	case PERL:
 	case BASH:
-	case MAKE:
 	case JDB:
 	    if (!info.file.empty() && info.file != NO_GDB_ANSWER)
 	    {
@@ -2445,7 +2440,6 @@ bool save_options(unsigned long flags)
     string gdb_settings  = app_data.gdb_settings;
     string xdb_settings  = app_data.xdb_settings;
     string jdb_settings  = app_data.jdb_settings;
-    string make_settings = app_data.make_settings;
     string perl_settings = app_data.perl_settings;
     string pydb_settings = app_data.pydb_settings;
 
@@ -2476,24 +2470,20 @@ bool save_options(unsigned long flags)
 	    gdb_settings = settings;
 	    break;
 
-	case MAKE:
-	    make_settings = settings;
+	case XDB:
+	    xdb_settings = settings;
 	    break;
 
 	case JDB:
 	    jdb_settings = settings;
 	    break;
 
-	case PERL:
-	    perl_settings = settings;
-	    break;
-
 	case PYDB:
 	    pydb_settings = settings;
 	    break;
 
-	case XDB:
-	    xdb_settings = settings;
+	case PERL:
+	    perl_settings = settings;
 	    break;
 
 	}
@@ -2755,7 +2745,6 @@ bool save_options(unsigned long flags)
 	string dbx_display_shortcuts  = app_data.dbx_display_shortcuts;
 	string gdb_display_shortcuts  = app_data.gdb_display_shortcuts;
 	string jdb_display_shortcuts  = app_data.jdb_display_shortcuts;
-	string make_display_shortcuts = app_data.make_display_shortcuts;
 	string pydb_display_shortcuts = app_data.pydb_display_shortcuts;
 	string perl_display_shortcuts = app_data.perl_display_shortcuts;
 	string xdb_display_shortcuts  = app_data.xdb_display_shortcuts;
@@ -2767,7 +2756,6 @@ bool save_options(unsigned long flags)
 	case DBX:  dbx_display_shortcuts  = expr; break;
 	case GDB:  gdb_display_shortcuts  = expr; break;
 	case JDB:  jdb_display_shortcuts  = expr; break;
-	case MAKE: make_display_shortcuts = expr; break;
 	case PERL: perl_display_shortcuts = expr; break;
 	case PYDB: pydb_display_shortcuts = expr; break;
 	case XDB:  xdb_display_shortcuts  = expr; break;
@@ -2781,8 +2769,6 @@ bool save_options(unsigned long flags)
 			       dbx_display_shortcuts.chars(), True) << '\n';
 	os << string_app_value(XtNgdbDisplayShortcuts, 
 			       gdb_display_shortcuts.chars(), True) << '\n';
-	os << string_app_value(XtNmakeDisplayShortcuts,
-			       make_display_shortcuts.chars(), True) << '\n';
 	os << string_app_value(XtNjdbDisplayShortcuts,
 			       jdb_display_shortcuts.chars(), True) << '\n';
 	os << string_app_value(XtNperlDisplayShortcuts,

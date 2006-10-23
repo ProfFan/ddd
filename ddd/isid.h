@@ -38,34 +38,16 @@ inline bool isid(char c)
     return isalnum((unsigned char)c) || c == '_' || c == '$';
 }
 
-// True if C can be a Bash "special" variable
-inline bool is_bash_special(char c)
-{
-  switch(c) {
-  case '*': case '@': case '#': case '?': case '-': case '$':
-  case '!': case '_':
-    return true;
-  default:
-    return false;
-  }
-}
-
-// True if C can be a GNU Make "automatic" variable
-inline bool is_make_automatic(char c)
-{
-  switch(c) {
-  case '@': case '%': case '*': case '+': case '|': case '<':
-  case '^': case '?':
-    return true;
-  default:
-    return false;
-  }
-}
-
 // True if C is a Perl prefix character
 inline bool is_perl_prefix(char c)
 {
     return c == '@' || c == '%' || c == '$';
+}
+
+// True if C is a Perl prefix character
+inline bool is_bash_prefix(char c)
+{
+    return c == '$';
 }
 
 #endif // _DDD_isid_h

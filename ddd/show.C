@@ -103,16 +103,16 @@ void show_invocation(const string& gdb_command, std::ostream& os)
 
     // Set up DDD options
     static const char *options_string[] = {
-	"  --bash             Invoke Bash as inferior debugger.",
-	"  --dbg              Invoke DBG as inferior debugger.",
-	"  --dbx              Invoke DBX as inferior debugger.",
 	"  --gdb              Invoke GDB as inferior debugger.",
+	"  --dbx              Invoke DBX as inferior debugger.",
 	"  --ladebug          Invoke Ladebug as inferior debugger.",
-	"  --jdb              Invoke JDB as inferior debugger.",
-	"  --perl             Invoke Perl as inferior debugger.",
-	"  --pydb             Invoke PYDB as inferior debugger.",
-	"  --wdb              Invoke WDB as inferior debugger.",
 	"  --xdb              Invoke XDB as inferior debugger.",
+	"  --jdb              Invoke JDB as inferior debugger.",
+	"  --pydb             Invoke PYDB as inferior debugger.",
+	"  --perl             Invoke Perl as inferior debugger.",
+	"  --bash             Invoke Bash as inferior debugger.",
+	"  --wdb              Invoke WDB as inferior debugger.",
+	"  --dbg              Invoke DBG as inferior debugger.",
 	"  --debugger CMD     Invoke inferior debugger as CMD.",
 	"  --host USER@HOST   Run inferior debugger on HOST.",
 	"  --rhost USER@HOST  Like --host, but use a rlogin connection.",
@@ -139,7 +139,7 @@ void show_invocation(const string& gdb_command, std::ostream& os)
     {
 	title = "BASH";
 	base  = "the BASH debugger.";
-	options += "  [bash options]     Pass option to Bash.";
+	options += "  [Berl options]     Pass option to Bash.";
 	args = "program-file [args]";
     }
     break;
@@ -209,15 +209,6 @@ void show_invocation(const string& gdb_command, std::ostream& os)
 	base  = "JDB, the Java debugger.";
 	options += "  [JDB options]      Pass option to JDB.";
 	args = "[class]";
-    }
-    break;
-
-    case MAKE:
-    {
-	title = "MAKE";
-	base  = "the GNU Make debugger.";
-	options += "  [make options]     Pass option to GNU Make.";
-	args = "program-file [args]";
     }
     break;
 

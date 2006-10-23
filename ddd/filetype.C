@@ -370,32 +370,14 @@ bool is_perl_file(const string& file_name)
     return false;
 }
 
-// A Bash file is a standard source file which ends in '.sh' or 
-// has #! bash. But we'll also take #! sh as well.
+// A Perl file is a standard source file which ends in '.pl' or `.pm'
 bool is_bash_file(const string& file_name)
 {
     if (!is_source_file(file_name))
 	return false;
 
-    if (file_name.contains(".sh", -1) 
-	|| has_hashbang(file_name, "bash")
-	|| has_hashbang(file_name, "sh"))
-	return true;
-
-    return false;
-}
-
-// A GNU Makefile is a standard source file that usually has the name
-// Makefile, GNUmakefilestarts that way or ends `.mk' or `.mak'
-bool is_make_file(const string& file_name)
-{
-    if (!is_source_file(file_name))
-	return false;
-
-    if (file_name.contains(".mak", -1) 
-	|| file_name.contains(".mk" -1)
-	|| file_name.contains("GNUMakefile", -1)
-	|| file_name.contains("Makefile", -1))
+    if (file_name.contains(".sh", -1) || 
+	has_hashbang(file_name, "bash"))
 	return true;
 
     return false;

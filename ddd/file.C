@@ -481,8 +481,16 @@ static void searchLocalExecFiles(Widget fs,
 {
     switch (gdb->type())
     {
+    case PYDB:
+	searchLocal(fs, cbs, is_python_file);
+	break;
+
+    case PERL:
+	searchLocal(fs, cbs, is_perl_file);
+	break;
+
     case BASH:
-	searchLocal(fs, cbs, is_bash_file);
+	searchLocal(fs, cbs, is_perl_file);
 	break;
 
     case DBG:
@@ -491,18 +499,6 @@ static void searchLocalExecFiles(Widget fs,
     
     case GDB:
 	searchLocal(fs, cbs, is_debuggee_file);
-	break;
-
-    case MAKE:
-	searchLocal(fs, cbs, is_make_file);
-	break;
-
-    case PERL:
-	searchLocal(fs, cbs, is_perl_file);
-	break;
-
-    case PYDB:
-	searchLocal(fs, cbs, is_python_file);
 	break;
 
     default:
@@ -642,7 +638,6 @@ static void openCoreDone(Widget w, XtPointer client_data, XtPointer call_data)
 	case BASH:
 	case DBG:
 	case JDB:
-	case MAKE:
 	case PERL:
 	case PYDB:
 	case XDB:
@@ -881,21 +876,6 @@ ProgramInfo::ProgramInfo()
 	break;
 
     case BASH:
-	// Use the program we were invoked with
-	file = gdb->program();
-	if (file.matches(rxint))
-	    file = "";		// Invoked with a constant expression
-
-	if (file.empty())
-	{
-	    // Not invoked with a program?  Use the current file, then.
-	    file = source_view->file_of_cursor();
-	    file = file.before(":");
-	}
-	core = "";
-	break;
-
-    case MAKE:
 	// Use the program we were invoked with
 	file = gdb->program();
 	if (file.matches(rxint))

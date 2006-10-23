@@ -116,9 +116,6 @@ extern "C" {
 #define S_IRWXO 07
 #endif
 
-#if !HAVE_PUTENV_DECL
-extern "C" int putenv(char *string);
-#endif
 
 // ---------------------------------------------------------------------------
 // How to present a default session to the user
@@ -983,7 +980,6 @@ static void open_session(const string& session)
     case DBX:  shortcuts = XtNdbxDisplayShortcuts;  break;
     case GDB:  shortcuts = XtNgdbDisplayShortcuts;  break;
     case JDB:  shortcuts = XtNjdbDisplayShortcuts;  break;
-    case MAKE: shortcuts = XtNmakeDisplayShortcuts; break;
     case PERL: shortcuts = XtNperlDisplayShortcuts; break;
     case PYDB: shortcuts = XtNpydbDisplayShortcuts; break;
     case XDB:  shortcuts = XtNxdbDisplayShortcuts;  break;
@@ -1008,14 +1004,11 @@ static void open_session(const string& session)
     case JDB:
 	app_data.jdb_display_shortcuts  = display_shortcuts.chars();
 	break;
-    case MAKE:
-	app_data.make_display_shortcuts = display_shortcuts.chars();
+    case PYDB:
+	app_data.pydb_display_shortcuts = display_shortcuts.chars();
 	break;
     case PERL:
 	app_data.perl_display_shortcuts = display_shortcuts.chars();
-	break;
-    case PYDB:
-	app_data.pydb_display_shortcuts = display_shortcuts.chars();
 	break;
     case XDB:
 	app_data.xdb_display_shortcuts  = display_shortcuts.chars();
@@ -1058,10 +1051,6 @@ static void open_session(const string& session)
 
     case JDB:
 	settings = get_resource(db, XtNjdbSettings, XtCSettings);
-	break;
-
-    case MAKE:
-	settings = get_resource(db, XtNmakeSettings, XtCSettings);
 	break;
 
     case PYDB:
@@ -1120,10 +1109,6 @@ void RestartDebuggerCB(Widget, XtPointer, XtPointer)
 
     case JDB:
 	app_data.jdb_settings = settings.chars();
-	break;
-
-    case MAKE:
-	app_data.make_settings = settings.chars();
 	break;
 
     case PERL:
